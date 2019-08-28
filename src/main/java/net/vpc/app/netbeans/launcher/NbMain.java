@@ -6,10 +6,12 @@
 package net.vpc.app.netbeans.launcher;
 
 import javax.swing.JOptionPane;
+
+import net.vpc.app.netbeans.launcher.ui.MainWindowSwing;
 import net.vpc.app.netbeans.launcher.util.NbUtils;
-import net.vpc.app.nuts.NutsApplication;
-import net.vpc.app.nuts.NutsApplicationContext;
-import net.vpc.app.nuts.NutsCommandLine;
+import net.vpc.app.nuts.*;
+
+import java.io.PrintStream;
 
 /**
  *
@@ -19,14 +21,15 @@ public class NbMain extends NutsApplication {
 
     public static void main(String[] args) {
         // just create an instance and call runAndExit in the main method
-        new NbMain().run(args);
+        new NbMain().runAndExit(args);
     }
 
     @Override
     public void run(NutsApplicationContext appContext) {
-        System.out.println("Netbeans Launcher " + NbUtils.getArtifactVersionOrDev());
+        PrintStream out = appContext.session().out();
+        PrintStream err = appContext.session().err();
         if (!NbUtils.isPlatformSupported()) {
-            System.err.println("Platform not supported");
+            err.println("Platform not supported");
             if (System.console() == null) {
                 JOptionPane.showInputDialog("Platform not supported");
             }
@@ -54,15 +57,19 @@ public class NbMain extends NutsApplication {
                 options.swing_arg = true;
             } else if (cmdLine.accept("--cli")) {
                 options.cli = true;
+            } else if (cmdLine.accept("--version")) {
+                options.version = true;
             }
         }
-        if (options.cli && !options.swing_arg) {
-            net.vpc.app.netbeans.launcher.ui.cli.MainWindowCLI.main0(new String[0]);
+        if (options.version) {
+            out.println(appContext.appId().getVersion());
+        }else if (options.cli && !options.swing_arg) {
+            net.vpc.app.netbeans.launcher.cli.MainWindowCLI.launch(appContext,options);
         } else if (options.swing_arg) {
-            net.vpc.app.netbeans.launcher.ui.swing.MainWindowSwing.launch(appContext,options);
+            MainWindowSwing.launch(appContext,options,true);
         } else {
             //will default to swing!!
-            net.vpc.app.netbeans.launcher.ui.swing.MainWindowSwing.launch(appContext,options);
+            MainWindowSwing.launch(appContext,options,true);
         }
     }
 }

@@ -22,6 +22,7 @@ public class NetbeansInstallation  implements Serializable{
     private String cachedir;
     private String jdkhome;
     private String options;
+    private NetbeansInstallationStore store=NetbeansInstallationStore.USER;
 
     public String getJdkhome() {
         return jdkhome;
@@ -93,6 +94,15 @@ public class NetbeansInstallation  implements Serializable{
         this.options = options;
     }
 
+    public NetbeansInstallationStore getStore() {
+        return store;
+    }
+
+    public NetbeansInstallation setStore(NetbeansInstallationStore store) {
+        this.store = store;
+        return this;
+    }
+
     @Override
     public int hashCode() {
         int hash = 7;
@@ -100,6 +110,7 @@ public class NetbeansInstallation  implements Serializable{
         hash = 29 * hash + Objects.hashCode(this.version);
         hash = 29 * hash + Objects.hashCode(this.name);
         hash = 29 * hash + Objects.hashCode(this.options);
+        hash = 29 * hash + Objects.hashCode(this.store);
         return hash;
     }
 
@@ -122,6 +133,9 @@ public class NetbeansInstallation  implements Serializable{
             return false;
         }
         if (!Objects.equals(this.name, other.name)) {
+            return false;
+        }
+        if (!Objects.equals(this.store, other.store)) {
             return false;
         }
         if (!Objects.equals(this.options, other.options)) {

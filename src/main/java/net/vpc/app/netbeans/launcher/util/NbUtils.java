@@ -10,11 +10,7 @@ import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -23,6 +19,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import net.vpc.app.netbeans.launcher.model.NbOsConfig;
@@ -32,6 +30,7 @@ import net.vpc.app.netbeans.launcher.model.NbOsConfig;
  * @author vpc
  */
 public class NbUtils {
+    private static final Logger LOG = Logger.getLogger(NbUtils.class.getName());
 
     public static final NbOsConfig LINUX_CONFIG = new NbOsConfig(
             new String[]{
@@ -433,5 +432,92 @@ public class NbUtils {
         }
         return sb.toString();
     }
-    
+    /**
+     * Unzip it
+     *
+     * @param zipFile input zip file
+     * @param outputFolder zip file output folder
+     */
+    public static void unzip(String zipFile, String outputFolder, UnzipOptions options) throws IOException {
+        if (options == null) {
+            options = new UnzipOptions();
+        }
+        byte[] buffer = new byte[1024];
+
+        //create output directory is not exists
+        File folder = new File(outputFolder);
+        if (!folder.exists()) {
+            folder.mkdir();
+        }
+
+        //get the zip file content
+        try(ZipInputStream zis
+                    = new ZipInputStream(new FileInputStream(new File(zipFile)))) {
+            //get the zipped file list entry
+            ZipEntry ze = zis.getNextEntry();
+            String root = null;
+            while (ze != null) {
+
+                String fileName = ze.getName();
+                if (options.isSkipRoot()) {
+                    if (root == null) {
+                        if (fileName.endsWith("/")) {
+                            root = fileName;
+                            ze = zis.getNextEntry();
+                            continue;
+                        } else {
+                            throw new IOException("tot a single root zip");
+                        }
+                    }
+                    if (fileName.startsWith(root)) {
+                        fileName = fileName.substring(root.length());
+                    } else {
+                        throw new IOException("tot a single root zip");
+                    }
+                }
+                if (fileName.endsWith("/")) {
+                    File newFile = new File(outputFolder + File.separator + fileName);
+                    newFile.mkdirs();
+                } else {
+                    File newFile = new File(outputFolder + File.separator + fileName);
+                    LOG.log(Level.FINEST, "file unzip : " + newFile.getAbsoluteFile());
+                    //create all non exists folders
+                    //else you will hit FileNotFoundException for compressed folder
+                    newFile.getParentFile().mkdirs();
+
+                    FileOutputStream fos = new FileOutputStream(newFile);
+
+                    int len;
+                    while ((len = zis.read(buffer)) > 0) {
+                        fos.write(buffer, 0, len);
+                    }
+
+                    fos.close();
+                }
+                ze = zis.getNextEntry();
+            }
+
+            zis.closeEntry();
+        }
+    }
+
+
+    public static class UnzipOptions {
+
+        private boolean skipRoot = false;
+
+        public UnzipOptions() {
+        }
+
+        public boolean isSkipRoot() {
+            return skipRoot;
+        }
+
+        public UnzipOptions setSkipRoot(boolean skipRoot) {
+            this.skipRoot = skipRoot;
+            return this;
+        }
+
+    }
+
 }

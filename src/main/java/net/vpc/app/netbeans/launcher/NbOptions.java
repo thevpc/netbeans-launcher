@@ -11,6 +11,7 @@ package net.vpc.app.netbeans.launcher;
  */
 public class NbOptions {
 
+    public boolean version = false;
     public boolean cli = false;
     public boolean swing = false;
     public boolean cli_arg = false;
