@@ -338,6 +338,7 @@ public class MainWindowSwing {
                                 running.remove(name);
                             }
                             onRefreshHeader();
+                            updateList();
                         }
                     }
 
@@ -346,6 +347,7 @@ public class MainWindowSwing {
                 toolkit.showError(toolkit.msg("App.RunWorkspace.Error"), ex);
             } finally {
                 onRefreshHeader();
+                updateList();
             }
         }
     }

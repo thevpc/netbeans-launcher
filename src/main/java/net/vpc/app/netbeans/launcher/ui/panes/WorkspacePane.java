@@ -90,6 +90,9 @@ public class WorkspacePane extends AppPane {
         //            g.setPadding(new Insets(5, 5, 5, 5));
         int row = 0;
         g.insets(1, 10).add(toolkit.createLabel("App.Workspace.InstallFolder"), 0, row);
+        Box b1 = Box.createHorizontalBox();
+        b1.add(toolkit.createIconButton("folder", "App.Action.OpenSelectedFolder", () -> onOpenNbdir()));
+        g.insets(1, 1).add(b1, 1, row);
         row++;
         g.insets(1, 1).add(c.path, 0, row, 2, 1);
         row++;
@@ -178,7 +181,11 @@ public class WorkspacePane extends AppPane {
         //            g.setPadding(new Insets(5, 5, 5, 5));
         int row = 0;
         g.insets(1, 10).add(toolkit.createLabel("App.Workspace.InstallFolder"), 0, row);
-        g.insets(1, 1).add(c.path, 1, row, 3, 1);
+        g.insets(1, 1).add(c.path, 1, row, 2, 1);
+        Box b1 = Box.createHorizontalBox();
+        b1.add(toolkit.createIconButton("folder", "App.Action.OpenSelectedFolder", () -> onOpenNbdir()));
+        g.insets(1, 1).add(b1, 3, row);
+
         row++;
         g.insets(1, 10).add(toolkit.createLabel("App.Workspace.Name"), 0, row);
         g.insets(1, 1).add(c.name, 1, row, 3, 1);
@@ -729,6 +736,10 @@ public class WorkspacePane extends AppPane {
 
     private void onOpenUserdir() {
         toolkit.openFolder(getEditUserdir());
+    }
+
+    private void onOpenNbdir() {
+        toolkit.openFolder(getEditPath());
     }
 
     private void onSelectUserdir() {

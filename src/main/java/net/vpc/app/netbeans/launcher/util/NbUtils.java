@@ -23,10 +23,10 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+
 import net.vpc.app.netbeans.launcher.model.NbOsConfig;
 
 /**
- *
  * @author vpc
  */
 public class NbUtils {
@@ -34,14 +34,14 @@ public class NbUtils {
 
     public static final NbOsConfig LINUX_CONFIG = new NbOsConfig(
             new String[]{
-                "/usr/local",
-                "~/bin",
-                "~/programs",
-                "~/Programs",},
+                    "/usr/local",
+                    "~/bin",
+                    "~/programs",
+                    "~/Programs",},
             new String[]{
-                "/usr/java",
-                "/usr/lib64/jvm",
-                "/usr/lib/jvm"
+                    "/usr/java",
+                    "/usr/lib64/jvm",
+                    "/usr/lib/jvm"
             },
             "~/.netbeans",
             "~/.cache/netbeans",
@@ -50,13 +50,13 @@ public class NbUtils {
     );
     public static final NbOsConfig WINDOWS_CONFIG = new NbOsConfig(
             new String[]{
-                NbUtils.coalesce(System.getenv("ProgramFiles"), "C:\\Program Files"),
-                NbUtils.coalesce(System.getenv("ProgramFiles(x86)"), "C:\\Program Files (x86)"),
-                "~/programs",
-                "~/Programs",},
+                    NbUtils.coalesce(System.getenv("ProgramFiles"), "C:\\Program Files"),
+                    NbUtils.coalesce(System.getenv("ProgramFiles(x86)"), "C:\\Program Files (x86)"),
+                    "~/programs",
+                    "~/Programs",},
             new String[]{
-                NbUtils.coalesce(System.getenv("ProgramFiles"), "C:\\Program Files") + "\\Java",
-                NbUtils.coalesce(System.getenv("ProgramFiles(x86)"), "C:\\Program Files (x86)") + "\\Java",},
+                    NbUtils.coalesce(System.getenv("ProgramFiles"), "C:\\Program Files") + "\\Java",
+                    NbUtils.coalesce(System.getenv("ProgramFiles(x86)"), "C:\\Program Files (x86)") + "\\Java",},
             "~\\AppData\\Roaming/Netbeans",
             "~\\AppData\\Local\\Netbeans\\Cache",
             "netbeans.exe",
@@ -64,12 +64,12 @@ public class NbUtils {
     );
     public static final NbOsConfig MAC_CONFIG = new NbOsConfig(
             new String[]{
-                "/Library/",
-                "~/programs",
-                "~/Programs",},
+                    "/Library/",
+                    "~/programs",
+                    "~/Programs",},
             new String[]{
-                "/Library/Java/JavaVirtualMachines",
-                "/System/Library/Frameworks/JavaVM.framework"
+                    "/Library/Java/JavaVirtualMachines",
+                    "/System/Library/Frameworks/JavaVM.framework"
             },
             "~/Library/Application Support/",
             "~/Library/Caches/NetBeans",
@@ -77,7 +77,7 @@ public class NbUtils {
             "java"
     );
 
-//    public static void main(String[] args) {
+    //    public static void main(String[] args) {
 //        try {
 ////            String s = response(new String[]{"/usr/java/jdk1.5.0_22/bin/java", "-version"});
 //            String s = response(new String[]{"/usr/java/jdk-10s/bin/java", "-version"});
@@ -432,13 +432,20 @@ public class NbUtils {
         }
         return sb.toString();
     }
+
+    public static void unzip(String zipFile, String outputFolder, UnzipOptions options) throws IOException {
+        try (InputStream zis = new FileInputStream(new File(zipFile))) {
+            unzip(zis, outputFolder, options);
+        }
+    }
+
     /**
      * Unzip it
      *
-     * @param zipFile input zip file
+     * @param in      input zip file
      * @param outputFolder zip file output folder
      */
-    public static void unzip(String zipFile, String outputFolder, UnzipOptions options) throws IOException {
+    public static void unzip(InputStream in, String outputFolder, UnzipOptions options) throws IOException {
         if (options == null) {
             options = new UnzipOptions();
         }
@@ -451,8 +458,7 @@ public class NbUtils {
         }
 
         //get the zip file content
-        try(ZipInputStream zis
-                    = new ZipInputStream(new FileInputStream(new File(zipFile)))) {
+        try (ZipInputStream zis= new ZipInputStream(in)) {
             //get the zipped file list entry
             ZipEntry ze = zis.getNextEntry();
             String root = null;

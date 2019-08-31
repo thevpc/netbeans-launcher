@@ -10,6 +10,7 @@ import java.awt.Desktop;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URI;
+import java.text.DecimalFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
@@ -132,8 +133,8 @@ public abstract class AppPane extends JPanel {
                 updateProgressbar();
             }
         });
-        c.footer.add(c.jpb);
-        c.footer.addGlueH();
+        c.footer.addExpandH(c.jpb);
+//        c.footer.addGlueH();
         c.footer.setBackground(SwingUtils2.componentGradientPaint("d6d9df","dfe2e8", Direction.BOTTOM));
         JLabel link = new JLabel();
         link.setText("v" + win.getAppContext().getAppId().getVersion());
@@ -176,19 +177,63 @@ public abstract class AppPane extends JPanel {
         }
     }
 
+    private static class LongOperationTracker{
+        private long lastTime;
+        private int period=3;
+        private LongOperation lastLongOperation;
+
+        private LongOperation next(LongOperation[] operations){
+            long now=System.currentTimeMillis();
+            if(now-lastTime<period*1000){
+                for (LongOperation operation : operations) {
+                    if (lastLongOperation == operation) {
+                        return lastLongOperation;
+                    }
+                }
+            }
+            int r=(int)(Math.random()*(operations.length));
+            lastLongOperation=operations[r];
+            lastTime=now;
+            return lastLongOperation;
+        };
+
+    }
+    private LongOperationTracker tracker=new LongOperationTracker();
     private void updateProgressbar(JProgressBar jpb) {
         LongOperation[] operations = configService.getOperations();
+        DecimalFormat df=new DecimalFormat("00.0");
         if (operations.length > 0) {
             if (operations.length == 1) {
                 LongOperation o = operations[0];
                 jpb.setIndeterminate(o.isIndeterminate());
                 jpb.setValue((int) o.getPercent());
                 jpb.setStringPainted(true);
-                jpb.setString(o.getDescription());
+                if(o.getName()==null) {
+                    jpb.setString(df.format(o.getPercent()));
+                }else{
+                    jpb.setString(df.format(o.getPercent()) + "% " + o.getName());
+                }
             } else {
-                jpb.setIndeterminate(true);
+                double percents=0;
+                int determinateCount=0;
+                for (LongOperation operation : operations) {
+                    if(!operation.isIndeterminate()) {
+                        percents += operation.getPercent();
+                        determinateCount++;
+                    }
+                }
+                if(determinateCount>1){
+                    percents=percents/determinateCount;
+                }
+                jpb.setIndeterminate(determinateCount==0);
                 jpb.setStringPainted(true);
-                jpb.setString(operations.length + " task(s)");
+                LongOperation o = tracker.next(operations);
+                jpb.setValue((int) percents);
+                if(o.getName()==null) {
+                    jpb.setString(operations.length + " task(s) : "+df.format(o.getPercent()));
+                }else{
+                    jpb.setString(operations.length + " task(s) : "+df.format(o.getPercent()) + "% " + o.getName());
+                }
             }
 
         } else {

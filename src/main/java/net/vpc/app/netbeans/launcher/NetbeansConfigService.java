@@ -20,9 +20,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import net.vpc.app.netbeans.launcher.compat.NetbeansConfigLoader11;
-import net.vpc.app.nuts.NutsApplicationContext;
-import net.vpc.app.nuts.NutsExecCommand;
-import net.vpc.app.nuts.NutsWorkspace;
+import net.vpc.app.nuts.*;
 
 /**
  * @author vpc
@@ -948,9 +946,6 @@ public class NetbeansConfigService {
     }
 
     public void installNetbeansBinary(NetbeansBinaryLink i) {
-        WritableLongOperation op = addOperation("Installing " + i.toString());
-        op.setDescription("Downloading " + i.toString());
-        op.start(true);
         NutsWorkspace ws = appContext.workspace();
         Path zipTo = appContext.getSharedAppsFolder()
                 .resolve("netbeans")
@@ -959,10 +954,9 @@ public class NetbeansConfigService {
                 .resolve("netbeans")
                 .resolve("netbeans-" + i.getVersion());
         if (!Files.exists(zipTo)) {
-            ws.io().copy().from(i.getUrl()).to(zipTo).monitorable().run();
+            ws.io().copy().from(i.getUrl()).to(zipTo).monitorable()
+                    .progressMonitor(new OpNutsInputStreamProgressMonitor(addOperation("Downloading " + i.toString()))).run();
         }
-        op.setDescription("Installing " + i.toString());
-        op.inc(1);
         try {
             Files.createDirectories(folderTo);
         } catch (IOException ex) {
@@ -977,8 +971,12 @@ public class NetbeansConfigService {
         } else {
             try {
                 new FileOutputStream(running).close();
-                NbUtils.unzip(zipTo.toString(), folderTo.toString(), new NbUtils.UnzipOptions().setSkipRoot(true));
-                running.delete();
+                try(InputStream in=ws.io().monitor().origin(zipTo)
+                        .progressMonitor(new OpNutsInputStreamProgressMonitor(addOperation("Unzipping " + i.toString())))
+                        .create()) {
+                    NbUtils.unzip(in, folderTo.toString(), new NbUtils.UnzipOptions().setSkipRoot(true));
+                    running.delete();
+                }
             } catch (IOException ex) {
                 throw new UncheckedIOException(ex);
             }
@@ -1043,8 +1041,6 @@ public class NetbeansConfigService {
             }
             addNb(o);
         }
-        op.setDescription("Installing " + i.toString());
-        op.end();
     }
 
     void fire(WritableLongOperation w) {
@@ -1077,4 +1073,27 @@ public class NetbeansConfigService {
     }
 
 
+    private static class OpNutsInputStreamProgressMonitor implements NutsInputStreamProgressMonitor {
+        private final WritableLongOperation op;
+
+        public OpNutsInputStreamProgressMonitor(WritableLongOperation op) {
+            this.op = op;
+        }
+
+        @Override
+        public void onStart(NutsInputStreamEvent event) {
+            op.start(event.isIndeterminate());
+        }
+
+        @Override
+        public void onComplete(NutsInputStreamEvent event) {
+            op.end();
+        }
+
+        @Override
+        public boolean onProgress(NutsInputStreamEvent event) {
+            op.setPercent(event.getPercent());
+            return true;
+        }
+    }
 }

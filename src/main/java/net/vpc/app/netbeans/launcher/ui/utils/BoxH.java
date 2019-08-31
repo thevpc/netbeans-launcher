@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class BoxH {
 
@@ -15,7 +16,12 @@ public class BoxH {
     ComponentPaint background;
     String name;
 
-    private java.util.List<JComponent> children = new ArrayList<JComponent>();
+    private java.util.List<ComInfo> children = new ArrayList<ComInfo>();
+
+    private static class ComInfo {
+        JComponent c;
+        boolean expandH;
+    }
 
     public String getName() {
         return name;
@@ -41,7 +47,7 @@ public class BoxH {
     }
 
     public BoxH setBackground(ComponentPaint c) {
-        background=c;
+        background = c;
         return this;
     }
 
@@ -61,11 +67,21 @@ public class BoxH {
     }
 
     public List<JComponent> getChildren() {
-        return children;
+        return children.stream().map(x -> x.c).collect(Collectors.toList());
     }
 
     public void add(JComponent c) {
-        children.add(c);
+        ComInfo cc = new ComInfo();
+        cc.c = c;
+        cc.expandH = false;
+        children.add(cc);
+    }
+
+    public void addExpandH(JComponent c) {
+        ComInfo cc = new ComInfo();
+        cc.c = c;
+        cc.expandH = true;
+        children.add(cc);
     }
 
     public BoxH setLeftAligned() {
@@ -84,7 +100,8 @@ public class BoxH {
         if (leftGlue) {
             p.add(new JLabel(), Grid.at(index++, 0).expandH());
         }
-        for (JComponent cc : children) {
+        for (ComInfo cci : children) {
+            JComponent cc=cci.c;
             if (cc instanceof Glue) {
                 Grid g = Grid.at(index++, 0);
                 if (((Glue) cc).horizontal) {
@@ -93,9 +110,17 @@ public class BoxH {
                 if (((Glue) cc).vertical) {
                     g = g.expandV();
                 }
+                //cc.setBorder(BorderFactory.createLineBorder(Color.BLUE));
                 p.add(cc, g);
             } else {
-                p.add(cc, Grid.at(index++, 0).fillH().fillV().insets(vgap, hgap));
+
+                Grid g = Grid.at(index++, 0).fillVH().insets(vgap, hgap);
+                g.anchorWest();
+                if(cci.expandH){
+                    g.expandH();
+                    //cc.setBorder(BorderFactory.createLineBorder(Color.RED));
+                }
+                p.add(cc, g);
             }
         }
         if (rightGlue) {

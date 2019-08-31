@@ -71,7 +71,7 @@ public class DefaultLongOperation implements WritableLongOperation {
     @Override
     public void setPercent(float v) {
         if (!isIndeterminate()) {
-            float p = getPercent() + v;
+            float p = v;
             if (p <= 0) {
                 p = 0;
             }
