@@ -9,9 +9,8 @@ import net.vpc.app.netbeans.launcher.model.*;
 import net.vpc.app.netbeans.launcher.util.NbUtils;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
 import java.util.*;
 import java.util.logging.Level;
@@ -990,8 +989,55 @@ public class NetbeansConfigService {
                 case LINUX:
                 case UNIX:
                 case MACOS: {
-                    Path n = Paths.get(o.getPath()).resolve("bin").resolve("netbeans");
-                    n.toFile().setExecutable(true);
+                    for (String s : new String[]{
+                            "/bin/netbeans"
+                            ,"/java/maven/bin/mvn"
+                            ,"/java/maven/bin/mvnDebug"
+                            ,"/java/maven/bin/mvnyjp"
+                            ,"/extide/ant/bin/ant"
+                            ,"/extide/ant/bin/antRun"
+                            ,"/extide/ant/bin/antRun.pl"
+                            ,"/extide/ant/bin/complete-ant-cmd.pl"
+                            ,"/extide/ant/bin/runant.pl"
+                            ,"/extide/ant/bin/runant.py"
+                    }) {
+                        Path n = Paths.get(o.getPath()+s);
+                        if(Files.exists(n)) {
+                            n.toFile().setExecutable(true);
+                        }
+                    }
+                    try {
+                        Path nativeexecution=Paths.get(o.getPath() + "/ide/bin/nativeexecution/");
+                        if(Files.isDirectory(nativeexecution)) {
+                            Files.walkFileTree(nativeexecution, new FileVisitor<Path>() {
+                                @Override
+                                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                                    return FileVisitResult.CONTINUE;
+                                }
+
+                                @Override
+                                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                                    String n = file.getFileName().toString();
+                                    if (n.indexOf('.') < 0) {
+                                        file.toFile().setExecutable(true);
+                                    }
+                                    return FileVisitResult.CONTINUE;
+                                }
+
+                                @Override
+                                public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+                                    return FileVisitResult.CONTINUE;
+                                }
+
+                                @Override
+                                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                                    return FileVisitResult.CONTINUE;
+                                }
+                            });
+                        }
+                    } catch (IOException e) {
+                        LOG.log(Level.FINEST, "Unable to visit "+o.getPath());
+                    }
                     break;
                 }
             }
