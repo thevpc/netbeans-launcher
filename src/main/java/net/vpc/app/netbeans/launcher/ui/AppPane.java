@@ -237,6 +237,7 @@ public abstract class AppPane extends JPanel {
             }
 
         } else {
+            jpb.setValue(0);
             jpb.setIndeterminate(false);
             jpb.setStringPainted(false);
             jpb.setString("");

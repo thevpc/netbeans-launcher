@@ -24,7 +24,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 
-import net.vpc.app.netbeans.launcher.model.JdkInstallation;
 import net.vpc.app.netbeans.launcher.model.NetbeansBinaryLink;
 import net.vpc.app.netbeans.launcher.model.NetbeansInstallation;
 import net.vpc.app.netbeans.launcher.model.NetbeansInstallationStore;
@@ -32,6 +31,7 @@ import net.vpc.app.netbeans.launcher.ui.*;
 import net.vpc.app.netbeans.launcher.ui.utils.SwingUtils2;
 import net.vpc.app.netbeans.launcher.util.JlistToStringer;
 import net.vpc.app.netbeans.launcher.util.Workers;
+import net.vpc.app.nuts.NutsSdkLocation;
 
 /**
  * @author vpc
@@ -59,8 +59,8 @@ public class SettingsPane extends AppPane {
     private JlistToStringer jdkStringer = new JlistToStringer(2) {
         @Override
         public String toString(Object value, int level) {
-            if (value instanceof JdkInstallation) {
-                JdkInstallation i = (JdkInstallation) value;
+            if (value instanceof NutsSdkLocation) {
+                NutsSdkLocation i = (NutsSdkLocation) value;
                 if (win.isCompact()) {
                     switch (level) {
                         case 0: {
@@ -312,7 +312,7 @@ public class SettingsPane extends AppPane {
                         final File f = c.getSelectedFile();
                         if (f != null) {
                             configService.setCurrentDirectory(f);
-                            JdkInstallation loc = configService.detectJdk(f.getPath());
+                            NutsSdkLocation loc = configService.detectJdk(f.getPath());
                             if (loc != null) {
                                 configService.addJdk(loc);
                                 updateJdkList();
@@ -362,7 +362,7 @@ public class SettingsPane extends AppPane {
         try {
             switch (getSettingType()) {
                 case JDK_INSTALLATION: {
-                    JdkInstallation loc = getSelectedJdkLocation();
+                    NutsSdkLocation loc = getSelectedJdkLocation();
                     if (loc != null) {
                         configService.removeJdk(loc.getPath());
                         updateJdkList();
@@ -450,7 +450,7 @@ public class SettingsPane extends AppPane {
     }
 
     public void updateJdkList() {
-        toolkit.updateList(getComps2().jdkListView, configService.getAllJdk(), (a, b) -> a != null && b != null && ((JdkInstallation) a).getName().equals(((JdkInstallation) b).getName()), null);
+        toolkit.updateList(getComps2().jdkListView, configService.getAllJdk(), (a, b) -> a != null && b != null && ((NutsSdkLocation) a).getName().equals(((NutsSdkLocation) b).getName()), null);
     }
 
     public void updateNbList() {
@@ -486,8 +486,8 @@ public class SettingsPane extends AppPane {
         return null;
     }
 
-    public JdkInstallation getSelectedJdkLocation() {
-        JdkInstallation w = (JdkInstallation) getComps2().jdkListView.getSelectedValue();
+    public NutsSdkLocation getSelectedJdkLocation() {
+        NutsSdkLocation w = (NutsSdkLocation) getComps2().jdkListView.getSelectedValue();
         if (w != null) {
             return w;
         }

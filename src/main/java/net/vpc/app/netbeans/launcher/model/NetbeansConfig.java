@@ -5,6 +5,8 @@
  */
 package net.vpc.app.netbeans.launcher.model;
 
+import net.vpc.app.nuts.NutsSdkLocation;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +20,7 @@ public class NetbeansConfig implements Serializable {
     public static final long serialVersionUID = 1;
     private final List<NetbeansInstallation> installations = new ArrayList<>();
     private final List<NetbeansWorkspace> workspaces = new ArrayList<>();
-    private final List<JdkInstallation> jdkLocations = new ArrayList<>();
+    private final List<NutsSdkLocation> jdkLocations = new ArrayList<>();
     private boolean sumoMode = false;
 
     public List<NetbeansInstallation> getInstallations() {
@@ -29,7 +31,7 @@ public class NetbeansConfig implements Serializable {
         return workspaces;
     }
 
-    public List<JdkInstallation> getJdkLocations() {
+    public List<NutsSdkLocation> getJdkLocations() {
         return jdkLocations;
     }
 

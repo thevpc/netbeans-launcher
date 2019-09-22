@@ -32,6 +32,7 @@ import net.vpc.app.netbeans.launcher.ui.*;
 import net.vpc.app.netbeans.launcher.ui.utils.GridPane;
 import net.vpc.app.netbeans.launcher.ui.utils.SwingUtils2;
 import net.vpc.app.netbeans.launcher.util.NbUtils;
+import net.vpc.app.nuts.NutsSdkLocation;
 
 /**
  * @author vpc
@@ -417,9 +418,15 @@ public class WorkspacePane extends AppPane {
         String oldValue = getEditUserdir();
         getComps3().userdir.setEditable(true);
         toolkit.setComboxValues(getComps3().userdir, configService.getUserdirProposals(w), oldValue);
+//        if(NbUtils.isEmpty(oldValue)){
+            getComps3().userdir.setSelectedItem(configService.getUserdirProposal(w));
+//        }
         oldValue = getEditCachedir();
         getComps3().cachedir.setEditable(true);
         toolkit.setComboxValues(getComps3().cachedir, configService.getCachedirProposals(w), oldValue);
+//        if(NbUtils.isEmpty(oldValue)){
+            getComps3().cachedir.setSelectedItem(configService.getCachedirProposal(w));
+//        }
     }
 
     public void resetValues() {
@@ -555,8 +562,8 @@ public class WorkspacePane extends AppPane {
         }
         lastWorkspace = w.copy();
         resetValues();
-        setEditName(w.getName());
         setEditPath(w.getPath());
+        setEditName(w.getName());
         setEditJdkhome(w.getJdkhome());
         setEditFontSize(w.getFontSize());
         onRequireUpdateDirProposals();
@@ -572,8 +579,8 @@ public class WorkspacePane extends AppPane {
 
     public NetbeansWorkspace getWorkspace() {
         NetbeansWorkspace w = new NetbeansWorkspace();
-        w.setName(getEditName());
         w.setPath(getEditPath());
+        w.setName(getEditName());
         w.setGroup(getEditGroup());
         w.setJdkhome(getEditJdkHome());
         w.setFontSize(getEditFontSize());
@@ -601,7 +608,7 @@ public class WorkspacePane extends AppPane {
     }
 
     public void setEditJdkhome(String p) {
-        JdkInstallation pp2 = configService.getJdk(p);
+        NutsSdkLocation pp2 = configService.getJdk(p);
         if (pp2 != null) {
             getComps3().jdkhome.setSelectedItem(pp2);
         } else {
@@ -697,8 +704,8 @@ public class WorkspacePane extends AppPane {
 
     public String getEditJdkHome() {
         Object i = toolkit.getComboSelectedObject(getComps3().jdkhome);
-        if (i instanceof JdkInstallation) {
-            return ((JdkInstallation) i).getPath();
+        if (i instanceof NutsSdkLocation) {
+            return ((NutsSdkLocation) i).getPath();
         } else {
             return i == null ? null : String.valueOf(i);
         }

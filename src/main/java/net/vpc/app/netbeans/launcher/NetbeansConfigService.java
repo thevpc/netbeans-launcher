@@ -32,7 +32,7 @@ public class NetbeansConfigService {
     private NetbeansConfig config = new NetbeansConfig();
     private File currentDirectory = new File(System.getProperty("user.home"));
     private static String[] prefix = {"Workspace", "WS", "NB", "Netbeans"};
-    private static String[] suffix = {" Perso", " Work", " Research", " Fun", " Test", " Release", " Test 1", " Test 2", " A", " B", " C", " D", " E"};
+    private static String[] suffix = {"-Perso", "-Work", "-Research", "-Edu", "-Fun", "-Test", "-Release", "-Test 1", "-Test 2", "-A", "-B", "-C", "-D", "-E"};
     private List<WritableLongOperation> operations = new ArrayList<>();
     private List<LongOperationListener> operationListeners = new ArrayList<>();
 
@@ -83,7 +83,7 @@ public class NetbeansConfigService {
         });
         if (files != null) {
             for (File file : files) {
-                JdkInstallation o = findJdk(file.getPath());
+                NutsSdkLocation o = findJdk(file.getPath());
                 if (o == null) {
                     o = detectJdk(file.getPath());
                     if (o != null) {
@@ -131,55 +131,8 @@ public class NetbeansConfigService {
         }
     }
 
-    public JdkInstallation detectJdk(String path) {
-        if (path == null) {
-            return null;
-        }
-        File f = NbUtils.resolveFile(path);
-        File javaExePath = new File(f, NbUtils.toOsPath("bin/" + NbUtils.getNbOsConfig().getJavaExe()));
-        if (!javaExePath.exists()) {
-            return null;
-        }
-        String type = null;
-        String jdkVersion = null;
-        try {
-            String s = NbUtils.response(new String[]{javaExePath.getPath(), "-version"});
-            if (s.length() > 0) {
-                String prefix = "java version \"";
-                int i = s.indexOf(prefix);
-                if (i >= 0) {
-                    i = i + prefix.length();
-                    int j = s.indexOf("\"", i);
-                    if (i >= 0) {
-                        jdkVersion = s.substring(i, j);
-                        type = "JDK";
-                    }
-                }
-                if (jdkVersion == null) {
-
-                    prefix = "openjdk version \"";
-                    i = s.indexOf(prefix);
-                    if (i >= 0) {
-                        i = i + prefix.length();
-                        int j = s.indexOf("\"", i);
-                        if (i > 0) {
-                            jdkVersion = s.substring(i, j);
-                            type = "OpenJDK";
-                        }
-                    }
-                }
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(NetbeansConfigService.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        if (jdkVersion == null) {
-            return null;
-        }
-        JdkInstallation loc = new JdkInstallation();
-        loc.setName(type + " " + jdkVersion);
-        loc.setVersion(jdkVersion);
-        loc.setPath(f.getPath());
-        return loc;
+    public NutsSdkLocation detectJdk(String path) {
+        return appContext.workspace().config().resolveSdkLocation("java", Paths.get(path), null, appContext.session());
     }
 
     //    public JdkLocation addJdkLocation(String path, boolean registerNew) {
@@ -444,22 +397,22 @@ public class NetbeansConfigService {
         return null;
     }
 
-    public JdkInstallation findJdk(String path) {
+    public NutsSdkLocation findJdk(String path) {
         if (path == null) {
             return null;
         }
-        for (JdkInstallation loc : config.getJdkLocations()) {
+        for (NutsSdkLocation loc : config.getJdkLocations()) {
             if (NbUtils.equalsStr(path, loc.getPath())) {
                 return loc;
             }
         }
         if (!NbUtils.isPath(path)) {
-            for (JdkInstallation loc : config.getJdkLocations()) {
+            for (NutsSdkLocation loc : config.getJdkLocations()) {
                 if (NbUtils.equalsStr(path, loc.getName())) {
                     return loc;
                 }
             }
-            for (JdkInstallation loc : config.getJdkLocations()) {
+            for (NutsSdkLocation loc : config.getJdkLocations()) {
                 if (NbUtils.equalsStr(path, loc.getVersion())) {
                     return loc;
                 }
@@ -486,8 +439,8 @@ public class NetbeansConfigService {
         return true;
     }
 
-    public boolean addJdk(JdkInstallation netbeansInstallation) {
-        for (JdkInstallation installation : config.getJdkLocations()) {
+    public boolean addJdk(NutsSdkLocation netbeansInstallation) {
+        for (NutsSdkLocation installation : config.getJdkLocations()) {
             if (NbUtils.equalsStr(netbeansInstallation.getPath(), installation.getPath())) {
                 return false;
             }
@@ -506,19 +459,19 @@ public class NetbeansConfigService {
             }
             String n1 = a.getName();
             String n2 = b.getName();
-            if(n1==null){
-                n1="";
+            if (n1 == null) {
+                n1 = "";
             }
-            if(n2==null){
-                n2="";
+            if (n2 == null) {
+                n2 = "";
             }
             return n1.compareTo(n2);
         });
         return w;
     }
 
-    public JdkInstallation[] getAllJdk() {
-        List<JdkInstallation> list = config.getJdkLocations();
+    public NutsSdkLocation[] getAllJdk() {
+        List<NutsSdkLocation> list = config.getJdkLocations();
         list.sort((a, b) -> {
             int i = NbUtils.compareVersions(a.getVersion(), b.getVersion());
             if (i != 0) {
@@ -526,7 +479,7 @@ public class NetbeansConfigService {
             }
             return a.getName().compareTo(b.getName());
         });
-        return list.toArray(new JdkInstallation[0]);
+        return list.toArray(new NutsSdkLocation[0]);
     }
 
     public NetbeansInstallation[] getAllNb() {
@@ -572,11 +525,11 @@ public class NetbeansConfigService {
         return o;
     }
 
-    public JdkInstallation getJdk(String path) {
+    public NutsSdkLocation getJdk(String path) {
         if (path == null) {
             return null;
         }
-        JdkInstallation o = findJdk(path);
+        NutsSdkLocation o = findJdk(path);
         if (o == null) {
             o = detectJdk(path);
             if (o != null) {
@@ -667,7 +620,7 @@ public class NetbeansConfigService {
     }
 
     public void removeJdk(String path) {
-        JdkInstallation o = findJdk(path);
+        NutsSdkLocation o = findJdk(path);
         if (o != null) {
             for (NetbeansWorkspace w : getWorkspacesByJdk(o.getPath())) {
                 removeNbWorkspace(w);
@@ -915,6 +868,15 @@ public class NetbeansConfigService {
         return all.toArray(new String[0]);
     }
 
+    public String getUserdirProposal(NetbeansWorkspace w) {
+        String n = NbUtils.trim(w.getName());
+        if (NbUtils.isEmpty(n)) {
+            n = "noname";
+        }
+        String configRoot = NbUtils.getNbOsConfig().getConfigRoot();
+        return NbUtils.toOsPath(configRoot + File.separatorChar + n);
+    }
+
     public String[] getUserdirProposals(NetbeansWorkspace w) {
         String n = NbUtils.trim(w.getName());
         if (NbUtils.isEmpty(n)) {
@@ -925,7 +887,7 @@ public class NetbeansConfigService {
         for (String extra : new String[]{"", " 1", " 2", " 3", " 4", " 5"}) {
             all.add(NbUtils.toOsPath(configRoot + File.separatorChar + n + extra));
         }
-        return all.toArray(new String[all.size()]);
+        return all.toArray(new String[0]);
     }
 
     public String[] getCachedirProposals(NetbeansWorkspace w) {
@@ -941,6 +903,15 @@ public class NetbeansConfigService {
         return all.toArray(new String[0]);
     }
 
+    public String getCachedirProposal(NetbeansWorkspace w) {
+        String n = NbUtils.trim(w.getName());
+        if (NbUtils.isEmpty(n)) {
+            n = "noname";
+        }
+        String cacheRoot = NbUtils.getNbOsConfig().getCacheRoot();
+        return NbUtils.toOsPath(cacheRoot + File.separatorChar + n);
+    }
+
     public boolean isSumoMode() {
         return config.isSumoMode();
     }
@@ -954,31 +925,21 @@ public class NetbeansConfigService {
                 .resolve("netbeans")
                 .resolve("netbeans-" + i.getVersion());
         if (!Files.exists(zipTo)) {
-            ws.io().copy().from(i.getUrl()).to(zipTo).monitorable()
+            ws.io().copy().from(i.getUrl()).to(zipTo).logProgress()
                     .progressMonitor(new OpNutsInputStreamProgressMonitor(addOperation("Downloading " + i.toString()))).run();
         }
-        try {
-            Files.createDirectories(folderTo);
-        } catch (IOException ex) {
-            throw new UncheckedIOException(ex);
-        }
-        File running = new File(zipTo.toString() + ".unpacking");
-        if (running.exists()) {
-            throw new RuntimeException("Lock File exits " + running.getPath());
-        }
+        NutsLock lck = ws.io().lock().source(zipTo).create();
+        lck.checkFree();
         if (Files.exists(folderTo.resolve("bin").resolve("netbeans"))) {
             //ok !
         } else {
+            lck.acquire();
             try {
-                new FileOutputStream(running).close();
-                try(InputStream in=ws.io().monitor().origin(zipTo)
+                ws.io().uncompress().from(zipTo).to(folderTo).skipRoot()
                         .progressMonitor(new OpNutsInputStreamProgressMonitor(addOperation("Unzipping " + i.toString())))
-                        .create()) {
-                    NbUtils.unzip(in, folderTo.toString(), new NbUtils.UnzipOptions().setSkipRoot(true));
-                    running.delete();
-                }
-            } catch (IOException ex) {
-                throw new UncheckedIOException(ex);
+                        .run();
+            } finally {
+                lck.release();
             }
         }
         NetbeansInstallation o = detectNb(folderTo.toString(), NetbeansInstallationStore.DEFAULT);
@@ -989,24 +950,24 @@ public class NetbeansConfigService {
                 case MACOS: {
                     for (String s : new String[]{
                             "/bin/netbeans"
-                            ,"/java/maven/bin/mvn"
-                            ,"/java/maven/bin/mvnDebug"
-                            ,"/java/maven/bin/mvnyjp"
-                            ,"/extide/ant/bin/ant"
-                            ,"/extide/ant/bin/antRun"
-                            ,"/extide/ant/bin/antRun.pl"
-                            ,"/extide/ant/bin/complete-ant-cmd.pl"
-                            ,"/extide/ant/bin/runant.pl"
-                            ,"/extide/ant/bin/runant.py"
+                            , "/java/maven/bin/mvn"
+                            , "/java/maven/bin/mvnDebug"
+                            , "/java/maven/bin/mvnyjp"
+                            , "/extide/ant/bin/ant"
+                            , "/extide/ant/bin/antRun"
+                            , "/extide/ant/bin/antRun.pl"
+                            , "/extide/ant/bin/complete-ant-cmd.pl"
+                            , "/extide/ant/bin/runant.pl"
+                            , "/extide/ant/bin/runant.py"
                     }) {
-                        Path n = Paths.get(o.getPath()+s);
-                        if(Files.exists(n)) {
+                        Path n = Paths.get(o.getPath() + s);
+                        if (Files.exists(n)) {
                             n.toFile().setExecutable(true);
                         }
                     }
                     try {
-                        Path nativeexecution=Paths.get(o.getPath() + "/ide/bin/nativeexecution/");
-                        if(Files.isDirectory(nativeexecution)) {
+                        Path nativeexecution = Paths.get(o.getPath() + "/ide/bin/nativeexecution/");
+                        if (Files.isDirectory(nativeexecution)) {
                             Files.walkFileTree(nativeexecution, new FileVisitor<Path>() {
                                 @Override
                                 public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
@@ -1034,7 +995,7 @@ public class NetbeansConfigService {
                             });
                         }
                     } catch (IOException e) {
-                        LOG.log(Level.FINEST, "Unable to visit "+o.getPath());
+                        LOG.log(Level.FINEST, "Unable to visit " + o.getPath());
                     }
                     break;
                 }
@@ -1073,7 +1034,7 @@ public class NetbeansConfigService {
     }
 
 
-    private static class OpNutsInputStreamProgressMonitor implements NutsInputStreamProgressMonitor {
+    private static class OpNutsInputStreamProgressMonitor implements NutsProgressMonitor {
         private final WritableLongOperation op;
 
         public OpNutsInputStreamProgressMonitor(WritableLongOperation op) {
@@ -1081,17 +1042,17 @@ public class NetbeansConfigService {
         }
 
         @Override
-        public void onStart(NutsInputStreamEvent event) {
+        public void onStart(NutsProgressEvent event) {
             op.start(event.isIndeterminate());
         }
 
         @Override
-        public void onComplete(NutsInputStreamEvent event) {
+        public void onComplete(NutsProgressEvent event) {
             op.end();
         }
 
         @Override
-        public boolean onProgress(NutsInputStreamEvent event) {
+        public boolean onProgress(NutsProgressEvent event) {
             op.setPercent(event.getPercent());
             return true;
         }
