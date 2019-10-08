@@ -6,6 +6,7 @@ import net.vpc.app.netbeans.launcher.ui.MainWindowSwing;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.util.HashMap;
@@ -203,32 +204,32 @@ public class SwingUtils2 {
         return v;
     }
 
-    public static synchronized ComponentPaint componentGradientPaint(String a, int darkening,Direction dir) {
-        return componentGradientPaint(color(a),darkening,dir);
+    public static synchronized ComponentPaint componentGradientPaint(String a, int darkening, Direction dir) {
+        return componentGradientPaint(color(a), darkening, dir);
     }
 
-    public static synchronized ComponentPaint componentGradientPaint(Color a, int darkening,Direction dir) {
-        Color b=a;
-        while(darkening>0){
-            b=b.darker();
+    public static synchronized ComponentPaint componentGradientPaint(Color a, int darkening, Direction dir) {
+        Color b = a;
+        while (darkening > 0) {
+            b = b.darker();
             darkening--;
         }
-        while(darkening<0){
-            b=b.brighter();
+        while (darkening < 0) {
+            b = b.brighter();
             darkening++;
         }
-        return componentGradientPaint(a,b,dir);
+        return componentGradientPaint(a, b, dir);
     }
 
-    public static synchronized ComponentPaint componentGradientPaint(String a, String b,Direction dir) {
-        return componentGradientPaint(color(a),color(b),dir);
+    public static synchronized ComponentPaint componentGradientPaint(String a, String b, Direction dir) {
+        return componentGradientPaint(color(a), color(b), dir);
     }
 
-    public static synchronized ComponentPaint componentGradientPaint(Color a, Color b,Direction dir) {
-        if(dir==null){
-            dir=Direction.BOTTOM;
+    public static synchronized ComponentPaint componentGradientPaint(Color a, Color b, Direction dir) {
+        if (dir == null) {
+            dir = Direction.BOTTOM;
         }
-        switch (dir){
+        switch (dir) {
             case BOTTOM:
                 return new ComponentPaint() {
                     @Override
@@ -353,7 +354,26 @@ public class SwingUtils2 {
         return false;
     }
 
-    public static String trim(String s){
-        return s==null?"":s.trim();
+    public static String trim(String s) {
+        return s == null ? "" : s.trim();
+    }
+
+    public static void addEnterAction(JList list, ButtonAction action) {
+        KeyStroke keyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
+        InputMap im = list.getInputMap();
+        im.put(keyStroke, keyStroke);
+        list.getActionMap().put(keyStroke, new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                action.action();
+            }
+        });
+    }
+
+    public static void addEnterAction(JList list, Action action) {
+        KeyStroke keyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
+        InputMap im = list.getInputMap();
+        im.put(keyStroke, keyStroke);
+        list.getActionMap().put(keyStroke, action);
     }
 }

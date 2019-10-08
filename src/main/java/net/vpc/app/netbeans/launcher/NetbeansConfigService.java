@@ -13,6 +13,7 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.locks.Lock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -928,19 +929,18 @@ public class NetbeansConfigService {
             ws.io().copy().from(i.getUrl()).to(zipTo).logProgress()
                     .progressMonitor(new OpNutsInputStreamProgressMonitor(addOperation("Downloading " + i.toString()))).run();
         }
-        NutsLock lck = ws.io().lock().source(zipTo).create();
-        lck.checkFree();
-        if (Files.exists(folderTo.resolve("bin").resolve("netbeans"))) {
-            //ok !
-        } else {
-            lck.acquire();
-            try {
+        Lock lck = ws.io().lock().source(zipTo).create();
+        lck.lock();
+        try {
+            if (Files.exists(folderTo.resolve("bin").resolve("netbeans"))) {
+                //already unzipped!!
+            }else {
                 ws.io().uncompress().from(zipTo).to(folderTo).skipRoot()
                         .progressMonitor(new OpNutsInputStreamProgressMonitor(addOperation("Unzipping " + i.toString())))
                         .run();
-            } finally {
-                lck.release();
             }
+        } finally {
+            lck.unlock();
         }
         NetbeansInstallation o = detectNb(folderTo.toString(), NetbeansInstallationStore.DEFAULT);
         if (o != null) {

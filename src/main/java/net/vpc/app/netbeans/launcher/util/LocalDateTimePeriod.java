@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 /**
- *
  * @author vpc
  */
 public class LocalDateTimePeriod {
@@ -130,8 +129,7 @@ public class LocalDateTimePeriod {
         return update(years, months, days, hours, minutes, seconds, milliseconds);
     }
 
-    @Override
-    public String toString() {
+    public String getFullMessage() {
         StringBuilder sb = new StringBuilder();
         if (years > 0) {
             if (sb.length() > 0) {
@@ -168,6 +166,64 @@ public class LocalDateTimePeriod {
                 sb.append(", ");
             }
             sb.append(seconds).append(" seconds");
+        }
+        if (milliseconds > 0) {
+            if (sb.length() > 0) {
+                sb.append(", ");
+            }
+            sb.append(milliseconds).append(" milliseconds");
+        }
+        if (sb.length() == 0) {
+            return "0 seconds";
+        }
+        return sb.toString();
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        if (years > 0) {
+            if (sb.length() > 0) {
+                sb.append(", ");
+            }
+            sb.append(years).append(" years");
+            return sb.toString();
+        }
+        if (months > 0) {
+            if (sb.length() > 0) {
+                sb.append(", ");
+            }
+            sb.append(months).append(" months");
+            return sb.toString();
+        }
+        if (days > 0) {
+            if (sb.length() > 0) {
+                sb.append(", ");
+            }
+            sb.append(days).append(" days");
+            return sb.toString();
+        }
+        if (hours > 0) {
+            if (sb.length() > 0) {
+                sb.append(", ");
+            }
+            sb.append(hours).append(" hours");
+        }
+        if (minutes > 0) {
+            if (sb.length() > 0) {
+                sb.append(", ");
+            }
+            sb.append(minutes).append(" minutes");
+        }
+        if(hours>0 || minutes>0){
+            return sb.toString();
+        }
+        if (seconds > 0) {
+            if (sb.length() > 0) {
+                sb.append(", ");
+            }
+            sb.append(seconds).append(" seconds");
+            return sb.toString();
         }
         if (milliseconds > 0) {
             if (sb.length() > 0) {

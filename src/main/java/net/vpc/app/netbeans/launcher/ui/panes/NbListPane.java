@@ -7,6 +7,7 @@ package net.vpc.app.netbeans.launcher.ui.panes;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.time.Duration;
@@ -40,6 +41,7 @@ public class NbListPane extends AppPane {
         JComponent buttonAdd;
         JComponent[] buttons;
         JComponent main;
+        boolean compact;
         DefaultListModel<NetbeansWorkspace> workspacesModel;
     }
 
@@ -53,6 +55,7 @@ public class NbListPane extends AppPane {
 
     private Comps1 createComps1(boolean compact) {
         Comps1 c = new Comps1();
+        c.compact = compact;
         c.buttonAdd = toolkit.createIconButton("add", "App.Action.Add", () -> win.onAddWorkspace(null), compact);
         c.buttonRemove = toolkit.createIconButton("remove", "App.Action.Remove", () -> onRemoveWorkspace(), compact);
         c.buttonCopy = toolkit.createIconButton("copy", "App.Action.Copy", () -> onCopyWorkspace(), compact);
@@ -67,6 +70,7 @@ public class NbListPane extends AppPane {
         }
         c.workspacesListView = new JList(c.workspacesModel);
         c.workspacesListView.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        SwingUtils2.addEnterAction(c.workspacesListView, () -> win.startWorkspace(getSelectedWorkspace()));
         c.workspacesListView.setBorder(new EmptyBorder(2, 2, 2, 2));
         c.workspacesListView.setFixedCellHeight(compact ? 30 : 50);
         c.workspacesListView.setCellRenderer(new DefaultListCellRenderer() {

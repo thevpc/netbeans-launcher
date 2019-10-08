@@ -5,7 +5,7 @@
  */
 package net.vpc.app.netbeans.launcher.ui.panes;
 
-import java.awt.Dimension;
+import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
@@ -16,21 +16,12 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashSet;
-import javax.swing.Box;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JFileChooser;
-import javax.swing.JScrollPane;
-import javax.swing.JSpinner;
-import javax.swing.JTextField;
-import javax.swing.SpinnerNumberModel;
+import javax.swing.*;
 
 import net.vpc.app.netbeans.launcher.NetbeansConfigService;
 import net.vpc.app.netbeans.launcher.model.*;
 import net.vpc.app.netbeans.launcher.ui.*;
-import net.vpc.app.netbeans.launcher.ui.utils.GridPane;
-import net.vpc.app.netbeans.launcher.ui.utils.SwingUtils2;
+import net.vpc.app.netbeans.launcher.ui.utils.*;
 import net.vpc.app.netbeans.launcher.util.NbUtils;
 import net.vpc.app.nuts.NutsSdkLocation;
 
@@ -815,6 +806,35 @@ public class WorkspacePane extends AppPane {
         c.name = toolkit.createCombo();
         c.group = toolkit.createCombo();
         c.jdkhome = toolkit.createCombo();
+        JdkJlistToStringer jdkJlistToStringer = new JdkJlistToStringer();
+        c.jdkhome.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                return super.getListCellRendererComponent(list, jdkJlistToStringer.toString(list, value), index, isSelected, cellHasFocus);
+            }
+        });
+        c.jdkhome.setEditor(new SimpleBasicComboBoxEditor(
+                new StringMapper() {
+                    @Override
+                    public String toString(Object o) {
+                        return jdkJlistToStringer.toString(o,1);
+                    }
+
+                    @Override
+                    public Object fromString(String str) {
+                        ComboBoxModel model = c.jdkhome.getModel();
+                        int size = model.getSize();
+                        for (int i = 0; i < size; i++) {
+                            Object p = model.getElementAt(i);
+                            String s = toString(p);
+                            if(s.equals(str)){
+                                return p;
+                            }
+                        }
+                        return null;
+                    }
+                }
+        ));
         c.fontSize = new JSpinner();
         c.fontSize.setModel(new SpinnerNumberModel(0, 0, 72, 1));
         c.path.addItemListener(pathUpdatedChangeListener);

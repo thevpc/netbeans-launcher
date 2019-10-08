@@ -28,6 +28,7 @@ import net.vpc.app.netbeans.launcher.model.NetbeansBinaryLink;
 import net.vpc.app.netbeans.launcher.model.NetbeansInstallation;
 import net.vpc.app.netbeans.launcher.model.NetbeansInstallationStore;
 import net.vpc.app.netbeans.launcher.ui.*;
+import net.vpc.app.netbeans.launcher.ui.utils.JdkJlistToStringer;
 import net.vpc.app.netbeans.launcher.ui.utils.SwingUtils2;
 import net.vpc.app.netbeans.launcher.util.JlistToStringer;
 import net.vpc.app.netbeans.launcher.util.Workers;
@@ -56,34 +57,7 @@ public class SettingsPane extends AppPane {
 
     private Comp2 compact;
     private Comp2 nonCompact;
-    private JlistToStringer jdkStringer = new JlistToStringer(2) {
-        @Override
-        public String toString(Object value, int level) {
-            if (value instanceof NutsSdkLocation) {
-                NutsSdkLocation i = (NutsSdkLocation) value;
-                if (win.isCompact()) {
-                    switch (level) {
-                        case 0: {
-                            return i.getName();
-                        }
-                        case 1: {
-                            return i.getName() + " (" + i.getPath() + ")";
-                        }
-                    }
-                } else {
-                    switch (level) {
-                        case 0: {
-                            return i.getName() + " (" + i.getPath() + ")";
-                        }
-                        case 1: {
-                            return i.getName() + " (" + i.getPath() + ")";
-                        }
-                    }
-                }
-            }
-            return String.valueOf(value);
-        }
-    };
+    private JlistToStringer jdkStringer = new  JdkJlistToStringer();
     private static final Set<String> downloading = new HashSet<>();
     private JlistToStringer nbStringer = new JlistToStringer(2) {
         @Override
@@ -244,6 +218,7 @@ public class SettingsPane extends AppPane {
                 }
             }
         });
+        SwingUtils2.addEnterAction(nbListView, () -> onDownload());
         return nbListView;
     }
 
