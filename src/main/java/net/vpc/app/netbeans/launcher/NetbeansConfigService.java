@@ -95,7 +95,6 @@ public class NetbeansConfigService {
         }
     }
 
-
     public NetbeansBinaryLink[] searchRemoteInstallableNbBinaries() {
         NetbeansBinaryLink[] all = appContext.workspace().json().parse(getClass().getResource("/net/vpc/app/netbeans/launcher/binaries.json"), NetbeansBinaryLink[].class);
         Set<String> locallyAvailable = Arrays.stream(getAllNb()).map(NetbeansInstallation::getVersion).collect(Collectors.toSet());
@@ -745,24 +744,13 @@ public class NetbeansConfigService {
     }
 
     public void loadFile() {
-        Path oldFile = Paths.get(System.getProperty("user.home")).resolve(".java/apps/net/vpc/toolbox/netbeans-launcher.json");
-        appContext.getConfigFolder().resolve("config.json");
+        boolean loaded = false;
         Path validFile = appContext.getConfigFolder().resolve("config.json");
-        if (!Files.isRegularFile(validFile) && Files.isRegularFile(oldFile)) {
-            try {
-                config = NetbeansConfigLoader11.load(oldFile, appContext.workspace());
-                saveFile();
-            } catch (Exception e) {
-                System.err.println("Unable to load config from " + oldFile);
-                LOG.log(Level.SEVERE, "Unable to load config from " + oldFile, e);
-                config = new NetbeansConfig();
-            }
-        } else if (Files.isRegularFile(validFile)) {
+        if (Files.isRegularFile(validFile)) {
             try {
                 config = (NetbeansConfig) appContext.workspace().json().parse(validFile, NetbeansConfig.class);
             } catch (Exception e) {
                 System.err.println("Unable to load config from " + validFile.toString());
-                LOG.log(Level.SEVERE, "Unable to load config from " + oldFile, e);
                 int i = 2;
                 while (true) {
                     Path f2 = Paths.get(validFile.toString() + "." + i + ".save");
@@ -792,10 +780,43 @@ public class NetbeansConfigService {
             if (needSave) {
                 saveFile();
             }
-        } else {
-            if (config == null) {
-                config = new NetbeansConfig();
+            loaded = true;
+        }
+        List<NutsId> olderVersions = appContext.workspace().search().installed().id(appContext.getAppId().builder().setVersion("").build()).getResultIds().stream().sorted(
+                (a, b) -> b.getVersion().compareTo(a.getVersion())
+        ).filter(x -> x.getVersion().compareTo(appContext.getAppId().getVersion()) < 0).collect(Collectors.toList());
+        for (NutsId olderVersion : olderVersions) {
+            Path validFile2 = appContext.workspace().config().getStoreLocation(olderVersion, NutsStoreLocation.CONFIG).resolve("config.json");
+            if (Files.isRegularFile(validFile2)) {
+                try {
+                    config = (NetbeansConfig) appContext.workspace().json().parse(validFile2, NetbeansConfig.class);
+                } catch (Exception e) {
+                    System.err.println("Unable to load config from " + validFile2.toString());
+                    break;
+                }
+                if (config != null) {
+                    saveFile();
+                    loaded = true;
+                    break;
+                }
             }
+        }
+        if (!loaded) {
+            Path oldFile = Paths.get(System.getProperty("user.home")).resolve(".java/apps/net/vpc/toolbox/netbeans-launcher.json");
+            if (Files.isRegularFile(oldFile)) {
+                try {
+                    config = NetbeansConfigLoader11.load(oldFile, appContext.workspace());
+                    loaded = true;
+                    saveFile();
+                } catch (Exception e) {
+                    System.err.println("Unable to load config from " + oldFile);
+                    LOG.log(Level.SEVERE, "Unable to load config from " + oldFile, e);
+                    config = new NetbeansConfig();
+                }
+            }
+        }
+        if (config == null) {
+            config = new NetbeansConfig();
         }
         if (config.getInstallations().isEmpty()) {
             configureDefaults();
@@ -917,7 +938,7 @@ public class NetbeansConfigService {
         return config.isSumoMode();
     }
 
-    public void installNetbeansBinary(NetbeansBinaryLink i) {
+    public NetbeansInstallation installNetbeansBinary(NetbeansBinaryLink i) {
         NutsWorkspace ws = appContext.workspace();
         Path zipTo = appContext.getSharedAppsFolder()
                 .resolve("netbeans")
@@ -934,7 +955,7 @@ public class NetbeansConfigService {
         try {
             if (Files.exists(folderTo.resolve("bin").resolve("netbeans"))) {
                 //already unzipped!!
-            }else {
+            } else {
                 ws.io().uncompress().from(zipTo).to(folderTo).skipRoot()
                         .progressMonitor(new OpNutsInputStreamProgressMonitor(addOperation("Unzipping " + i.toString())))
                         .run();
@@ -949,16 +970,16 @@ public class NetbeansConfigService {
                 case UNIX:
                 case MACOS: {
                     for (String s : new String[]{
-                            "/bin/netbeans"
-                            , "/java/maven/bin/mvn"
-                            , "/java/maven/bin/mvnDebug"
-                            , "/java/maven/bin/mvnyjp"
-                            , "/extide/ant/bin/ant"
-                            , "/extide/ant/bin/antRun"
-                            , "/extide/ant/bin/antRun.pl"
-                            , "/extide/ant/bin/complete-ant-cmd.pl"
-                            , "/extide/ant/bin/runant.pl"
-                            , "/extide/ant/bin/runant.py"
+                        "/bin/netbeans",
+                        "/java/maven/bin/mvn",
+                        "/java/maven/bin/mvnDebug",
+                        "/java/maven/bin/mvnyjp",
+                        "/extide/ant/bin/ant",
+                        "/extide/ant/bin/antRun",
+                        "/extide/ant/bin/antRun.pl",
+                        "/extide/ant/bin/complete-ant-cmd.pl",
+                        "/extide/ant/bin/runant.pl",
+                        "/extide/ant/bin/runant.py"
                     }) {
                         Path n = Paths.get(o.getPath() + s);
                         if (Files.exists(n)) {
@@ -1002,6 +1023,7 @@ public class NetbeansConfigService {
             }
             addNb(o);
         }
+        return o;
     }
 
     void fire(WritableLongOperation w) {
@@ -1033,8 +1055,8 @@ public class NetbeansConfigService {
         return d;
     }
 
-
     private static class OpNutsInputStreamProgressMonitor implements NutsProgressMonitor {
+
         private final WritableLongOperation op;
 
         public OpNutsInputStreamProgressMonitor(WritableLongOperation op) {

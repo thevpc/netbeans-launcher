@@ -11,12 +11,15 @@ import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 
 /**
  * thank you
  * https://stackoverflow.com/questions/46797579/how-can-i-control-the-brightness-of-an-image
  */
 public class SwingUtils2 {
+
     private static Map<String, Color> colorsCache = new HashMap<>();
     private static Map<String, ImageIcon> iconsCache = new HashMap<>();
 
@@ -114,8 +117,8 @@ public class SwingUtils2 {
      * @return BufferedImage corresponding to provided Image.
      */
     private static BufferedImage imageToBufferedImage(final Image image) {
-        final BufferedImage bufferedImage =
-                new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+        final BufferedImage bufferedImage
+                = new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_ARGB);
         final Graphics2D g2 = bufferedImage.createGraphics();
         g2.drawImage(image, 0, 0, null);
         g2.dispose();
@@ -370,10 +373,46 @@ public class SwingUtils2 {
         });
     }
 
+    public static void addEnterAction(JTable list, ButtonAction action) {
+        KeyStroke keyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
+        InputMap im = list.getInputMap();
+        im.put(keyStroke, keyStroke);
+        list.getActionMap().put(keyStroke, new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                action.action();
+            }
+        });
+    }
+
     public static void addEnterAction(JList list, Action action) {
         KeyStroke keyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
         InputMap im = list.getInputMap();
         im.put(keyStroke, keyStroke);
         list.getActionMap().put(keyStroke, action);
+    }
+
+    public static void setWidthAsPercentages(JTable table, float... percentages) {
+        Dimension size = table.getSize();
+
+        TableColumnModel model = table.getColumnModel();
+        float[] allColumns = new float[model.getColumnCount()];
+        float t = 0;
+        for (int i = 0; i < percentages.length; i++) {
+            t += percentages[i];
+        }
+        for (int i = 0; i < allColumns.length; i++) {
+            float f = 0;
+            if (i < percentages.length) {
+                f = percentages[i] / t;
+            } else {
+                f = percentages[percentages.length - 1] / t;
+            }
+            allColumns[i]=f;
+        }
+        for (int columnIndex = 0; columnIndex < allColumns.length; columnIndex++) {
+            TableColumn column = model.getColumn(columnIndex);
+            column.setPreferredWidth((int) (allColumns[columnIndex] * size.getWidth()));
+        }
     }
 }

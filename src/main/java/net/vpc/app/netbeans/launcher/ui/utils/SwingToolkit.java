@@ -13,6 +13,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -21,6 +22,7 @@ import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 
 import net.vpc.app.netbeans.launcher.util.NbUtils;
 import net.vpc.app.nuts.NutsExecutionException;
@@ -50,6 +52,7 @@ public class SwingToolkit {
     private final static Pattern keyPattern = Pattern.compile("\\$\\{(?<name>[a-z]+)}");
 
     private static class ButtonLabelMouseAdapter extends MouseAdapter {
+
         private final ButtonAction action;
         JLabel label;
         ImageIcon normalIcon;
@@ -67,23 +70,24 @@ public class SwingToolkit {
 
         @Override
         public void mouseEntered(MouseEvent e) {
-            hover=true;
+            hover = true;
             revalidateIcon();
         }
 
         @Override
         public void mouseExited(MouseEvent e) {
-            hover=false;
+            hover = false;
             revalidateIcon();
         }
-        private void revalidateIcon(){
-            if(label.isEnabled()){
-                if(hover){
+
+        private void revalidateIcon() {
+            if (label.isEnabled()) {
+                if (hover) {
                     label.setIcon(selectedIcon);
-                }else{
+                } else {
                     label.setIcon(normalIcon);
                 }
-            }else{
+            } else {
                 label.setIcon(disabledIcon);
             }
         }
@@ -94,8 +98,9 @@ public class SwingToolkit {
                 action.action();
             }
         }
-        public void install(JLabel label){
-            this.label=label;
+
+        public void install(JLabel label) {
+            this.label = label;
             label.setIcon(normalIcon);
             label.addPropertyChangeListener("enabled", new PropertyChangeListener() {
                 @Override
@@ -266,13 +271,9 @@ public class SwingToolkit {
         c.setVisible(visible);
     }
 
-    public interface Equilizer {
 
-        boolean equals(Object a, Object b);
-    }
-
-    public void updateList(JList list, Object[] values, Equilizer e, Comparator comp) {
-        Equilizer e2 = new Equilizer() {
+    public void updateList(JList list, Object[] values, Equalizer e, Comparator comp) {
+        Equalizer e2 = new Equalizer() {
             @Override
             public boolean equals(Object a, Object b) {
                 if (a == null && b == null) {
@@ -300,6 +301,74 @@ public class SwingToolkit {
         list.setSelectedValue(ok, true);
     }
 
+    public void updateTable(JTable table, Object[] values, Equalizer e, Comparator comp) {
+        Equalizer e2 = new Equalizer() {
+            @Override
+            public boolean equals(Object a, Object b) {
+                if (a == null && b == null) {
+                    return true;
+                } else if (a == null || b == null) {
+                    return false;
+                } else {
+                    return a.equals(b);
+                }
+            }
+        };
+        if (comp != null) {
+            Arrays.sort(values, comp);
+        }
+        int old = table.getSelectionModel().getLeadSelectionIndex();
+        Object ok = null;
+        int okIndex = -1;
+        ObjectTableModel model = (ObjectTableModel) table.getModel();
+        model.clear();
+        for (int i = 0; i < values.length; i++) {
+            Object loc = values[i];
+            model.addRow(loc);
+            if (e != null ? e.equals(old, loc) : e2.equals(old, loc)) {
+                ok = loc;
+                okIndex = i;
+            }
+        }
+        if (okIndex > 0) {
+            table.getSelectionModel().setSelectionInterval(okIndex, okIndex);
+        }
+    }
+
+    public void updateTable(CatalogComponent table, Object[] values, Equalizer e, Comparator comp) {
+        Equalizer e2 = new Equalizer() {
+            @Override
+            public boolean equals(Object a, Object b) {
+                if (a == null && b == null) {
+                    return true;
+                } else if (a == null || b == null) {
+                    return false;
+                } else {
+                    return a.equals(b);
+                }
+            }
+        };
+        if (comp != null) {
+            Arrays.sort(values, comp);
+        }
+        Object old = table.getSelectedValue();
+        Object ok = null;
+        int okIndex = -1;
+        java.util.List<Object> newVals = new ArrayList<Object>();
+        for (int i = 0; i < values.length; i++) {
+            Object loc = values[i];
+            newVals.add(loc);
+            if (e != null ? e.equals(old, loc) : e2.equals(old, loc)) {
+                ok = loc;
+                okIndex = i;
+            }
+        }
+        table.setValues(newVals);
+        if (okIndex > 0) {
+            table.setSelectedIndex(okIndex);
+        }
+    }
+
     public JComponent createIconButton0(String icon, String tooltip, ButtonAction action, boolean compact) {
         JLabel label = new JLabel();
         label.setToolTipText(msg(tooltip).getText());
@@ -314,18 +383,19 @@ public class SwingToolkit {
 //        jLabel.setFont(new Font(Font.MONOSPACED,Font.BOLD,12));
         return jLabel;
     }
+
     public JComponent createIconButton(String icon, String tooltip, ButtonAction action) {
-        if(true){
+        if (true) {
             return createIconButton0(icon, tooltip, action, true);
-        }else {
+        } else {
             return createIconButton(icon, tooltip, action, true);
         }
     }
 
     public JComponent createIconButton(String icon, String tooltip, ButtonAction action, boolean compact) {
-        if(true){
+        if (true) {
             return createIconButton0(icon, tooltip, action, true);
-        }else {
+        } else {
             compact = true;
             ImageIcon imageIcon = SwingUtils2.loadIcon(icon + ".png", compact ? 16 : 32);
             JButton button = new JButton(imageIcon);

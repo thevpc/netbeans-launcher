@@ -17,9 +17,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
@@ -32,10 +30,10 @@ import net.vpc.app.nuts.NutsApplicationContext;
  * @author vpc
  */
 public class MainWindowSwing {
-    private static Logger LOG = Logger.getLogger(MainWindowSwing.class.getName());
+
+    private static final Logger LOG = Logger.getLogger(MainWindowSwing.class.getName());
     protected NetbeansConfigService configService;
     protected SwingToolkit toolkit;
-    protected final Set<String> running = new HashSet<String>();
     private WorkspacePane workspacePane;
     private NbListPane workspaceListPane;
     private SettingsPane settingsPane;
@@ -87,19 +85,16 @@ public class MainWindowSwing {
 //                    System.out.println("Tray Icon - Mouse released!");
 //                }
 //            };
-
 //            ActionListener exitListener = new ActionListener() {
 //                public void actionPerformed(ActionEvent e) {
 //                    System.out.println("Exiting...");
 //                    System.exit(0);
 //                }
 //            };
-
 //            PopupMenu popup = new PopupMenu();
 //            MenuItem defaultItem = new MenuItem("Exit");
 //            defaultItem.addActionListener(exitListener);
 //            popup.add(defaultItem);
-
             TrayIcon trayIcon = new TrayIcon(image, "Netbeans Launcher", null);
 //            trayIcon.setPopupMenu(new JPopupMenu());
             ActionListener actionListener = new ActionListener() {
@@ -140,7 +135,6 @@ public class MainWindowSwing {
         } else {
 
             //  System Tray is not supported
-
         }
         if (wait) {
             final Object lock = new Object();
@@ -158,7 +152,6 @@ public class MainWindowSwing {
         return appContext;
     }
 
-
     public MainWindowSwing(NutsApplicationContext appContext) {
         this.appContext = appContext;
         this.configService = new NetbeansConfigService(appContext);
@@ -167,7 +160,6 @@ public class MainWindowSwing {
     public SwingToolkit getToolkit() {
         return toolkit;
     }
-
 
     public void start(JFrame primaryStage) { //int2troadmin
         toolkit = new SwingToolkit(primaryStage);
@@ -206,13 +198,18 @@ public class MainWindowSwing {
         frame.setUndecorated(true);
         primaryStage.setLocationRelativeTo(null);
         primaryStage.setVisible(true);
+        if (configService.getAllNbWorkspaces().length == 0) {
+            setSelectedPane(AppPaneType.SETTINGS);
+            SettingsPane s = (SettingsPane) getPane(AppPaneType.SETTINGS);
+            s.setSettingType(SettingsPane.SettingType.NB_INSTALLATION);
+        }
     }
 
     private JComponent createHeader() {
         int vgap = 1;//compact ? 1 : 13;
         int hgap = 1;//compact ? 1 : 5;
         BoxH winHeader = SwingUtils2.boxH().setVgap(vgap).setHgap(hgap).setOpaque(true).setName("global-header");
-        Color cc= new Color(Integer.parseInt("336699", 16));
+        Color cc = new Color(Integer.parseInt("336699", 16));
         winHeader.setBackground(
                 SwingUtils2.componentGradientPaint(
                         new GradientPaint(0, 0, cc, 0, 32, cc.darker())
@@ -267,7 +264,6 @@ public class MainWindowSwing {
 
     }
 
-
     public AppPane getPane(AppPaneType type) {
         for (AppPane appPane : appPaneContainer.getAppPanes()) {
             if (appPane.getPaneType() == type) {
@@ -311,15 +307,10 @@ public class MainWindowSwing {
 
     public void startWorkspace(NetbeansWorkspace w) {
         if (w != null) {
-            String name = w.getName();
-            synchronized (running) {
-                if (running.contains(name)) {
-                    return;
-                }
+            if(NbListPane.isStarted(getAppContext(), w)){
+                return;
             }
-            synchronized (running) {
-                running.add(name);
-            }
+            NbListPane.setStarted(getAppContext(), w);
             try {
                 w.setLastLaunchDate(Instant.now());
                 w.setExecutionCount(w.getExecutionCount() + 1);
@@ -334,9 +325,7 @@ public class MainWindowSwing {
                         } catch (Exception ex) {
                             toolkit.showError(toolkit.msg("App.RunWorkspace.Error"), ex);
                         } finally {
-                            synchronized (running) {
-                                running.remove(name);
-                            }
+                            NbListPane.setStopped(getAppContext(), w);
                             onRefreshHeader();
                             updateList();
                         }
@@ -349,12 +338,6 @@ public class MainWindowSwing {
                 onRefreshHeader();
                 updateList();
             }
-        }
-    }
-
-    public boolean isRunningWorkspace(String n) {
-        synchronized (running) {
-            return running.contains(n);
         }
     }
 
@@ -382,7 +365,7 @@ public class MainWindowSwing {
         compactButton.setVisible(!compact);
         if (appPaneContainer != null) {
             ((SlideAppPaneContainer) appPaneContainer).setSlideTime(
-//                    compact ? 50 : 20
+                    //                    compact ? 50 : 20
                     compact ? 500 : 200
             );
         }
@@ -407,12 +390,13 @@ public class MainWindowSwing {
     public void confirmAndExit() {
         showConfirmOkCancel(
                 toolkit.msg("App.Exit.Confirm.Title"),
-                toolkit.msg("App.Exit.Confirm.Message")
-                , () -> System.exit(0)
+                toolkit.msg("App.Exit.Confirm.Message"),
+                 () -> System.exit(0)
         );
     }
 
     interface AppPaneContainer {
+
         void addAppPane(AppPane pane);
 
         void setAppPane(AppPane pane);
@@ -423,6 +407,7 @@ public class MainWindowSwing {
     }
 
     public static class SlideAppPaneContainer implements AppPaneContainer {
+
         SimplePanelSlider root;
         List<AppPane> all = new ArrayList<>();
         private AppPanePos pos = new AppPanePos(-1000, -1000);
@@ -474,6 +459,7 @@ public class MainWindowSwing {
     }
 
     private static class CardAppPaneContainer implements AppPaneContainer {
+
         private JPanel root;
 
         public CardAppPaneContainer() {
@@ -515,7 +501,7 @@ public class MainWindowSwing {
     public void showConfirmOkCancel(SwingToolkit.Message title, SwingToolkit.Message message, Runnable todo, Runnable todoElse) {
         if (currentPane.paneType != AppPaneType.CONFIRM) {
             confirmPane.initOkCancel(currentPane.paneType, title, message, ok -> {
-                if (ok== ConfirmResult.OK) {
+                if (ok == ConfirmResult.OK) {
                     if (todo != null) {
                         todo.run();
                     }
@@ -528,14 +514,15 @@ public class MainWindowSwing {
             setSelectedPane(AppPaneType.CONFIRM);
         }
     }
+
     public void showConfirmYesNoCancel(SwingToolkit.Message title, SwingToolkit.Message message, Runnable yes, Runnable no, Runnable cancel) {
         if (currentPane.paneType != AppPaneType.CONFIRM) {
             confirmPane.initYesNoCancel(currentPane.paneType, title, message, ok -> {
-                if (ok== ConfirmResult.YES) {
+                if (ok == ConfirmResult.YES) {
                     if (yes != null) {
                         yes.run();
                     }
-                }else if (ok== ConfirmResult.NO) {
+                } else if (ok == ConfirmResult.NO) {
                     if (no != null) {
                         no.run();
                     }
@@ -547,5 +534,9 @@ public class MainWindowSwing {
             });
             setSelectedPane(AppPaneType.CONFIRM);
         }
+    }
+
+    public NetbeansConfigService getConfigService() {
+        return configService;
     }
 }

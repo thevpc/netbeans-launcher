@@ -12,7 +12,7 @@ import java.util.Objects;
  *
  * @author vpc
  */
-public class NetbeansInstallation  implements Serializable{
+public class NetbeansInstallation  extends NetbeansLocation implements Serializable{
 
     public static final long serialVersionUID = 1;
     private String path;

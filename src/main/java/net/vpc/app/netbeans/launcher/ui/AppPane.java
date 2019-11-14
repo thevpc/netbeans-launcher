@@ -51,8 +51,12 @@ public abstract class AppPane extends JPanel {
         this.win = win;
         this.pos =pos;
         this.paneType = paneType;
-        this.toolkit = win.toolkit;
+        this.toolkit = win.getToolkit();
         this.configService = win.configService;
+    }
+
+    public SwingToolkit getNbToolkit() {
+        return toolkit;
     }
 
     public AppPanePos getPos() {

@@ -15,6 +15,7 @@ import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -25,23 +26,29 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 
 import net.vpc.app.netbeans.launcher.model.NbOsConfig;
+import net.vpc.app.netbeans.launcher.model.NetbeansInstallation;
+import net.vpc.app.netbeans.launcher.model.NetbeansWorkspace;
+import net.vpc.app.netbeans.launcher.ui.utils.CachedValue;
+import net.vpc.app.nuts.NutsApplicationContext;
+import net.vpc.app.nuts.NutsCommandLine;
 
 /**
  * @author vpc
  */
 public class NbUtils {
+
     private static final Logger LOG = Logger.getLogger(NbUtils.class.getName());
 
     public static final NbOsConfig LINUX_CONFIG = new NbOsConfig(
             new String[]{
-                    "/usr/local",
-                    "~/bin",
-                    "~/programs",
-                    "~/Programs",},
+                "/usr/local",
+                "~/bin",
+                "~/programs",
+                "~/Programs",},
             new String[]{
-                    "/usr/java",
-                    "/usr/lib64/jvm",
-                    "/usr/lib/jvm"
+                "/usr/java",
+                "/usr/lib64/jvm",
+                "/usr/lib/jvm"
             },
             "~/.netbeans",
             "~/.cache/netbeans",
@@ -50,13 +57,13 @@ public class NbUtils {
     );
     public static final NbOsConfig WINDOWS_CONFIG = new NbOsConfig(
             new String[]{
-                    NbUtils.coalesce(System.getenv("ProgramFiles"), "C:\\Program Files"),
-                    NbUtils.coalesce(System.getenv("ProgramFiles(x86)"), "C:\\Program Files (x86)"),
-                    "~/programs",
-                    "~/Programs",},
+                NbUtils.coalesce(System.getenv("ProgramFiles"), "C:\\Program Files"),
+                NbUtils.coalesce(System.getenv("ProgramFiles(x86)"), "C:\\Program Files (x86)"),
+                "~/programs",
+                "~/Programs",},
             new String[]{
-                    NbUtils.coalesce(System.getenv("ProgramFiles"), "C:\\Program Files") + "\\Java",
-                    NbUtils.coalesce(System.getenv("ProgramFiles(x86)"), "C:\\Program Files (x86)") + "\\Java",},
+                NbUtils.coalesce(System.getenv("ProgramFiles"), "C:\\Program Files") + "\\Java",
+                NbUtils.coalesce(System.getenv("ProgramFiles(x86)"), "C:\\Program Files (x86)") + "\\Java",},
             "~\\AppData\\Roaming/Netbeans",
             "~\\AppData\\Local\\Netbeans\\Cache",
             "netbeans.exe",
@@ -64,12 +71,12 @@ public class NbUtils {
     );
     public static final NbOsConfig MAC_CONFIG = new NbOsConfig(
             new String[]{
-                    "/Library/",
-                    "~/programs",
-                    "~/Programs",},
+                "/Library/",
+                "~/programs",
+                "~/Programs",},
             new String[]{
-                    "/Library/Java/JavaVirtualMachines",
-                    "/System/Library/Frameworks/JavaVM.framework"
+                "/Library/Java/JavaVirtualMachines",
+                "/System/Library/Frameworks/JavaVM.framework"
             },
             "~/Library/Application Support/",
             "~/Library/Caches/NetBeans",
@@ -439,10 +446,50 @@ public class NbUtils {
         }
     }
 
+    public static NbProcess[] getRunning(NutsApplicationContext ctx) {
+        try {
+            return Arrays.stream(JpsUtils.getRunningJava(ctx, "org.netbeans.Main"))
+                    .map(x -> new NbProcess(ctx, x)).toArray(NbProcess[]::new);
+        } catch (IOException ex) {
+            return new NbProcess[0];
+        }
+    }
+    private static CachedValue<NbProcess[]> CACHED_PROCESSES;
+
+    public static boolean isRunningWithCache(NutsApplicationContext ctx, NetbeansWorkspace nb) {
+        if (CACHED_PROCESSES == null) {
+            CACHED_PROCESSES = new CachedValue<>(() -> getRunning(ctx), 60);
+        }
+        if (CACHED_PROCESSES.isValid()) {
+            NbProcess[] lv = CACHED_PROCESSES.getLastValue();
+            return isRunning(nb, lv);
+        }
+        CACHED_PROCESSES.updateAsync();
+        return false;
+    }
+
+    public static boolean isRunning(NetbeansWorkspace nb, NbProcess[] all) {
+        return Arrays.stream(all)
+                .filter(
+                        x -> {
+                            String ud = trim(nb.getUserdir());
+                            if (ud.isEmpty()) {
+                                return false;
+                            }
+                            String cd = trim(nb.getCachedir());
+                            if (cd.isEmpty()) {
+                                return false;
+                            }
+                            return trim(x.getUserdir()).equals(resolveFile(ud).getPath())
+                            && trim(x.getCachedir()).equals(resolveFile(cd).getPath());
+                        }
+                ).count() > 0;
+    }
+
     /**
      * Unzip it
      *
-     * @param in      input zip file
+     * @param in input zip file
      * @param outputFolder zip file output folder
      */
     public static void unzip(InputStream in, String outputFolder, UnzipOptions options) throws IOException {
@@ -458,7 +505,7 @@ public class NbUtils {
         }
 
         //get the zip file content
-        try (ZipInputStream zis= new ZipInputStream(in)) {
+        try (ZipInputStream zis = new ZipInputStream(in)) {
             //get the zipped file list entry
             ZipEntry ze = zis.getNextEntry();
             String root = null;
@@ -506,7 +553,6 @@ public class NbUtils {
             zis.closeEntry();
         }
     }
-
 
     public static class UnzipOptions {
 

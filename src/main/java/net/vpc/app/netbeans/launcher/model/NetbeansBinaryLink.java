@@ -1,6 +1,6 @@
 package net.vpc.app.netbeans.launcher.model;
 
-public class NetbeansBinaryLink {
+public class NetbeansBinaryLink extends NetbeansLocation{
     private String version;
     private String packaging;
     private String url;

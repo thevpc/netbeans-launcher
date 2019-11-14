@@ -7,32 +7,71 @@ package net.vpc.app.netbeans.launcher.ui.panes;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.event.ListSelectionEvent;
+import javax.swing.table.DefaultTableCellRenderer;
 
 import net.vpc.app.netbeans.launcher.model.NetbeansWorkspace;
 import net.vpc.app.netbeans.launcher.ui.*;
+import net.vpc.app.netbeans.launcher.ui.utils.CatalogComponent;
+import net.vpc.app.netbeans.launcher.ui.utils.ListComponent;
 import net.vpc.app.netbeans.launcher.ui.utils.SwingUtils2;
-import net.vpc.app.netbeans.launcher.ui.utils.SwingToolkit;
 import net.vpc.app.netbeans.launcher.util.LocalDateTimePeriod;
+import net.vpc.app.netbeans.launcher.util.NbUtils;
+import net.vpc.app.nuts.NutsApplicationContext;
+import net.vpc.app.netbeans.launcher.ui.utils.Equalizer;
+import net.vpc.app.netbeans.launcher.ui.utils.ObjectTableModel;
+import net.vpc.app.netbeans.launcher.ui.utils.TableComponent;
+import net.vpc.app.netbeans.launcher.util.NbTheme;
 
 /**
  * @author vpc
  */
 public class NbListPane extends AppPane {
 
+    protected final static Set<String> running = new HashSet<String>();
+
+    public static boolean isStarted(NutsApplicationContext ctx, NetbeansWorkspace w) {
+        String name = w.getName();
+        synchronized (running) {
+            if (running.contains(name)) {
+                return true;
+            }
+        }
+        return NbUtils.isRunningWithCache(ctx, w);
+    }
+
+    public static boolean setStopped(NutsApplicationContext ctx, NetbeansWorkspace w) {
+        String name = w.getName();
+        synchronized (running) {
+            if (running.remove(name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean setStarted(NutsApplicationContext ctx, NetbeansWorkspace w) {
+        synchronized (running) {
+            if (isStarted(ctx, w)) {
+                String name = w.getName();
+                running.add(name);
+                return true;
+
+            }
+        }
+        return false;
+    }
+
     private static class Comps1 {
 
-        JList workspacesListView;
+        CatalogComponent workspacesListView;
         JComponent buttonStart;
         JComponent buttonRemove;
         JComponent buttonCopy;
@@ -42,14 +81,13 @@ public class NbListPane extends AppPane {
         JComponent[] buttons;
         JComponent main;
         boolean compact;
-        DefaultListModel<NetbeansWorkspace> workspacesModel;
     }
 
     Comps1 compact;
     Comps1 nonCompact;
 
     public NbListPane(MainWindowSwing win) {
-        super(AppPaneType.LIST_WS,new AppPanePos(0,0), win);
+        super(AppPaneType.LIST_WS, new AppPanePos(0, 0), win);
         build();
     }
 
@@ -64,59 +102,102 @@ public class NbListPane extends AppPane {
         c.buttonSearchLocal = toolkit.createIconButton("settings", "App.Action.Settings", () -> win.setSelectedPane(AppPaneType.SETTINGS), compact);
         c.buttons = new JComponent[]{c.buttonStart, c.buttonAdd, c.buttonRemove, c.buttonEdit, c.buttonCopy, c.buttonSearchLocal};
 
-        c.workspacesModel = new DefaultListModel();
+        c.workspacesListView = new TableComponent();
+        c.workspacesListView.setElementHeight(win.isCompact() ? 30 : 50);
         for (NetbeansWorkspace workspace : configService.getAllNbWorkspaces()) {
-            c.workspacesModel.addElement(workspace);
+            c.workspacesListView.addValue(workspace);
         }
-        c.workspacesListView = new JList(c.workspacesModel);
-        c.workspacesListView.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        SwingUtils2.addEnterAction(c.workspacesListView, () -> win.startWorkspace(getSelectedWorkspace()));
-        c.workspacesListView.setBorder(new EmptyBorder(2, 2, 2, 2));
-        c.workspacesListView.setFixedCellHeight(compact ? 30 : 50);
-        c.workspacesListView.setCellRenderer(new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-                NetbeansWorkspace ws = (value instanceof NetbeansWorkspace) ? (NetbeansWorkspace) value : null;
-                String name = ws == null ? "" : ws.getName()
-                        + (" (" + evalInstantRelative(ws.getLastLaunchDate(), ws.getExecutionCount()) + ")");
-                super.getListCellRendererComponent(list, name, index, isSelected, cellHasFocus);
-                if (ws != null && win.isRunningWorkspace(ws.getName())) {
-                    if (!isSelected) {
-                        setBackground(index % 2 == 0 ? Color.WHITE : SwingUtils2.color("f9f9f9"));
-                    } else {
-                        setBackground(SwingUtils2.color("0096c9"));
-                    }
+        c.workspacesListView.addEnterSelection((e) -> win.startWorkspace(getSelectedWorkspace()));
+        if (c.workspacesListView instanceof ListComponent) {
+            ((ListComponent) c.workspacesListView).getList().setCellRenderer(new DefaultListCellRenderer() {
+                @Override
+                public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                    NetbeansWorkspace ws = (value instanceof NetbeansWorkspace) ? (NetbeansWorkspace) value : null;
+                    String name = ws == null ? "" : ws.getName()
+                            + (" (" + evalInstantRelative(ws.getLastLaunchDate(), ws.getExecutionCount()) + ")");
+                    super.getListCellRendererComponent(list, name, index, isSelected, cellHasFocus);
+                    if (ws != null && isStarted(win.getAppContext(), ws)) {
+                        if (!isSelected) {
+                            setBackground(index % 2 == 0 ? Color.WHITE : SwingUtils2.color("f9f9f9"));
+                        } else {
+                            setBackground(SwingUtils2.color("0096c9"));
+                        }
 //                    if (!isSelected) {
 //                        setBackground(index % 2 == 0 ? MainWindowSwingHelper.color("ffe4b4") : MainWindowSwingHelper.color("ffbd86"));
 //                    } else {
 //                        setBackground(MainWindowSwingHelper.color("ffdb9d"));
 //                    }
-                    setIcon(SwingUtils2.loadIcon("running.png", win.isCompact() ? 16 : 32));
-                } else {
-                    if (!isSelected) {
-                        setBackground(index % 2 == 0 ? Color.WHITE : SwingUtils2.color("f9f9f9"));
+                        setIcon(SwingUtils2.loadIcon("running.png", win.isCompact() ? 16 : 32));
                     } else {
-                        setBackground(SwingUtils2.color("0096c9"));
+                        if (!isSelected) {
+                            setBackground(index % 2 == 0 ? Color.WHITE : SwingUtils2.color("f9f9f9"));
+                        } else {
+                            setBackground(SwingUtils2.color("0096c9"));
+                        }
+                        setIcon(SwingUtils2.loadIcon("blank.png", win.isCompact() ? 16 : 32));
                     }
-                    setIcon(SwingUtils2.loadIcon("not-running.png", win.isCompact() ? 16 : 32));
+                    return this;
                 }
-                return this;
+            });
+        }
+        if (c.workspacesListView instanceof TableComponent) {
+            TableComponent a = (TableComponent) c.workspacesListView;
+            a.setColumns(new ObjectTableModel.NamedColumns<NetbeansWorkspace>(new String[]{"Workspace", "Since", "Times"}) {
+                @Override
+                public Object getValueAt(int row, String column, NetbeansWorkspace ws) {
+                    switch (column) {
+                        case "Workspace": {
+                            return ws.getName();
+                        }
+                        case "Since": {
+                            return evalInstantRelativeWhen(ws.getLastLaunchDate());
+                        }
+                        case "Times": {
+                            long r = ws.getExecutionCount();
+                            return r > 0 ? r : null;
+                        }
+                    }
+                    return "";
+                }
+
+            }.setColumnSizes(new float[]{5, 2, 1}));
+            a.getTable().getColumnModel().getColumn(0).setCellRenderer(new DefaultTableCellRenderer() {
+                @Override
+                public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                    super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                    NetbeansWorkspace ws = (NetbeansWorkspace) a.getValue(row);
+                    if (ws != null && isStarted(win.getAppContext(), ws)) {
+//                        if (!isSelected) {
+//                            setBackground(index % 2 == 0 ? Color.WHITE : SwingUtils2.color("f9f9f9"));
+//                        } else {
+//                            setBackground(SwingUtils2.color("0096c9"));
+//                        }
+                        setIcon(SwingUtils2.loadIcon("running.png", win.isCompact() ? 24 : 48));
+                    } else {
+//                        if (!isSelected) {
+//                            setBackground(index % 2 == 0 ? Color.WHITE : SwingUtils2.color("f9f9f9"));
+//                        } else {
+//                            setBackground(SwingUtils2.color("0096c9"));
+//                        }
+                        setIcon(SwingUtils2.loadIcon("blank.png", win.isCompact() ? 24 : 48));
+                    }
+                    return this;
+                }
+
+            });
+        }
+
+        c.workspacesListView.addMouseSelection((e) -> {
+            if (e.getMouseEvent().getButton() == 1) {
+                if (e.getMouseEvent().getClickCount() == 2) {
+                    win.startWorkspace(getSelectedWorkspace());
+                }
             }
         });
-        c.workspacesListView.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent mouseEvent) {
-                if (mouseEvent.getButton() == 1) {
-                    if (mouseEvent.getClickCount() == 2) {
-                        win.startWorkspace(getSelectedWorkspace());
-                    }
-                }
-            }
-        });
-        c.workspacesListView.addListSelectionListener((ListSelectionEvent e) -> {
+        c.workspacesListView.addListSelectionListener((e) -> {
             onRequiredUpdateButtonStatuses();
         });
-        c.main = new javax.swing.JScrollPane(c.workspacesListView);
+        c.main = NbTheme.prepare(new javax.swing.JScrollPane(c.workspacesListView.toComponent()));
         return c;
     }
 
@@ -133,6 +214,10 @@ public class NbListPane extends AppPane {
         return nonCompact;
     }
 
+    public void setSelectedWorkspace(NetbeansWorkspace w) {
+        getComps1().workspacesListView.setSelectedValue(w);
+    }
+
     public NetbeansWorkspace getSelectedWorkspace() {
         NetbeansWorkspace w = (NetbeansWorkspace) getComps1().workspacesListView.getSelectedValue();
         if (w != null) {
@@ -142,41 +227,41 @@ public class NbListPane extends AppPane {
     }
 
     public void updateList() {
-        SwingToolkit.Equilizer name = (a, b) -> a != null && b != null && SwingUtils2.trim(((NetbeansWorkspace) a).getName())
+        Equalizer name = (a, b) -> a != null && b != null && SwingUtils2.trim(((NetbeansWorkspace) a).getName())
                 .equals(SwingUtils2.trim(((NetbeansWorkspace) b).getName()));
-        toolkit.updateList(
+        toolkit.updateTable(
                 getComps1().workspacesListView, configService.getAllNbWorkspaces(),
                 name,
                 new Comparator<NetbeansWorkspace>() {
-                    @Override
-                    public int compare(NetbeansWorkspace a, NetbeansWorkspace b) {
-                        return instantFor(b).compareTo(instantFor(a));
-                    }
+            @Override
+            public int compare(NetbeansWorkspace a, NetbeansWorkspace b) {
+                return instantFor(b).compareTo(instantFor(a));
+            }
 
-                    public Instant instantFor(NetbeansWorkspace a) {
-                        if (a == null) {
-                            return Instant.MIN;
-                        }
-                        if (a.getLastLaunchDate() != null) {
-                            return a.getLastLaunchDate();
-                        }
-                        if (a.getCreationDate() != null) {
-                            return a.getCreationDate();
-                        }
-                        return Instant.MIN;
-                    }
-                });
+            public Instant instantFor(NetbeansWorkspace a) {
+                if (a == null) {
+                    return Instant.MIN;
+                }
+                if (a.getLastLaunchDate() != null) {
+                    return a.getLastLaunchDate();
+                }
+                if (a.getCreationDate() != null) {
+                    return a.getCreationDate();
+                }
+                return Instant.MIN;
+            }
+        });
     }
 
     private void onRemoveWorkspace() {
         NetbeansWorkspace w = getSelectedWorkspace();
         win.showConfirmOkCancel(
                 toolkit.msg("App.RemoveConfiguration.Confirm.Title"),
-                toolkit.msg("App.RemoveConfiguration.Confirm.Message")
-                , () -> {
+                toolkit.msg("App.RemoveConfiguration.Confirm.Message"),
+                () -> {
                     try {
                         configService.removeNbWorkspace(w);
-                        getComps1().workspacesModel.removeElement(w);
+                        getComps1().workspacesListView.removeValue(w);
                     } catch (Exception ex) {
                         toolkit.showError(toolkit.msg("App.RemoveWorkspace.Error"), ex);
                     }
@@ -197,6 +282,25 @@ public class NbListPane extends AppPane {
                 .setSeconds(0).setMilliseconds(0);
         return period.toString()
                 + " ago, " + (count == 1 ? "one time" : ("" + count + " times"));
+    }
+
+    private String evalInstantRelativeWhen(Instant i) {
+        if (i == null) {
+            return "never executed";
+        }
+        Duration duration = Duration.between(i, Instant.now());
+        if (duration.getSeconds() <= 60) {
+            return "now";
+        }
+        LocalDateTimePeriod period = LocalDateTimePeriod.between(LocalDateTime.ofInstant(i, ZoneId.systemDefault()),
+                LocalDateTime.now())
+                .setSeconds(0).setMilliseconds(0);
+        return period.toString()
+                + " ago";
+    }
+
+    private String evalInstantRelativeHowMutch(long count) {
+        return count == 1 ? "" : count == 1 ? "one time" : ("" + count + " times");
     }
 
     private void onCopyWorkspace() {
@@ -231,12 +335,10 @@ public class NbListPane extends AppPane {
     protected void onRequiredUpdateButtonStatuses() {
         NetbeansWorkspace w = getSelectedWorkspace();
         Comps1 c = getComps1();
-        toolkit.setControlVisible(c.buttonStart, !(w == null || win.isRunningWorkspace(w.getName())));
+        toolkit.setControlVisible(c.buttonStart, !(w == null || isStarted(win.getAppContext(), w)));
         toolkit.setControlVisible(c.buttonCopy, !(w == null));
         toolkit.setControlVisible(c.buttonEdit, !(w == null));
         toolkit.setControlVisible(c.buttonRemove, !(w == null));
-        c.workspacesListView.invalidate();
-        c.workspacesListView.revalidate();
         c.workspacesListView.repaint();
     }
 

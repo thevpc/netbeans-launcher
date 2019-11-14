@@ -87,4 +87,29 @@ public abstract class JlistToStringer {
         }
         return p;
     }
+    public String toString(List<?> list, Object value) {
+        final int size = list.size();
+        int level = 0;
+        HashMap<String, Object> ok = new HashMap<>();
+        HashMap<Object, String> okr = new HashMap<>();
+
+        HashMap<String, List<Object>> vals = null;
+        while (level < maxLevel) {
+            if (level == 0) {
+                vals = mapConflicts((List) list, 0);
+            } else {
+                vals = mapConflicts(new ArrayList<>(vals.values()), level);
+            }
+            extractConflicts(vals, ok, okr);
+            if (vals.isEmpty()) {
+                break;
+            }
+            level++;
+        }
+        String p = okr.get(value);
+        if (p == null) {
+            p = toString(value, maxLevel - 1);
+        }
+        return p;
+    }
 }

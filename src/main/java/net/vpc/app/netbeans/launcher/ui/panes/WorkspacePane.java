@@ -268,7 +268,7 @@ public class WorkspacePane extends AppPane {
                 toolkit.msg("App.DeleteFolder.Confirm.Title"),
                 toolkit.msg("App.DeleteFolder.Confirm.Message")
                 , () -> {
-                    if (win.isRunningWorkspace(editName)) {
+                    if (NbListPane.isStarted(win.getAppContext(),getWorkspace())) {
                         toolkit.showError(toolkit.msg("App.DeleteWorkspaceFolder.Error"));
                     } else {
                         try {

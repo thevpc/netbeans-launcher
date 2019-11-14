@@ -5,32 +5,32 @@
  */
 package net.vpc.app.netbeans.launcher.ui.panes;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
 import java.io.File;
-import java.util.HashSet;
-import java.util.Set;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.DefaultListModel;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
-import javax.swing.JList;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
-import javax.swing.ListSelectionModel;
-import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
-import javax.swing.event.ListSelectionEvent;
 
 import net.vpc.app.netbeans.launcher.model.NetbeansBinaryLink;
 import net.vpc.app.netbeans.launcher.model.NetbeansInstallation;
 import net.vpc.app.netbeans.launcher.model.NetbeansInstallationStore;
+import net.vpc.app.netbeans.launcher.model.NetbeansLocation;
 import net.vpc.app.netbeans.launcher.ui.*;
+import net.vpc.app.netbeans.launcher.ui.utils.CatalogComponent;
 import net.vpc.app.netbeans.launcher.ui.utils.JdkJlistToStringer;
-import net.vpc.app.netbeans.launcher.ui.utils.SwingUtils2;
+import net.vpc.app.netbeans.launcher.ui.utils.ListComponent;
+import net.vpc.app.netbeans.launcher.ui.utils.ObjectTableModel;
+import net.vpc.app.netbeans.launcher.ui.utils.TableComponent;
 import net.vpc.app.netbeans.launcher.util.JlistToStringer;
+import net.vpc.app.netbeans.launcher.util.NbTheme;
 import net.vpc.app.netbeans.launcher.util.Workers;
 import net.vpc.app.nuts.NutsSdkLocation;
 
@@ -41,9 +41,8 @@ public class SettingsPane extends AppPane {
 
     private static class Comp2 {
 
-        private JList jdkListView;
-        private JList localNbListView;
-        private JList remoteNbListView;
+        private CatalogComponent jdkListView;
+        private NbListComponent nbListView;
         private JTabbedPane tabbedPane;
         private JComponent buttonAdd;
         private JComponent buttonRemove;
@@ -57,80 +56,10 @@ public class SettingsPane extends AppPane {
 
     private Comp2 compact;
     private Comp2 nonCompact;
-    private JlistToStringer jdkStringer = new  JdkJlistToStringer();
-    private static final Set<String> downloading = new HashSet<>();
-    private JlistToStringer nbStringer = new JlistToStringer(2) {
-        @Override
-        public String toString(Object value, int level) {
-            if (value instanceof NetbeansInstallation) {
-                NetbeansInstallation i = (NetbeansInstallation) value;
-                boolean _downloading = false;
-                if (i.getStore() == NetbeansInstallationStore.DEFAULT) {
-                    synchronized (downloading) {
-                        if (downloading.contains(i.getVersion())) {
-                            _downloading = true;
-                        }
-                    }
-                }
-                if (win.isCompact()) {
-                    switch (level) {
-                        case 0: {
-                            return i.getName();
-                        }
-                        case 1: {
-                            switch (i.getStore()) {
-                                case USER: {
-                                    return i.getName() + " (" + i.getPath() + ")";
-                                }
-                                case SYSTEM: {
-                                    return i.getName() + " (system)";
-                                }
-                                case DEFAULT: {
-                                    return i.getName() + (_downloading ? " (downloading...)" : "");
-                                }
-                            }
-                            return i.getName() + " (" + i.getPath() + ")";
-                        }
-                    }
-                } else {
-                    switch (i.getStore()) {
-                        case USER: {
-                            return i.getName() + " (" + i.getPath() + ")";
-                        }
-                        case SYSTEM: {
-                            return i.getName() + " (system)";
-                        }
-                        case DEFAULT: {
-                            return i.getName() + (_downloading ? "(downloading...)" : "");
-                        }
-                    }
-                    return i.getName() + " (" + i.getPath() + ")";
-                }
-            }
-            return String.valueOf(value);
-        }
-
-    };
-    private JlistToStringer nbLinkStringer = new JlistToStringer(2) {
-        @Override
-        public String toString(Object value, int level) {
-            if (value instanceof NetbeansBinaryLink) {
-                NetbeansBinaryLink i = (NetbeansBinaryLink) value;
-                boolean _downloading = false;
-                synchronized (downloading) {
-                    if (downloading.contains(i.getVersion())) {
-                        _downloading = true;
-                    }
-                }
-                return "Netbeans " + i.getVersion() + (_downloading ? " (downloading...)" : "");
-            }
-            return String.valueOf(value);
-        }
-
-    };
+    private JlistToStringer jdkStringer = new JdkJlistToStringer();
 
     public SettingsPane(MainWindowSwing win) {
-        super(AppPaneType.SETTINGS,new AppPanePos(2,0), win);
+        super(AppPaneType.SETTINGS, new AppPanePos(2, 0), win);
         build();
     }
 
@@ -139,87 +68,35 @@ public class SettingsPane extends AppPane {
         return getComps2().main;
     }
 
-    public JList createJdkList() {
-        JList jdkListView = new JList(new DefaultListModel());
-        jdkListView.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        jdkListView.setBorder(new EmptyBorder(2, 2, 2, 2));
-        jdkListView.setFixedCellHeight(win.isCompact() ? 30 : 50);
-        jdkListView.setCellRenderer(new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-                super.getListCellRendererComponent(list, jdkStringer.toString(list, value), index, isSelected, cellHasFocus);
-                if (!isSelected) {
-                    setBackground(index % 2 == 0 ? Color.WHITE : SwingUtils2.color("f9f9f9"));
-                } else {
-                    setBackground(SwingUtils2.color("0096c9"));
+    public CatalogComponent createJdkList() {
+        CatalogComponent jdkListView = new TableComponent();
+        jdkListView.setElementHeight(win.isCompact() ? 30 : 50);
+        if (jdkListView instanceof ListComponent) {
+            ((ListComponent) jdkListView).setStringer(jdkStringer);
+        } else if (jdkListView instanceof TableComponent) {
+            ((TableComponent) jdkListView).setColumns(new ObjectTableModel.NamedColumns<NutsSdkLocation>(new String[]{"Name", "Location"}) {
+                @Override
+                public Object getValueAt(int row, String column, NutsSdkLocation t) {
+                    switch (column) {
+                        case "Name":
+                            return t.getName();
+                        case "Type":
+                            return t.getPackaging();
+                        case "Location":
+                            return t.getPath();
+                    }
+                    return "";
                 }
-                return this;
-            }
-        });
-        jdkListView.addListSelectionListener((ListSelectionEvent e) -> {
+            }.setColumnSizes(new float[]{2, 5}));
+        }
+        jdkListView.addListSelectionListener((e) -> {
             onRequiredUpdateButtonStatuses();
         });
         return jdkListView;
     }
 
-    public JList createLocalNbList() {
-        JList nbListView = new JList(new DefaultListModel());
-        nbListView.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        nbListView.setBorder(new EmptyBorder(2, 2, 2, 2));
-        nbListView.setFixedCellHeight(win.isCompact() ? 30 : 50);
-        nbListView.setCellRenderer(new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-
-                super.getListCellRendererComponent(list, nbStringer.toString(list, value), index, isSelected, cellHasFocus);
-                if (!isSelected) {
-                    setBackground(index % 2 == 0 ? Color.WHITE : SwingUtils2.color("f9f9f9"));
-                } else {
-                    setBackground(SwingUtils2.color("0096c9"));
-                }
-                return this;
-            }
-        });
-        nbListView.addListSelectionListener((ListSelectionEvent e) -> {
-            onRequiredUpdateButtonStatuses();
-        });
-        return nbListView;
-    }
-
-    public JList createRemoteNbList() {
-        JList nbListView = new JList(new DefaultListModel());
-        nbListView.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        nbListView.setBorder(new EmptyBorder(2, 2, 2, 2));
-        nbListView.setFixedCellHeight(win.isCompact() ? 30 : 50);
-        nbListView.setCellRenderer(new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-
-                super.getListCellRendererComponent(list, nbLinkStringer.toString(list, value), index, isSelected, cellHasFocus);
-                if (!isSelected) {
-                    setBackground(index % 2 == 0 ? Color.WHITE : SwingUtils2.color("f9f9f9"));
-                } else {
-                    setBackground(SwingUtils2.color("0096c9"));
-                }
-                return this;
-            }
-        });
-        nbListView.addListSelectionListener((ListSelectionEvent e) -> {
-            onRequiredUpdateButtonStatuses();
-        });
-        nbListView.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent evt) {
-                JList list = (JList) evt.getSource();
-                if (evt.getClickCount() == 2) {
-                    int index = list.locationToIndex(evt.getPoint());
-                    if (index >= 0) {
-                        onDownload();
-                    }
-                }
-            }
-        });
-        SwingUtils2.addEnterAction(nbListView, () -> onDownload());
-        return nbListView;
+    public NbListComponent createRemoteNbList() {
+        return new NbListComponentAsTable(win, () -> onRequiredUpdateButtonStatuses());
     }
 
     protected SettingType getSettingType() {
@@ -229,9 +106,6 @@ public class SettingsPane extends AppPane {
             }
             case 1: {
                 return SettingType.JDK_INSTALLATION;
-            }
-            case 2: {
-                return SettingType.NB_REMOTE;
             }
         }
         return SettingType.JDK_INSTALLATION;
@@ -245,7 +119,8 @@ public class SettingsPane extends AppPane {
                 toolkit.setControlVisible(getComps2().buttonSearchRemote, false);
                 toolkit.setControlVisible(getComps2().buttonDownload, false);
                 toolkit.setControlVisible(getComps2().buttonAdd, true);
-                toolkit.setControlVisible(getComps2().buttonRemove, getSelectedNbInstallation() != null);
+                toolkit.setControlVisible(getComps2().buttonDownload, getComps2().nbListView.getSelectedValue() instanceof NetbeansBinaryLink);
+                toolkit.setControlVisible(getComps2().buttonRemove, getComps2().nbListView.getSelectedValue() instanceof NetbeansInstallation);
                 break;
             }
             case JDK_INSTALLATION: {
@@ -257,17 +132,21 @@ public class SettingsPane extends AppPane {
                 toolkit.setControlVisible(getComps2().buttonDownload, false);
                 break;
             }
-            case NB_REMOTE: {
-                //remote nb installations
-                toolkit.setControlVisible(getComps2().buttonAdd, false);
-                toolkit.setControlVisible(getComps2().buttonRemove, false);
-                toolkit.setControlVisible(getComps2().buttonSearchLocal, false);
-                toolkit.setControlVisible(getComps2().buttonSearchRemote, false);
-                toolkit.setControlVisible(getComps2().buttonDownload, getSelectedRemoteNbInstallation() != null);
+        }
+//        NetbeansWorkspace w = getSelectedWorkspace();
+    }
+
+    public void setSettingType(SettingType r) {
+        switch (r) {
+            case NB_INSTALLATION: {
+                getComps2().tabbedPane.setSelectedIndex(0);
+                break;
+            }
+            case JDK_INSTALLATION: {
+                getComps2().tabbedPane.setSelectedIndex(1);
                 break;
             }
         }
-//        NetbeansWorkspace w = getSelectedWorkspace();
     }
 
     @Override
@@ -345,10 +224,13 @@ public class SettingsPane extends AppPane {
                     break;
                 }
                 case NB_INSTALLATION: {
-                    NetbeansInstallation loc = getSelectedNbInstallation();
-                    if (loc != null) {
-                        configService.removeNb(loc.getPath());
-                        updateNbList();
+                    NetbeansLocation g = (NetbeansLocation) getComps2().nbListView.getSelectedValue();
+                    if (g instanceof NetbeansInstallation) {
+                        NetbeansInstallation loc = (NetbeansInstallation) g;
+                        if (loc != null) {
+                            configService.removeNb(loc.getPath());
+                            updateNbList();
+                        }
                     }
                     break;
                 }
@@ -361,8 +243,8 @@ public class SettingsPane extends AppPane {
     public void onSearchLocal() {
         win.showConfirmOkCancel(
                 toolkit.msg("App.SearchLocal.Confirm.Title"),
-                toolkit.msg("App.SearchLocal.Confirm.Message")
-                , () -> {
+                toolkit.msg("App.SearchLocal.Confirm.Message"),
+                () -> {
                     try {
                         configService.configureDefaults();
                         win.updateList();
@@ -373,64 +255,25 @@ public class SettingsPane extends AppPane {
 
     }
 
-    public void onDownload() {
-        Workers.SwingWorker w = Workers.richWorker();
-        NetbeansBinaryLink i = getSelectedRemoteNbInstallation();
-        if (i != null) {
-            synchronized (downloading) {
-                if (!downloading.contains(i.getVersion())) {
-                    w.store("i", i);
-                    downloading.add(i.getVersion());
-                } else {
-                    return;
-                }
-            }
-            win.showConfirmOkCancel(
-                    toolkit.msg("App.Download.Confirm.Title"),
-                    toolkit.msg("App.Download.Confirm.Message").with("name", i.toString())
-                    ,
-                    () -> {
-                        w.run(() -> configService.installNetbeansBinary(w.load("i")))
-                                .onError(ex -> toolkit.showError(toolkit.msg("App.Download.Error"), ex))
-                                .onSuccess(() -> win.updateList())
-                                .onFinally(() -> {
-                                    synchronized (downloading) {
-                                        NetbeansBinaryLink ii = w.load("i");
-                                        if (ii != null) {
-                                            downloading.remove(ii.getVersion());
-                                        }
-                                    }
-                                })
-                                .start();
-                    }
-            );
-        }
-
-
-    }
-
-
     public void onSearchRemote() {
         win.showConfirmOkCancel(
                 toolkit.msg("App.SearchRemote.Confirm.Title"),
-                toolkit.msg("App.SearchRemote.Confirm.Message")
-                ,
-                () ->
-                        Workers.richWorker()
-                                .run(() -> configService.configureDefaults())
-                                .onSuccess(() -> win.updateList())
-                                .onError((ex) -> toolkit.showError(toolkit.msg("App.SearchLocal.Error"), ex))
-                                .start()
+                toolkit.msg("App.SearchRemote.Confirm.Message"),
+                ()
+                -> Workers.richWorker()
+                        .run(() -> configService.configureDefaults())
+                        .onSuccess(() -> win.updateList())
+                        .onError((ex) -> toolkit.showError(toolkit.msg("App.SearchLocal.Error"), ex))
+                        .start()
         );
     }
 
     public void updateJdkList() {
-        toolkit.updateList(getComps2().jdkListView, configService.getAllJdk(), (a, b) -> a != null && b != null && ((NutsSdkLocation) a).getName().equals(((NutsSdkLocation) b).getName()), null);
+        toolkit.updateTable(getComps2().jdkListView, configService.getAllJdk(), (a, b) -> a != null && b != null && ((NutsSdkLocation) a).getName().equals(((NutsSdkLocation) b).getName()), null);
     }
 
     public void updateNbList() {
-        toolkit.updateList(getComps2().localNbListView, configService.getAllNb(), (a, b) -> a != null && b != null && ((NetbeansInstallation) a).getName().equals(((NetbeansInstallation) b).getName()), null);
-        toolkit.updateList(getComps2().remoteNbListView, configService.searchRemoteInstallableNbBinaries(), (a, b) -> a != null && b != null && ((NetbeansBinaryLink) a).getVersion().equals(((NetbeansBinaryLink) b).getVersion()), null);
+        getComps2().nbListView.refresh();
     }
 
     @Override
@@ -440,27 +283,25 @@ public class SettingsPane extends AppPane {
     }
 
     public enum SettingType {
-        NB_REMOTE,
         NB_INSTALLATION,
         JDK_INSTALLATION,
     }
 
-    public NetbeansInstallation getSelectedNbInstallation() {
-        NetbeansInstallation w = (NetbeansInstallation) getComps2().localNbListView.getSelectedValue();
-        if (w != null) {
-            return w;
-        }
-        return null;
-    }
-
-    public NetbeansBinaryLink getSelectedRemoteNbInstallation() {
-        NetbeansBinaryLink w = (NetbeansBinaryLink) getComps2().remoteNbListView.getSelectedValue();
-        if (w != null) {
-            return w;
-        }
-        return null;
-    }
-
+//    public NetbeansInstallation getSelectedNbInstallation() {
+//        NetbeansInstallation w = (NetbeansInstallation) getComps2().localNbListView.getSelectedValue();
+//        if (w != null) {
+//            return w;
+//        }
+//        return null;
+//    }
+//
+//    public NetbeansBinaryLink getSelectedRemoteNbInstallation() {
+//        NetbeansBinaryLink w = (NetbeansBinaryLink) getComps2().remoteNbListView.getSelectedValue();
+//        if (w != null) {
+//            return w;
+//        }
+//        return null;
+//    }
     public NutsSdkLocation getSelectedJdkLocation() {
         NutsSdkLocation w = (NutsSdkLocation) getComps2().jdkListView.getSelectedValue();
         if (w != null) {
@@ -484,17 +325,34 @@ public class SettingsPane extends AppPane {
 
     private Comp2 createComp2(boolean b) {
         Comp2 c = new Comp2();
+        c.nbListView = createRemoteNbList();
+        c.jdkListView = createJdkList();
         c.buttonAdd = toolkit.createIconButton("add", "App.Action.Add", () -> onAdd(), win.isCompact());
         c.buttonRemove = toolkit.createIconButton("remove", "App.Action.Remove", () -> onRemove(), win.isCompact());
         c.buttonSearchLocal = toolkit.createIconButton("search-local", "App.Action.SearchLocal", () -> onSearchLocal(), win.isCompact());
         c.buttonSearchRemote = toolkit.createIconButton("search-remote", "App.Action.SearchRemote", () -> onSearchRemote(), win.isCompact());
-        c.buttonDownload = toolkit.createIconButton("download", "App.Action.Download", () -> onDownload(), win.isCompact());
+        c.buttonDownload = toolkit.createIconButton("download", "App.Action.Download", () -> c.nbListView.onDownload(), win.isCompact());
         c.buttonClose = toolkit.createIconButton("close", "App.Action.Close", () -> win.setSelectedPane(AppPaneType.LIST_WS), win.isCompact());
         c.buttons = new JComponent[]{c.buttonAdd, c.buttonRemove, c.buttonSearchLocal, c.buttonSearchRemote, c.buttonDownload, c.buttonClose};
-        c.tabbedPane = new JTabbedPane();
-        c.tabbedPane.add(toolkit.msg("App.Label.Netbeans").getText(), new JScrollPane(c.localNbListView = createLocalNbList()));
-        c.tabbedPane.add(toolkit.msg("App.Label.JavaSDK").getText(), new JScrollPane(c.jdkListView = createJdkList()));
-        c.tabbedPane.add(toolkit.msg("App.Label.RemoteNetbeans").getText(), new JScrollPane(c.remoteNbListView = createRemoteNbList()));
+        c.tabbedPane = NbTheme.prepare(new JTabbedPane() {
+            Font font = getFont();
+            Font font2 = font.deriveFont(Font.BOLD | Font.ITALIC, 16);
+            Color darker = new Color(37, 73, 110);
+
+            @Override
+            public void paint(Graphics g) {
+                super.paint(g);
+                Dimension s = getSize();
+                g.setFont(font2);
+//                g.setColor(darker);
+//                g.drawString("Settings...", (int) (s.getWidth() - 80+1), 18);
+                g.setColor(darker);
+                g.drawString("Settings...", (int) (s.getWidth() - 80), 18);
+            }
+
+        });
+        c.tabbedPane.add(toolkit.msg("App.Label.Netbeans").getText(), NbTheme.prepare(new JScrollPane(c.nbListView.toComponent())));
+        c.tabbedPane.add(toolkit.msg("App.Label.JavaSDK").getText(), NbTheme.prepare(new JScrollPane(c.jdkListView.toComponent())));
         c.tabbedPane.addChangeListener((ChangeEvent e) -> {
             onRequiredUpdateButtonStatuses();
         });
@@ -503,21 +361,18 @@ public class SettingsPane extends AppPane {
     }
 
     private int cached_i;
-    private int cached_j;
     private int cached_k;
 
     @Override
     public void onPreChangeCompatStatus(boolean compact) {
         cached_i = getComps2().jdkListView.getSelectedIndex();
-        cached_j = getComps2().localNbListView.getSelectedIndex();
-        cached_k = getComps2().remoteNbListView.getSelectedIndex();
+        cached_k = getComps2().nbListView.getSelectedIndex();
     }
 
     @Override
     public void onChangeCompatStatus(boolean compact) {
         super.onChangeCompatStatus(compact);
         getComps2().jdkListView.setSelectedIndex(cached_i);
-        getComps2().localNbListView.setSelectedIndex(cached_j);
-        getComps2().remoteNbListView.setSelectedIndex(cached_k);
+        getComps2().nbListView.setSelectedIndex(cached_k);
     }
 }
