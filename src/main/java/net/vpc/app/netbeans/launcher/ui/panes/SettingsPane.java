@@ -115,12 +115,11 @@ public class SettingsPane extends AppPane {
         switch (getSettingType()) {
             case NB_INSTALLATION: {
                 //netbeans installations
+                toolkit.setControlVisible(getComps2().buttonAdd, true);
+                toolkit.setControlVisible(getComps2().buttonRemove, getComps2().nbListView.getSelectedValue() instanceof NetbeansInstallation);
                 toolkit.setControlVisible(getComps2().buttonSearchLocal, true);
                 toolkit.setControlVisible(getComps2().buttonSearchRemote, false);
-                toolkit.setControlVisible(getComps2().buttonDownload, false);
-                toolkit.setControlVisible(getComps2().buttonAdd, true);
-                toolkit.setControlVisible(getComps2().buttonDownload, getComps2().nbListView.getSelectedValue() instanceof NetbeansBinaryLink);
-                toolkit.setControlVisible(getComps2().buttonRemove, getComps2().nbListView.getSelectedValue() instanceof NetbeansInstallation);
+                toolkit.setControlVisible(getComps2().buttonDownload, true /* ENABLE REINSTALL// getComps2().nbListView.getSelectedValue() instanceof NetbeansBinaryLink*/);
                 break;
             }
             case JDK_INSTALLATION: {
@@ -333,7 +332,7 @@ public class SettingsPane extends AppPane {
         c.buttonSearchRemote = toolkit.createIconButton("search-remote", "App.Action.SearchRemote", () -> onSearchRemote(), win.isCompact());
         c.buttonDownload = toolkit.createIconButton("download", "App.Action.Download", () -> c.nbListView.onDownload(), win.isCompact());
         c.buttonClose = toolkit.createIconButton("close", "App.Action.Close", () -> win.setSelectedPane(AppPaneType.LIST_WS), win.isCompact());
-        c.buttons = new JComponent[]{c.buttonAdd, c.buttonRemove, c.buttonSearchLocal, c.buttonSearchRemote, c.buttonDownload, c.buttonClose};
+        c.buttons = new JComponent[]{c.buttonAdd, c.buttonRemove, c.buttonDownload, c.buttonSearchLocal, c.buttonSearchRemote, c.buttonClose};
         c.tabbedPane = NbTheme.prepare(new JTabbedPane() {
             Font font = getFont();
             Font font2 = font.deriveFont(Font.BOLD | Font.ITALIC, 16);

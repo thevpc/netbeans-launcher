@@ -1,13 +1,28 @@
 [
   {
+    "version": "12.0",
+    "packaging": "zip",
+    "url": "https://archive.apache.org/dist/netbeans/netbeans/12.0/netbeans-12.0-bin.zip"
+  },
+  {
+    "version": "11.3",
+    "packaging": "zip",
+    "url": "https://archive.apache.org/dist/netbeans/netbeans/11.3/netbeans-11.3-bin.zip"
+  },
+  {
+    "version": "11.2",
+    "packaging": "zip",
+    "url": "https://archive.apache.org/dist/netbeans/netbeans/11.2/netbeans-11.2-bin.zip"
+  },
+  {
     "version": "11.1",
     "packaging": "zip",
-    "url": "https://www-eu.apache.org/dist/netbeans/netbeans/11.1/netbeans-11.1-bin.zip"
+    "url": "https://archive.apache.org/dist/netbeans/netbeans/11.1/netbeans-11.1-bin.zip"
   },
   {
     "version": "11.0",
     "packaging": "zip",
-    "url": "https://www-eu.apache.org/dist/incubator/netbeans/incubating-netbeans/incubating-11.0/incubating-netbeans-11.0-bin.zip"
+    "url": "https://archive.apache.org/dist/incubator/netbeans/incubating-netbeans/incubating-11.0/incubating-netbeans-11.0-bin.zip"
   },
   {
     "version": "10.0",

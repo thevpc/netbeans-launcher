@@ -44,7 +44,10 @@ public class NbUtils {
                 "/usr/local",
                 "~/bin",
                 "~/programs",
-                "~/Programs",},
+                "~/Programs",
+                "~/apps",
+                "~/Apps",
+            },
             new String[]{
                 "/usr/java",
                 "/usr/lib64/jvm",
@@ -60,7 +63,10 @@ public class NbUtils {
                 NbUtils.coalesce(System.getenv("ProgramFiles"), "C:\\Program Files"),
                 NbUtils.coalesce(System.getenv("ProgramFiles(x86)"), "C:\\Program Files (x86)"),
                 "~/programs",
-                "~/Programs",},
+                "~/Programs",
+                "~/apps",
+                "~/Apps",
+            },
             new String[]{
                 NbUtils.coalesce(System.getenv("ProgramFiles"), "C:\\Program Files") + "\\Java",
                 NbUtils.coalesce(System.getenv("ProgramFiles(x86)"), "C:\\Program Files (x86)") + "\\Java",},
@@ -73,7 +79,10 @@ public class NbUtils {
             new String[]{
                 "/Library/",
                 "~/programs",
-                "~/Programs",},
+                "~/Programs",
+                "~/apps",
+                "~/Apps",
+            },
             new String[]{
                 "/Library/Java/JavaVirtualMachines",
                 "/System/Library/Frameworks/JavaVM.framework"
@@ -97,21 +106,6 @@ public class NbUtils {
         return true;//isOsWindows() || isOsLinux() || isOsMac();
     }
 
-    public static boolean isOsWindows() {
-        String osname = System.getProperty("os.name");
-        return osname.toLowerCase().startsWith("win");
-    }
-
-    public static boolean isOsLinux() {
-        String osname = System.getProperty("os.name");
-        return osname.toLowerCase().startsWith("linux");
-    }
-
-    public static boolean isOsMac() {
-        String osname = System.getProperty("os.name");
-        return osname.toLowerCase().startsWith("mac");
-    }
-
     public static String trim(String cmd) {
         return cmd == null ? "" : cmd.trim();
     }
@@ -130,7 +124,7 @@ public class NbUtils {
     }
 
     public static String response(List<String> cmd) throws IOException {
-        return response(cmd.toArray(new String[cmd.size()]));
+        return response(cmd.toArray(new String[0]));
     }
 
     public static String response(String[] cmd) throws IOException {
@@ -230,15 +224,15 @@ public class NbUtils {
         return sb.toString();
     }
 
-    public static final NbOsConfig getNbOsConfig() {
-        if (NbUtils.isOsLinux()) {
-            return NbUtils.LINUX_CONFIG;
-        }
-        if (NbUtils.isOsWindows()) {
-            return NbUtils.WINDOWS_CONFIG;
-        }
-        if (NbUtils.isOsMac()) {
-            return NbUtils.MAC_CONFIG;
+    public static final NbOsConfig getNbOsConfig(NutsApplicationContext appContext) {
+        switch (appContext.workspace().config().getOsFamily()){
+            case UNIX:
+            case LINUX:
+                return NbUtils.LINUX_CONFIG;
+            case MACOS:
+                return NbUtils.MAC_CONFIG;
+            case WINDOWS:
+                return NbUtils.WINDOWS_CONFIG;
         }
         // all others are supposed to be unixes!!
         return NbUtils.LINUX_CONFIG;
@@ -447,13 +441,11 @@ public class NbUtils {
     }
 
     public static NbProcess[] getRunning(NutsApplicationContext ctx) {
-        try {
-            return Arrays.stream(JpsUtils.getRunningJava(ctx, "org.netbeans.Main"))
-                    .map(x -> new NbProcess(ctx, x)).toArray(NbProcess[]::new);
-        } catch (IOException ex) {
-            return new NbProcess[0];
-        }
+        return ctx.getWorkspace().io().ps().type("java").getResultList()
+                .stream().filter((p) -> p.getName().equals("org.netbeans.Main"))
+                .map(x -> new NbProcess(ctx.workspace(),x)).toArray(NbProcess[]::new);
     }
+
     private static CachedValue<NbProcess[]> CACHED_PROCESSES;
 
     public static boolean isRunningWithCache(NutsApplicationContext ctx, NetbeansWorkspace nb) {

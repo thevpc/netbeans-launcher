@@ -1,9 +1,6 @@
 package net.vpc.app.netbeans.launcher.util;
 
-import net.vpc.app.nuts.NutsApplicationContext;
-import net.vpc.app.nuts.NutsArgument;
-import net.vpc.app.nuts.NutsCommandLine;
-import net.vpc.common.io.JpsResult;
+import net.vpc.app.nuts.*;
 
 public class NbProcess {
 
@@ -12,11 +9,11 @@ public class NbProcess {
     private final String userdir;
     private final String cachedir;
 
-    public NbProcess(NutsApplicationContext ctx, JpsResult jpsResult) {
-        NutsCommandLine cmd = ctx.commandLine().parseLine(jpsResult.getArgsLine());
+    public NbProcess(NutsWorkspace ws, NutsProcessInfo jpsResult) {
+        NutsCommandLine cmd = ws.commandLine().parse(jpsResult.getCommandLine());
         NutsArgument a;
         pid = jpsResult.getPid();
-        className = jpsResult.getClassName();
+        className = jpsResult.getName();
         String _userdir = null;
         String _cachedir = null;
         while (cmd.hasNext()) {

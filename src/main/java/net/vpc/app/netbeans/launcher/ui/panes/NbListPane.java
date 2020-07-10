@@ -17,6 +17,7 @@ import java.util.Set;
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 
+import net.vpc.app.netbeans.launcher.model.NetbeansLocation;
 import net.vpc.app.netbeans.launcher.model.NetbeansWorkspace;
 import net.vpc.app.netbeans.launcher.ui.*;
 import net.vpc.app.netbeans.launcher.ui.utils.CatalogComponent;
@@ -216,6 +217,11 @@ public class NbListPane extends AppPane {
 
     public void setSelectedWorkspace(NetbeansWorkspace w) {
         getComps1().workspacesListView.setSelectedValue(w);
+    }
+
+    public void setSelectedWorkspace(NetbeansLocation w) {
+        //TODO
+        //getComps1().workspacesListView.setSelectedValue(w);
     }
 
     public NetbeansWorkspace getSelectedWorkspace() {

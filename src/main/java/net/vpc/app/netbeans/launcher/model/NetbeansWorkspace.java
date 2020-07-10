@@ -34,6 +34,9 @@ public class NetbeansWorkspace implements Cloneable, Serializable {
     private Instant creationDate;
     private long executionCount;
 
+    public NetbeansWorkspace() {
+    }
+
     public String getJdkhome() {
         return jdkhome;
     }
@@ -236,19 +239,20 @@ public class NetbeansWorkspace implements Cloneable, Serializable {
     }
 
     public void copyFrom(NetbeansWorkspace w) {
-        this.setName(w.getName());
-        this.setPath(w.getPath());
-        this.setUserdir(w.getUserdir());
-        this.setCachedir(w.getCachedir());
-        this.setPath(w.getPath());
-        this.setJdkhome(w.getJdkhome());
-        this.setGroup(w.getGroup());
-        this.setFontSize(w.getFontSize());
-        this.setLaf(w.getLaf());
-        this.setOptions(w.getOptions());
-        this.setCpAppend(w.getCpAppend());
-        this.setCpPrepend(w.getCpPrepend());
-        this.setLocale(w.getLocale());
+        if(w!=this) {
+            this.setName(w.getName());
+            this.setPath(w.getPath());
+            this.setUserdir(w.getUserdir());
+            this.setCachedir(w.getCachedir());
+            this.setJdkhome(w.getJdkhome());
+            this.setGroup(w.getGroup());
+            this.setFontSize(w.getFontSize());
+            this.setLaf(w.getLaf());
+            this.setOptions(w.getOptions());
+            this.setCpAppend(w.getCpAppend());
+            this.setCpPrepend(w.getCpPrepend());
+            this.setLocale(w.getLocale());
+        }
     }
 
     public Instant getLastLaunchDate() {

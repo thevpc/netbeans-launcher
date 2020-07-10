@@ -1,6 +1,7 @@
 package net.vpc.app.netbeans.launcher.ui.panes;
 
 import java.util.ArrayList;
+
 import net.vpc.app.netbeans.launcher.model.NetbeansBinaryLink;
 import net.vpc.app.netbeans.launcher.model.NetbeansInstallation;
 import net.vpc.app.netbeans.launcher.model.NetbeansWorkspace;
@@ -13,6 +14,7 @@ import javax.swing.*;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
+
 import net.vpc.app.netbeans.launcher.model.NetbeansLocation;
 import net.vpc.app.netbeans.launcher.ui.utils.CatalogComponent;
 
@@ -23,7 +25,7 @@ public abstract class NbListComponent {
     protected Runnable _onRequiredUpdateButtonStatuses;
     private static final Set<String> downloading = new HashSet<>();
 
-    public NbListComponent(MainWindowSwing win,Runnable _onRequiredUpdateButtonStatuses) {
+    public NbListComponent(MainWindowSwing win, Runnable _onRequiredUpdateButtonStatuses) {
         this.win = win;
         this._onRequiredUpdateButtonStatuses = _onRequiredUpdateButtonStatuses;
         table = createCatalog();
@@ -65,6 +67,12 @@ public abstract class NbListComponent {
     public void onDownload() {
         SwingWorker w = Workers.richWorker();
         Object v = getSelectedValue();
+//        if (v instanceof NetbeansInstallation) {
+//            NetbeansBinaryLink ni = win.getConfigService().searchNetbeansBinaryLinkForInstallation((NetbeansInstallation) v);
+//            if (ni != null) {
+//                v = ni;
+//            }
+//        }
         if (v instanceof NetbeansBinaryLink) {
             NetbeansBinaryLink i = (NetbeansBinaryLink) v;
             if (markForDownload(i.getVersion())) {
@@ -87,7 +95,7 @@ public abstract class NbListComponent {
                                     NetbeansInstallation n = w.load("n");
                                     if (n != null) {
                                         NbListPane ws = (NbListPane) win.getPane(AppPaneType.LIST_WS);
-                                        ws.setSelectedWorkspace((NetbeansWorkspace) v);
+                                        ws.setSelectedWorkspace(i);
                                     }
                                 })
                                 .onFinally(() -> {
@@ -108,7 +116,7 @@ public abstract class NbListComponent {
         } else if (v instanceof NetbeansInstallation) {
             win.setSelectedPane(AppPaneType.LIST_WS);
             NbListPane ws = (NbListPane) win.getPane(AppPaneType.LIST_WS);
-            ws.setSelectedWorkspace((NetbeansWorkspace) v);
+            ws.setSelectedWorkspace((NetbeansInstallation) v);
         }
     }
 

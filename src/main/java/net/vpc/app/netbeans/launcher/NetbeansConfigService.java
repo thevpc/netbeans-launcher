@@ -13,7 +13,6 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.locks.Lock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -22,6 +21,8 @@ import java.util.stream.Collectors;
 
 import net.vpc.app.netbeans.launcher.compat.NetbeansConfigLoader11;
 import net.vpc.app.nuts.*;
+
+import static net.vpc.app.netbeans.launcher.util.NbUtils.resolveFile;
 
 /**
  * @author vpc
@@ -49,9 +50,39 @@ public class NetbeansConfigService {
         this.currentDirectory = currentDirectory;
     }
 
-    public void configureDefaultNb(File baseFolder, NetbeansInstallationStore store) {
+    public static class ConfigResult {
+        private int found = 0;
+        private int installed = 0;
+
+        public int getFound() {
+            return found;
+        }
+
+        public ConfigResult setFound(int found) {
+            this.found = found;
+            return this;
+        }
+
+        public int getInstalled() {
+            return installed;
+        }
+
+        public ConfigResult setInstalled(int installed) {
+            this.installed = installed;
+            return this;
+        }
+        public ConfigResult add(ConfigResult y){
+            if(y!=null){
+                this.found+=y.found;
+                this.installed+=y.installed;
+            }
+            return this;
+        }
+    }
+
+    public ConfigResult configureDefaultNb(File baseFolder, NetbeansInstallationStore store) {
         if (!baseFolder.isDirectory()) {
-            return;
+            return new ConfigResult();
         }
         File[] files = baseFolder.listFiles(new FileFilter() {
             @Override
@@ -59,17 +90,22 @@ public class NetbeansConfigService {
                 return pathname.isDirectory();
             }
         });
+        ConfigResult r = new ConfigResult();
         if (files != null) {
             for (File file : files) {
                 NetbeansInstallation o = findNb(file.getPath());
                 if (o == null) {
                     o = detectNb(file.getPath(), store);
                     if (o != null) {
-                        addNb(o);
+                        r.setFound(r.getFound() + 1);
+                        if (addNb(o)) {
+                            r.setInstalled(r.getInstalled() + 1);
+                        }
                     }
                 }
             }
         }
+        return r;
     }
 
     public void configureJdk(File baseFolder) {
@@ -95,10 +131,30 @@ public class NetbeansConfigService {
         }
     }
 
+    public NetbeansBinaryLink searchNetbeansBinaryLinkForInstallation(NetbeansInstallation netbeansInstallation) {
+        for (NetbeansBinaryLink netbeansBinaryLink : searchRemoteNbBinaries()) {
+            if (netbeansInstallation.getVersion().equals(netbeansBinaryLink.getVersion())) {
+                return netbeansBinaryLink;
+            }
+        }
+        return null;
+    }
+
     public NetbeansBinaryLink[] searchRemoteInstallableNbBinaries() {
         NetbeansBinaryLink[] all = appContext.workspace().json().parse(getClass().getResource("/net/vpc/app/netbeans/launcher/binaries.json"), NetbeansBinaryLink[].class);
         Set<String> locallyAvailable = Arrays.stream(getAllNb()).map(NetbeansInstallation::getVersion).collect(Collectors.toSet());
         return Arrays.stream(all).filter(x -> !locallyAvailable.contains(x.getVersion())).sorted(new Comparator<NetbeansBinaryLink>() {
+            @Override
+            public int compare(NetbeansBinaryLink o1, NetbeansBinaryLink o2) {
+                return -appContext.workspace().version().parse(o1.getVersion())
+                        .compareTo(o2.getVersion());
+            }
+        }).toArray(NetbeansBinaryLink[]::new);
+    }
+
+    public NetbeansBinaryLink[] searchRemoteNbBinaries() {
+        NetbeansBinaryLink[] all = appContext.workspace().json().parse(getClass().getResource("/net/vpc/app/netbeans/launcher/binaries.json"), NetbeansBinaryLink[].class);
+        return Arrays.stream(all).sorted(new Comparator<NetbeansBinaryLink>() {
             @Override
             public int compare(NetbeansBinaryLink o1, NetbeansBinaryLink o2) {
                 return -appContext.workspace().version().parse(o1.getVersion())
@@ -119,15 +175,46 @@ public class NetbeansConfigService {
         }
     }
 
-    public void configureDefaultNb() {
-        for (String programFolder : NbUtils.getNbOsConfig().getProgramFolders()) {
-            configureDefaultNb(new File(programFolder), NetbeansInstallationStore.SYSTEM);
+    public ConfigResult configureDefaultNb() {
+        ConfigResult r0=new ConfigResult();
+        for (String programFolder : NbUtils.getNbOsConfig(appContext).getProgramFolders()) {
+            File level1Folder = resolveFile(programFolder);
+            ConfigResult r = configureDefaultNb(level1Folder, NetbeansInstallationStore.SYSTEM);
+            r0.add(r);
+            if (r.getFound() > 0) {
+                //
+            } else {
+                //Level 2
+                if (level1Folder.isDirectory()) {
+                    for (File level2Folder : level1Folder.listFiles()) {
+                        r = configureDefaultNb(level2Folder, NetbeansInstallationStore.SYSTEM);
+                        r0.add(r);
+                        if (r.getFound() > 0) {
+                            //
+                        } else {
+                            //Level 3
+                            if (level2Folder.isDirectory()) {
+                                for (File level3Folder : level2Folder.listFiles()) {
+                                    r = configureDefaultNb(level3Folder, NetbeansInstallationStore.SYSTEM);
+                                    r0.add(r);
+                                    if (r.getFound() > 0) {
+                                        //
+                                    } else {
+                                        //nothing
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
+        return r0;
     }
 
     public void configureDefaultJdk() {
-        for (String jdkFolder : NbUtils.getNbOsConfig().getJdkFolders()) {
-            configureJdk(new File(jdkFolder));
+        for (String jdkFolder : NbUtils.getNbOsConfig(appContext).getJdkFolders()) {
+            configureJdk(resolveFile(jdkFolder));
         }
     }
 
@@ -148,14 +235,14 @@ public class NetbeansConfigService {
                 return null;
             }
             List<String> cmd = new ArrayList<>();
-            cmd.add(NbUtils.toOsPath(w.getPath() + "/bin/" + NbUtils.getNbOsConfig().getNetbeansExe()));//linux
+            cmd.add(NbUtils.toOsPath(w.getPath() + "/bin/" + NbUtils.getNbOsConfig(appContext).getNetbeansExe()));//linux
             if (w.getUserdir() != null) {
                 cmd.add("--userdir");
-                cmd.add(NbUtils.resolveFile(w.getUserdir()).getPath());
+                cmd.add(resolveFile(w.getUserdir()).getPath());
             }
             if (w.getCachedir() != null) {
                 cmd.add("--cachedir");
-                cmd.add(NbUtils.resolveFile(w.getCachedir()).getPath());
+                cmd.add(resolveFile(w.getCachedir()).getPath());
             }
             if (w.getGroup() != null) {
                 cmd.add("--open-group");
@@ -196,7 +283,7 @@ public class NetbeansConfigService {
     public static final NetbeansGroup NETBEANS_CLOSE_GROUP = new NetbeansGroup("--close-group", "--close-group");
 
     public String detectNbVersionFrom_buildinfo_file(String path) {
-        File f = NbUtils.resolveFile(path);
+        File f = resolveFile(path);
         if (!new File(f, NbUtils.toOsPath("nb/build_info")).exists()) {
             return null;
         }
@@ -221,7 +308,7 @@ public class NetbeansConfigService {
     }
 
     public String detectNbVersionFrom_VERSION_file(String path) {
-        File f = NbUtils.resolveFile(path);
+        File f = resolveFile(path);
         if (!new File(f, NbUtils.toOsPath("nb/VERSION.txt")).exists()) {
             return null;
         }
@@ -257,7 +344,7 @@ public class NetbeansConfigService {
             return new NetbeansInstallation[]{a};
         }
         List<NetbeansInstallation> subNetbeans = new ArrayList<>();
-        File f = NbUtils.resolveFile(path);
+        File f = resolveFile(path);
         if (f.isDirectory()) {
             File[] pp = f.listFiles(x -> x.isDirectory());
             if (pp != null) {
@@ -275,95 +362,134 @@ public class NetbeansConfigService {
         return subNetbeans.toArray(new NetbeansInstallation[0]);
     }
 
+    public static class VersionData{
+        private String version;
+        private String fullVersion;
+
+        public VersionData(String version, String fullVersion) {
+            this.setVersion(version);
+            this.setFullVersion(fullVersion);
+        }
+
+        public String getVersion() {
+            return version;
+        }
+
+        public void setVersion(String version) {
+            this.version = version;
+        }
+
+        public String getFullVersion() {
+            return fullVersion;
+        }
+
+        public void setFullVersion(String fullVersion) {
+            this.fullVersion = fullVersion;
+        }
+    }
+
+    private static Matcher match(String expr,String str) {
+        Pattern p = Pattern.compile(expr);
+        Matcher m = p.matcher(str);
+        if (m.find()) {
+            return m;
+        }
+        return null;
+    }
+
+    public static VersionData parseVersionData(String version) {
+        if(version==null){
+            version="";
+        }
+        version=version.trim();
+        Matcher m;
+        if ((m=match("(incubator-)?netbeans-release-(?<bn>[0-9]+)-on-(?<bd>[0-9]+)",version))!=null) {
+            String bn = m.group("bn");
+            String bd = m.group("bd");
+            int ibn = Integer.parseInt(bn);
+            if (ibn < 334) {
+                return new VersionData("8.x", version);
+            } else if (ibn == 334) {
+                return new VersionData("9.0", version);
+            } else if (ibn < 380) {
+                return new VersionData("9.x", version);
+            } else if (ibn == 380) {
+                return new VersionData("10.0", version);
+            } else if (ibn < 404) {
+                return new VersionData("10.x", version);
+            } else if (ibn == 404) {
+                return new VersionData("11.0", version);
+            } else if (ibn < 428) {
+                return new VersionData("11.0.x", version);
+            } else if (ibn == 428) {
+                return new VersionData("11.1", version);
+            } else {
+                return new VersionData("11.1.x", version);
+            }
+        }else if ((m=match("(?<bn>[0-9]+[.][0-9]+)-(?<bd>.*)",version))!=null) {
+            String v=m.group("bn");
+            return new VersionData(v, version);
+        }else if ((m=match("(?<bn>[0-9.]+)(?<bd>.*)",version))!=null) {
+            String bn = m.group("bn");
+            return new VersionData(bn,version);
+        }else{
+            return new VersionData(version,version);
+        }
+    }
+
     public NetbeansInstallation detectNb(String path, NetbeansInstallationStore store) {
         if (path == null) {
             return null;
         }
-        File f = NbUtils.resolveFile(path);
-        if (!new File(f, NbUtils.toOsPath("bin/" + NbUtils.getNbOsConfig().getNetbeansExe())).exists()) {
+        File f = resolveFile(path);
+        if (!new File(f, NbUtils.toOsPath("bin/" + NbUtils.getNbOsConfig(appContext).getNetbeansExe())).exists()) {
             return null;
         }
         String version = detectNbVersionFrom_VERSION_file(path);
+        if(version==null|| version.trim().isEmpty()){
+            return null;
+        }
         if ("9.0".equals(version)) {
             String v2 = detectNbVersionFrom_buildinfo_file(path);
             if (v2 != null) {
-                Pattern p = Pattern.compile("(incubator-)?netbeans-release-(?<bn>[0-9]+)-on-(?<bd>[0-9]+)");
-                Matcher m = p.matcher(v2.trim());
-                if (m.find()) {
-                    String bn = m.group("bn");
-                    String bd = m.group("bd");
-                    int ibn = Integer.parseInt(bn);
-                    switch (ibn) {
-                        case 334: {
-                            version = "9.0";
-                            break;
-                        }
-                        case 380: {
-                            version = "10.0";
-                            break;
-                        }
-                        case 404: {
-                            version = "11.0";
-                            break;
-                        }
-                        case 428: {
-                            version = "11.1";
-                            break;
-                        }
-                        default: {
-                            if (ibn < 334) {
-                                version = "8.x-" + bn + "-" + bd;
-                            } else if (ibn < 380) {
-                                version = "9.x-" + bn + "-" + bd;
-                            } else if (ibn < 404) {
-                                version = "10.x-" + bn + "-" + bd;
-                            } else if (ibn < 428) {
-                                version = "11.x-" + bn + "-" + bd;
-                            } else {
-                                version = "11.x-" + bn + "-" + bd;
-                            }
-                        }
-                    }
-                }
-
+                version=v2;
             }
         }
+        VersionData vd=parseVersionData(version);
 
-        if (version != null) {
-            NetbeansInstallation netbeansInstallation = new NetbeansInstallation();
-            netbeansInstallation.setName("Netbeans IDE " + version);
-            netbeansInstallation.setVersion(version);
-            netbeansInstallation.setPath(path);
-            Properties nbconf = NbUtils.loadProperties(new File(f, NbUtils.toOsPath("etc/netbeans.conf")));
-            for (Map.Entry<Object, Object> entry : new HashSet<>(nbconf.entrySet())) {
-                String s = (String) entry.getValue();
-                if (s.startsWith("\"") && s.endsWith("\"") && s.length() >= 2) {
-                    s = s.substring(1, s.length() - 1);
-                    nbconf.setProperty((String) entry.getKey(), s);
-                }
+
+        NetbeansInstallation netbeansInstallation = new NetbeansInstallation();
+        netbeansInstallation.setName("Netbeans IDE " + vd.getVersion());
+        netbeansInstallation.setVersion(vd.getFullVersion());
+        netbeansInstallation.setPath(path);
+        Properties nbconf = NbUtils.loadProperties(new File(f, NbUtils.toOsPath("etc/netbeans.conf")));
+        for (Map.Entry<Object, Object> entry : new HashSet<>(nbconf.entrySet())) {
+            String s = (String) entry.getValue();
+            if (s.startsWith("\"") && s.endsWith("\"") && s.length() >= 2) {
+                s = s.substring(1, s.length() - 1);
+                nbconf.setProperty((String) entry.getKey(), s);
             }
-            String netbeans_default_userdir = nbconf.getProperty("netbeans_default_userdir");
-            if (netbeans_default_userdir != null) {
-                netbeans_default_userdir = netbeans_default_userdir.replace("${DEFAULT_USERDIR_ROOT}", NbUtils.getNbOsConfig().getConfigRoot());
-            }
-            String netbeans_default_cachedir = nbconf.getProperty("netbeans_default_cachedir");
-            if (netbeans_default_cachedir != null) {
-                netbeans_default_cachedir = netbeans_default_cachedir.replace("${DEFAULT_CACHEDIR_ROOT}", NbUtils.getNbOsConfig().getCacheRoot());
-            }
-            String netbeans_default_options = nbconf.getProperty("netbeans_default_options");
-            if (netbeans_default_options != null) {
-                netbeans_default_options = netbeans_default_options.replace("${DEFAULT_CACHEDIR_ROOT}", NbUtils.getNbOsConfig().getCacheRoot());
-            }
+        }
+        String netbeans_default_userdir = nbconf.getProperty("netbeans_default_userdir");
+        if (netbeans_default_userdir != null) {
+            netbeans_default_userdir = netbeans_default_userdir.replace("${DEFAULT_USERDIR_ROOT}", NbUtils.getNbOsConfig(appContext).getConfigRoot());
+        }
+        String netbeans_default_cachedir = nbconf.getProperty("netbeans_default_cachedir");
+        if (netbeans_default_cachedir != null) {
+            netbeans_default_cachedir = netbeans_default_cachedir.replace("${DEFAULT_CACHEDIR_ROOT}", NbUtils.getNbOsConfig(appContext).getCacheRoot());
+        }
+        String netbeans_default_options = nbconf.getProperty("netbeans_default_options");
+        if (netbeans_default_options != null) {
+            netbeans_default_options = netbeans_default_options.replace("${DEFAULT_CACHEDIR_ROOT}", NbUtils.getNbOsConfig(appContext).getCacheRoot());
+        }
 //                String netbeans_default_options=nbconf.getProperty("netbeans_default_options");
-            String netbeans_jdkhome = nbconf.getProperty("netbeans_jdkhome");
-            netbeansInstallation.setUserdir(netbeans_default_userdir);
-            netbeansInstallation.setCachedir(netbeans_default_cachedir);
-            netbeansInstallation.setJdkhome(netbeans_jdkhome);
-            netbeansInstallation.setOptions(netbeans_default_options);
-            netbeansInstallation.setStore(store);
-            return netbeansInstallation;
-        }
-        return null;
+        String netbeans_jdkhome = nbconf.getProperty("netbeans_jdkhome");
+        netbeansInstallation.setUserdir(netbeans_default_userdir);
+        netbeansInstallation.setCachedir(netbeans_default_cachedir);
+        netbeansInstallation.setJdkhome(netbeans_jdkhome);
+        netbeansInstallation.setOptions(netbeans_default_options);
+        netbeansInstallation.setStore(store);
+        return netbeansInstallation;
     }
 
     public NetbeansWorkspace findNbWorkspace(String path, String userdir, String cachedir) {
@@ -665,14 +791,14 @@ public class NetbeansConfigService {
 
     public String[] createRunCommand(NetbeansWorkspace w) {
         List<String> cmd = new ArrayList<>();
-        cmd.add(NbUtils.toOsPath(w.getPath() + "/bin/" + NbUtils.getNbOsConfig().getNetbeansExe()));//linux
+        cmd.add(NbUtils.toOsPath(w.getPath() + "/bin/" + NbUtils.getNbOsConfig(appContext).getNetbeansExe()));//linux
         if (w.getUserdir() != null) {
             cmd.add("--userdir");
-            cmd.add(NbUtils.resolveFile(w.getUserdir()).getPath());
+            cmd.add(resolveFile(w.getUserdir()).getPath());
         }
         if (w.getCachedir() != null) {
             cmd.add("--cachedir");
-            cmd.add(NbUtils.resolveFile(w.getCachedir()).getPath());
+            cmd.add(resolveFile(w.getCachedir()).getPath());
         }
         if (w.getGroup() != null) {
             cmd.add("--open-group");
@@ -730,7 +856,7 @@ public class NetbeansConfigService {
     public NutsExecCommand run(NetbeansWorkspace w) throws IOException {
         String[] cmd = createRunCommand(w);
         return appContext.workspace().exec()
-                .syscall()
+                .userCmd()
                 .directory(w.getPath())
                 .command(cmd)
                 .redirectErrorStream()
@@ -746,9 +872,11 @@ public class NetbeansConfigService {
     public void loadFile() {
         boolean loaded = false;
         Path validFile = appContext.getConfigFolder().resolve("config.json");
+        boolean foundCurrVersionFile=false;
         if (Files.isRegularFile(validFile)) {
             try {
                 config = (NetbeansConfig) appContext.workspace().json().parse(validFile, NetbeansConfig.class);
+                foundCurrVersionFile=config!=null;
             } catch (Exception e) {
                 System.err.println("Unable to load config from " + validFile.toString());
                 int i = 2;
@@ -782,22 +910,24 @@ public class NetbeansConfigService {
             }
             loaded = true;
         }
-        List<NutsId> olderVersions = appContext.workspace().search().installed().id(appContext.getAppId().builder().setVersion("").build()).getResultIds().stream().sorted(
-                (a, b) -> b.getVersion().compareTo(a.getVersion())
-        ).filter(x -> x.getVersion().compareTo(appContext.getAppId().getVersion()) < 0).collect(Collectors.toList());
-        for (NutsId olderVersion : olderVersions) {
-            Path validFile2 = appContext.workspace().config().getStoreLocation(olderVersion, NutsStoreLocation.CONFIG).resolve("config.json");
-            if (Files.isRegularFile(validFile2)) {
-                try {
-                    config = (NetbeansConfig) appContext.workspace().json().parse(validFile2, NetbeansConfig.class);
-                } catch (Exception e) {
-                    System.err.println("Unable to load config from " + validFile2.toString());
-                    break;
-                }
-                if (config != null) {
-                    saveFile();
-                    loaded = true;
-                    break;
+        if(!foundCurrVersionFile) {
+            List<NutsId> olderVersions = appContext.workspace().search().installed().id(appContext.getAppId().builder().setVersion("").build()).getResultIds().stream().sorted(
+                    (a, b) -> b.getVersion().compareTo(a.getVersion())
+            ).filter(x -> x.getVersion().compareTo(appContext.getAppId().getVersion()) < 0).collect(Collectors.toList());
+            for (NutsId olderVersion : olderVersions) {
+                Path validFile2 = appContext.workspace().config().getStoreLocation(olderVersion, NutsStoreLocation.CONFIG).resolve("config.json");
+                if (Files.isRegularFile(validFile2)) {
+                    try {
+                        config = (NetbeansConfig) appContext.workspace().json().parse(validFile2, NetbeansConfig.class);
+                    } catch (Exception e) {
+                        System.err.println("Unable to load config from " + validFile2.toString());
+                        break;
+                    }
+                    if (config != null) {
+                        saveFile();
+                        loaded = true;
+                        break;
+                    }
                 }
             }
         }
@@ -895,7 +1025,7 @@ public class NetbeansConfigService {
         if (NbUtils.isEmpty(n)) {
             n = "noname";
         }
-        String configRoot = NbUtils.getNbOsConfig().getConfigRoot();
+        String configRoot = NbUtils.getNbOsConfig(appContext).getConfigRoot();
         return NbUtils.toOsPath(configRoot + File.separatorChar + n);
     }
 
@@ -904,7 +1034,7 @@ public class NetbeansConfigService {
         if (NbUtils.isEmpty(n)) {
             n = "noname";
         }
-        String configRoot = NbUtils.getNbOsConfig().getConfigRoot();
+        String configRoot = NbUtils.getNbOsConfig(appContext).getConfigRoot();
         List<String> all = new ArrayList<>();
         for (String extra : new String[]{"", " 1", " 2", " 3", " 4", " 5"}) {
             all.add(NbUtils.toOsPath(configRoot + File.separatorChar + n + extra));
@@ -917,7 +1047,7 @@ public class NetbeansConfigService {
         if (NbUtils.isEmpty(n)) {
             n = "noname";
         }
-        String cacheRoot = NbUtils.getNbOsConfig().getCacheRoot();
+        String cacheRoot = NbUtils.getNbOsConfig(appContext).getCacheRoot();
         List<String> all = new ArrayList<>();
         for (String extra : new String[]{"", " 1", " 2", " 3", " 4", " 5"}) {
             all.add(NbUtils.toOsPath(cacheRoot + File.separatorChar + n + extra));
@@ -930,7 +1060,7 @@ public class NetbeansConfigService {
         if (NbUtils.isEmpty(n)) {
             n = "noname";
         }
-        String cacheRoot = NbUtils.getNbOsConfig().getCacheRoot();
+        String cacheRoot = NbUtils.getNbOsConfig(appContext).getCacheRoot();
         return NbUtils.toOsPath(cacheRoot + File.separatorChar + n);
     }
 
@@ -946,13 +1076,11 @@ public class NetbeansConfigService {
         Path folderTo = appContext.getSharedAppsFolder()
                 .resolve("netbeans")
                 .resolve("netbeans-" + i.getVersion());
-        if (!Files.exists(zipTo)) {
-            ws.io().copy().from(i.getUrl()).to(zipTo).logProgress()
-                    .progressMonitor(new OpNutsInputStreamProgressMonitor(addOperation("Downloading " + i.toString()))).run();
-        }
-        Lock lck = ws.io().lock().source(zipTo).create();
-        lck.lock();
-        try {
+        //if (!Files.exists(zipTo)) {
+        ws.io().copy().from(i.getUrl()).to(zipTo).logProgress()
+                .progressMonitor(new OpNutsInputStreamProgressMonitor(addOperation("Downloading " + i.toString()))).run();
+        //}
+        ws.io().lock().source(zipTo).run(() -> {
             if (Files.exists(folderTo.resolve("bin").resolve("netbeans"))) {
                 //already unzipped!!
             } else {
@@ -960,9 +1088,7 @@ public class NetbeansConfigService {
                         .progressMonitor(new OpNutsInputStreamProgressMonitor(addOperation("Unzipping " + i.toString())))
                         .run();
             }
-        } finally {
-            lck.unlock();
-        }
+        });
         NetbeansInstallation o = detectNb(folderTo.toString(), NetbeansInstallationStore.DEFAULT);
         if (o != null) {
             switch (appContext.getWorkspace().config().getOsFamily()) {
@@ -970,16 +1096,16 @@ public class NetbeansConfigService {
                 case UNIX:
                 case MACOS: {
                     for (String s : new String[]{
-                        "/bin/netbeans",
-                        "/java/maven/bin/mvn",
-                        "/java/maven/bin/mvnDebug",
-                        "/java/maven/bin/mvnyjp",
-                        "/extide/ant/bin/ant",
-                        "/extide/ant/bin/antRun",
-                        "/extide/ant/bin/antRun.pl",
-                        "/extide/ant/bin/complete-ant-cmd.pl",
-                        "/extide/ant/bin/runant.pl",
-                        "/extide/ant/bin/runant.py"
+                            "/bin/netbeans",
+                            "/java/maven/bin/mvn",
+                            "/java/maven/bin/mvnDebug",
+                            "/java/maven/bin/mvnyjp",
+                            "/extide/ant/bin/ant",
+                            "/extide/ant/bin/antRun",
+                            "/extide/ant/bin/antRun.pl",
+                            "/extide/ant/bin/complete-ant-cmd.pl",
+                            "/extide/ant/bin/runant.pl",
+                            "/extide/ant/bin/runant.py"
                     }) {
                         Path n = Paths.get(o.getPath() + s);
                         if (Files.exists(n)) {

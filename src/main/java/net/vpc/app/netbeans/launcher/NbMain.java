@@ -40,25 +40,27 @@ public class NbMain extends NutsApplication {
         while (cmdLine.hasNext()) {
             if (appContext.configureFirst(cmdLine)) {
                 //do nothing
-            } else if (cmdLine.accept("--swing")) {
+            } else if (cmdLine.next("--swing")!=null) {
                 options.plaf = "nimbus";
                 options.swing_arg = true;
-            } else if (cmdLine.accept("--metal")) {
+            } else if (cmdLine.next("--metal")!=null) {
                 options.plaf = "metal";
                 options.swing_arg = true;
-            } else if (cmdLine.accept("--system")) {
+            } else if (cmdLine.next("--system")!=null) {
                 options.plaf = "system";
                 options.swing_arg = true;
-            } else if (cmdLine.accept("--gtk")) {
+            } else if (cmdLine.next("--gtk")!=null) {
                 options.plaf = "gtk";
                 options.swing_arg = true;
-            } else if (cmdLine.accept("--motif")) {
+            } else if (cmdLine.next("--motif")!=null) {
                 options.plaf = "motif";
                 options.swing_arg = true;
-            } else if (cmdLine.accept("--cli")) {
+            } else if (cmdLine.next("--cli")!=null) {
                 options.cli = true;
-            } else if (cmdLine.accept("--version")) {
+            } else if (cmdLine.next("--version")!=null) {
                 options.version = true;
+            }else{
+                cmdLine.unexpectedArgument();
             }
         }
         if (options.version) {

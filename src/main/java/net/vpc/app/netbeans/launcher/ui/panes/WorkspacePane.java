@@ -54,7 +54,7 @@ public class WorkspacePane extends AppPane {
     private Comp3 compact;
     private Comp3 nonCompact;
     private EditType editMode = EditType.EDIT;
-    private NetbeansWorkspace currWorkspace = new NetbeansWorkspace();
+//    private NetbeansWorkspace currWorkspace = new NetbeansWorkspace();
     private NetbeansWorkspace lastWorkspace = new NetbeansWorkspace();
     ItemListener updateGroupChangeListener = (ItemEvent e) -> {
         if (e.getStateChange() == ItemEvent.SELECTED) {
