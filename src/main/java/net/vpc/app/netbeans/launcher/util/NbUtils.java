@@ -10,12 +10,12 @@ import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.beans.PropertyChangeSupport;
 import java.io.*;
 import java.net.URL;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -24,13 +24,12 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 import net.vpc.app.netbeans.launcher.model.NbOsConfig;
-import net.vpc.app.netbeans.launcher.model.NetbeansInstallation;
 import net.vpc.app.netbeans.launcher.model.NetbeansWorkspace;
 import net.vpc.app.netbeans.launcher.ui.utils.CachedValue;
 import net.vpc.app.nuts.NutsApplicationContext;
-import net.vpc.app.nuts.NutsCommandLine;
 
 /**
  * @author vpc
@@ -46,8 +45,7 @@ public class NbUtils {
                 "~/programs",
                 "~/Programs",
                 "~/apps",
-                "~/Apps",
-            },
+                "~/Apps",},
             new String[]{
                 "/usr/java",
                 "/usr/lib64/jvm",
@@ -65,8 +63,7 @@ public class NbUtils {
                 "~/programs",
                 "~/Programs",
                 "~/apps",
-                "~/Apps",
-            },
+                "~/Apps",},
             new String[]{
                 NbUtils.coalesce(System.getenv("ProgramFiles"), "C:\\Program Files") + "\\Java",
                 NbUtils.coalesce(System.getenv("ProgramFiles(x86)"), "C:\\Program Files (x86)") + "\\Java",},
@@ -81,8 +78,7 @@ public class NbUtils {
                 "~/programs",
                 "~/Programs",
                 "~/apps",
-                "~/Apps",
-            },
+                "~/Apps",},
             new String[]{
                 "/Library/Java/JavaVirtualMachines",
                 "/System/Library/Frameworks/JavaVM.framework"
@@ -93,6 +89,8 @@ public class NbUtils {
             "java"
     );
 
+    public static final PropertyChangeSupport PROPERTIES = new PropertyChangeSupport(NbUtils.class);
+
     //    public static void main(String[] args) {
 //        try {
 ////            String s = response(new String[]{"/usr/java/jdk1.5.0_22/bin/java", "-version"});
@@ -102,6 +100,11 @@ public class NbUtils {
 //            Logger.getLogger(NbUtils.class.getName()).log(Level.SEVERE, null, ex);
 //        }
 //    }
+    
+    public static void onRunningNbProcessesChanged(Runnable r) {
+            NbUtils.PROPERTIES.addPropertyChangeListener("RunningNbProcessesChanged", (e)->r.run());
+
+    }
     public static boolean isPlatformSupported() {
         return true;//isOsWindows() || isOsLinux() || isOsMac();
     }
@@ -225,7 +228,7 @@ public class NbUtils {
     }
 
     public static final NbOsConfig getNbOsConfig(NutsApplicationContext appContext) {
-        switch (appContext.workspace().config().getOsFamily()){
+        switch (appContext.getWorkspace().config().getOsFamily()) {
             case UNIX:
             case LINUX:
                 return NbUtils.LINUX_CONFIG;
@@ -439,11 +442,18 @@ public class NbUtils {
             unzip(zis, outputFolder, options);
         }
     }
+    private static NbProcess[] _last_getRunning = null;
 
     public static NbProcess[] getRunning(NutsApplicationContext ctx) {
-        return ctx.getWorkspace().io().ps().type("java").getResultList()
+        NbProcess[] aa = ctx.getWorkspace().io().ps().type("java").getResultList()
                 .stream().filter((p) -> p.getName().equals("org.netbeans.Main"))
-                .map(x -> new NbProcess(ctx.workspace(),x)).toArray(NbProcess[]::new);
+                .map(x -> new NbProcess(ctx.getWorkspace(), x)).toArray(NbProcess[]::new);
+        Arrays.sort(aa);
+        if (_last_getRunning == null || !Arrays.equals(aa, _last_getRunning)) {
+            _last_getRunning = aa;
+            PROPERTIES.firePropertyChange("RunningNbProcessesChanged", false, true);
+        }
+        return aa;
     }
 
     private static CachedValue<NbProcess[]> CACHED_PROCESSES;
@@ -564,4 +574,19 @@ public class NbUtils {
 
     }
 
+    public static <T> int compare(T a, T b, Comparator<? super T> c) {
+        if (a == b) {
+            return 0;
+        }
+        if (a == null) {
+            return -1;
+        }
+        if (b == null) {
+            return 1;
+        }
+        if (c == null) {
+            return ((Comparable) a).compareTo(b);
+        }
+        return c.compare(a, b);
+    }
 }

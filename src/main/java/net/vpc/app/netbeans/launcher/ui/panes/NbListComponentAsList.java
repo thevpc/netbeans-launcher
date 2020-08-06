@@ -4,13 +4,8 @@ import net.vpc.app.netbeans.launcher.model.NetbeansBinaryLink;
 import net.vpc.app.netbeans.launcher.model.NetbeansInstallation;
 import net.vpc.app.netbeans.launcher.model.NetbeansInstallationStore;
 import net.vpc.app.netbeans.launcher.ui.MainWindowSwing;
-import net.vpc.app.netbeans.launcher.ui.utils.SwingUtils2;
 import net.vpc.app.netbeans.launcher.util.JlistToStringer;
 
-import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import net.vpc.app.netbeans.launcher.ui.utils.CatalogComponent;
 import net.vpc.app.netbeans.launcher.ui.utils.ListComponent;
 

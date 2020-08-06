@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import net.vpc.app.netbeans.launcher.model.NetbeansBinaryLink;
 import net.vpc.app.netbeans.launcher.model.NetbeansInstallation;
-import net.vpc.app.netbeans.launcher.model.NetbeansWorkspace;
 import net.vpc.app.netbeans.launcher.ui.AppPaneType;
 import net.vpc.app.netbeans.launcher.ui.MainWindowSwing;
 import net.vpc.app.netbeans.launcher.util.SwingWorker;
@@ -119,16 +118,26 @@ public abstract class NbListComponent {
             ws.setSelectedWorkspace((NetbeansInstallation) v);
         }
     }
-
+    private String extractUniformVersion(String version){
+        if(version==null){
+            return null;
+        }
+        int e = version.indexOf('-');
+        if(e>=0){
+            return version.substring(0,e);
+        }
+        return version;
+    }
+    
     public NetbeansLocation[] load() {
         java.util.List<NetbeansLocation> rr = new ArrayList<>();
         Set<String> versions = new TreeSet<>();
         for (NetbeansInstallation netbeansInstallation : win.getConfigService().getAllNb()) {
             rr.add(netbeansInstallation);
-            versions.add(netbeansInstallation.getVersion());
+            versions.add(extractUniformVersion(netbeansInstallation.getVersion()));
         }
         for (NetbeansBinaryLink netbeansBinaryLink : win.getConfigService().searchRemoteInstallableNbBinaries()) {
-            if (!versions.contains(netbeansBinaryLink.getVersion())) {
+            if (!versions.contains(extractUniformVersion(netbeansBinaryLink.getVersion()))) {
                 rr.add(netbeansBinaryLink);
             }
         }

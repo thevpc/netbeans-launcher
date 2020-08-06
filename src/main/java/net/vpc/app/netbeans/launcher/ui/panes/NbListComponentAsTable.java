@@ -1,5 +1,6 @@
 package net.vpc.app.netbeans.launcher.ui.panes;
 
+import java.awt.Component;
 import net.vpc.app.netbeans.launcher.model.NetbeansBinaryLink;
 import net.vpc.app.netbeans.launcher.model.NetbeansInstallation;
 import net.vpc.app.netbeans.launcher.model.NetbeansInstallationStore;
@@ -9,6 +10,9 @@ import net.vpc.app.netbeans.launcher.ui.utils.ObjectTableModel;
 import net.vpc.app.netbeans.launcher.util.JlistToStringer;
 
 import java.util.List;
+import javax.swing.JLabel;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
 import net.vpc.app.netbeans.launcher.ui.utils.CatalogComponent;
 import net.vpc.app.netbeans.launcher.ui.utils.TableComponent;
 
@@ -34,8 +38,9 @@ public class NbListComponentAsTable extends NbListComponent {
         super(win,_onRequiredUpdateButtonStatuses);
     }
 
+    @Override
     protected CatalogComponent createCatalog() {
-        return new TableComponent().setColumns(new ObjectTableModel.NamedColumns<NetbeansLocation>(
+        TableComponent tab = new TableComponent().setColumns(new ObjectTableModel.NamedColumns<NetbeansLocation>(
                 new String[]{"Name", "Status"}
         ) {
             @Override
@@ -85,7 +90,29 @@ public class NbListComponentAsTable extends NbListComponent {
                 }
                 return nbLinkStringer.toString(m, value);
             }
-        }.setColumnSizes(new float[]{1,2}));
+        }.setColumnSizes(new float[]{1,1.5f}));
+        tab.getTable().getColumnModel().getColumn(1).setCellRenderer(new DefaultTableCellRenderer() {
+                @Override
+                public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                    JLabel label = (JLabel)super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                    String s = String.valueOf(value);
+                    if("Not Installed".equals(s)){
+                        label.setToolTipText("Double click to install");
+                    }else{
+                        label.setToolTipText(null);
+                    }
+                    return label;
+                }
+            });
+        tab.getTable().getColumnModel().getColumn(0).setCellRenderer(new DefaultTableCellRenderer() {
+                @Override
+                public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                    JLabel label = (JLabel)super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                    setIcon(win.getToolkit().createIcon("anb", win.isCompact()));
+                    return label;
+                }
+            });
+        return tab;
 
     }
 

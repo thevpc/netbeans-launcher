@@ -22,7 +22,6 @@ import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 
 import net.vpc.app.netbeans.launcher.util.NbUtils;
 import net.vpc.app.nuts.NutsExecutionException;
@@ -271,7 +270,6 @@ public class SwingToolkit {
         c.setVisible(visible);
     }
 
-
     public void updateList(JList list, Object[] values, Equalizer e, Comparator comp) {
         Equalizer e2 = new Equalizer() {
             @Override
@@ -364,7 +362,7 @@ public class SwingToolkit {
             }
         }
         table.setValues(newVals);
-        if (okIndex > 0) {
+        if (okIndex >= 0) {
             table.setSelectedIndex(okIndex);
         }
     }
@@ -390,6 +388,10 @@ public class SwingToolkit {
         } else {
             return createIconButton(icon, tooltip, action, true);
         }
+    }
+
+    public ImageIcon createIcon(String icon, boolean compact) {
+        return SwingUtils2.loadIcon(icon + ".png", compact ? 16 : 32);
     }
 
     public JComponent createIconButton(String icon, String tooltip, ButtonAction action, boolean compact) {

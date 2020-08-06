@@ -5,8 +5,8 @@
  */
 package net.vpc.app.netbeans.launcher.ui.panes;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -14,12 +14,12 @@ import java.io.File;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTable;
 import javax.swing.event.ChangeEvent;
+import javax.swing.table.DefaultTableCellRenderer;
 
-import net.vpc.app.netbeans.launcher.model.NetbeansBinaryLink;
 import net.vpc.app.netbeans.launcher.model.NetbeansInstallation;
 import net.vpc.app.netbeans.launcher.model.NetbeansInstallationStore;
 import net.vpc.app.netbeans.launcher.model.NetbeansLocation;
@@ -87,7 +87,15 @@ public class SettingsPane extends AppPane {
                     }
                     return "";
                 }
-            }.setColumnSizes(new float[]{2, 5}));
+            }.setColumnSizes(new float[]{3, 5}));
+            ((TableComponent) jdkListView).getTable().getColumnModel().getColumn(0).setCellRenderer(new DefaultTableCellRenderer() {
+                @Override
+                public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                    JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                    setIcon(win.getToolkit().createIcon("java", win.isCompact()));
+                    return label;
+                }
+            });
         }
         jdkListView.addListSelectionListener((e) -> {
             onRequiredUpdateButtonStatuses();
@@ -355,6 +363,8 @@ public class SettingsPane extends AppPane {
         c.tabbedPane.addChangeListener((ChangeEvent e) -> {
             onRequiredUpdateButtonStatuses();
         });
+//        c.tabbedPane.setIconAt(0, toolkit.createIcon("anb", win.isCompact()));
+//        c.tabbedPane.setIconAt(1, toolkit.createIcon("java", win.isCompact()));
         c.main = c.tabbedPane;
         return c;
     }

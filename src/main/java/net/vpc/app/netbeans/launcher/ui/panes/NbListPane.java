@@ -143,6 +143,7 @@ public class NbListPane extends AppPane {
         }
         if (c.workspacesListView instanceof TableComponent) {
             TableComponent a = (TableComponent) c.workspacesListView;
+            NbUtils.onRunningNbProcessesChanged(() -> SwingUtilities.invokeLater(this::updateList));
             a.setColumns(new ObjectTableModel.NamedColumns<NetbeansWorkspace>(new String[]{"Workspace", "Since", "Times"}) {
                 @Override
                 public Object getValueAt(int row, String column, NetbeansWorkspace ws) {

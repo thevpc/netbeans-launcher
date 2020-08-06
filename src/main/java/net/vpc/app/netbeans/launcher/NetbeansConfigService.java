@@ -141,23 +141,23 @@ public class NetbeansConfigService {
     }
 
     public NetbeansBinaryLink[] searchRemoteInstallableNbBinaries() {
-        NetbeansBinaryLink[] all = appContext.workspace().json().parse(getClass().getResource("/net/vpc/app/netbeans/launcher/binaries.json"), NetbeansBinaryLink[].class);
+        NetbeansBinaryLink[] all = appContext.getWorkspace().json().parse(getClass().getResource("/net/vpc/app/netbeans/launcher/binaries.json"), NetbeansBinaryLink[].class);
         Set<String> locallyAvailable = Arrays.stream(getAllNb()).map(NetbeansInstallation::getVersion).collect(Collectors.toSet());
         return Arrays.stream(all).filter(x -> !locallyAvailable.contains(x.getVersion())).sorted(new Comparator<NetbeansBinaryLink>() {
             @Override
             public int compare(NetbeansBinaryLink o1, NetbeansBinaryLink o2) {
-                return -appContext.workspace().version().parse(o1.getVersion())
+                return -appContext.getWorkspace().version().parse(o1.getVersion())
                         .compareTo(o2.getVersion());
             }
         }).toArray(NetbeansBinaryLink[]::new);
     }
 
     public NetbeansBinaryLink[] searchRemoteNbBinaries() {
-        NetbeansBinaryLink[] all = appContext.workspace().json().parse(getClass().getResource("/net/vpc/app/netbeans/launcher/binaries.json"), NetbeansBinaryLink[].class);
+        NetbeansBinaryLink[] all = appContext.getWorkspace().json().parse(getClass().getResource("/net/vpc/app/netbeans/launcher/binaries.json"), NetbeansBinaryLink[].class);
         return Arrays.stream(all).sorted(new Comparator<NetbeansBinaryLink>() {
             @Override
             public int compare(NetbeansBinaryLink o1, NetbeansBinaryLink o2) {
-                return -appContext.workspace().version().parse(o1.getVersion())
+                return -appContext.getWorkspace().version().parse(o1.getVersion())
                         .compareTo(o2.getVersion());
             }
         }).toArray(NetbeansBinaryLink[]::new);
@@ -219,7 +219,7 @@ public class NetbeansConfigService {
     }
 
     public NutsSdkLocation detectJdk(String path) {
-        return appContext.workspace().config().resolveSdkLocation("java", Paths.get(path), null, appContext.session());
+        return appContext.getWorkspace().config().resolveSdkLocation("java", Paths.get(path), null, appContext.getSession());
     }
 
     //    public JdkLocation addJdkLocation(String path, boolean registerNew) {
@@ -855,27 +855,28 @@ public class NetbeansConfigService {
 
     public NutsExecCommand run(NetbeansWorkspace w) throws IOException {
         String[] cmd = createRunCommand(w);
-        return appContext.workspace().exec()
+        return appContext.getWorkspace().exec()
                 .userCmd()
-                .directory(w.getPath())
-                .command(cmd)
-                .redirectErrorStream()
+                .setDirectory(w.getPath())
+                .addCommand(cmd)
+                .setRedirectErrorStream(true)
                 .grabOutputString()
-                .failFast()
+                .setFailFast(true)
                 .run();
     }
 
     public void saveFile() {
-        appContext.workspace().json().value(config).print(appContext.getConfigFolder().resolve("config.json"));
+        appContext.getWorkspace().json().value(config).print(appContext.getConfigFolder().resolve("config.json"));
     }
 
     public void loadFile() {
         boolean loaded = false;
         Path validFile = appContext.getConfigFolder().resolve("config.json");
         boolean foundCurrVersionFile=false;
+        NutsWorkspace workspace = appContext.getWorkspace();
         if (Files.isRegularFile(validFile)) {
             try {
-                config = (NetbeansConfig) appContext.workspace().json().parse(validFile, NetbeansConfig.class);
+                config = (NetbeansConfig) workspace.json().parse(validFile, NetbeansConfig.class);
                 foundCurrVersionFile=config!=null;
             } catch (Exception e) {
                 System.err.println("Unable to load config from " + validFile.toString());
@@ -911,14 +912,14 @@ public class NetbeansConfigService {
             loaded = true;
         }
         if(!foundCurrVersionFile) {
-            List<NutsId> olderVersions = appContext.workspace().search().installed().id(appContext.getAppId().builder().setVersion("").build()).getResultIds().stream().sorted(
+            List<NutsId> olderVersions = workspace.search().installed().addId(appContext.getAppId().builder().setVersion("").build()).getResultIds().stream().sorted(
                     (a, b) -> b.getVersion().compareTo(a.getVersion())
             ).filter(x -> x.getVersion().compareTo(appContext.getAppId().getVersion()) < 0).collect(Collectors.toList());
             for (NutsId olderVersion : olderVersions) {
-                Path validFile2 = appContext.workspace().config().getStoreLocation(olderVersion, NutsStoreLocation.CONFIG).resolve("config.json");
+                Path validFile2 = workspace.config().getStoreLocation(olderVersion, NutsStoreLocation.CONFIG).resolve("config.json");
                 if (Files.isRegularFile(validFile2)) {
                     try {
-                        config = (NetbeansConfig) appContext.workspace().json().parse(validFile2, NetbeansConfig.class);
+                        config = (NetbeansConfig) workspace.json().parse(validFile2, NetbeansConfig.class);
                     } catch (Exception e) {
                         System.err.println("Unable to load config from " + validFile2.toString());
                         break;
@@ -935,7 +936,7 @@ public class NetbeansConfigService {
             Path oldFile = Paths.get(System.getProperty("user.home")).resolve(".java/apps/net/vpc/toolbox/netbeans-launcher.json");
             if (Files.isRegularFile(oldFile)) {
                 try {
-                    config = NetbeansConfigLoader11.load(oldFile, appContext.workspace());
+                    config = NetbeansConfigLoader11.load(oldFile, workspace);
                     loaded = true;
                     saveFile();
                 } catch (Exception e) {
@@ -1069,7 +1070,7 @@ public class NetbeansConfigService {
     }
 
     public NetbeansInstallation installNetbeansBinary(NetbeansBinaryLink i) {
-        NutsWorkspace ws = appContext.workspace();
+        NutsWorkspace ws = appContext.getWorkspace();
         Path zipTo = appContext.getSharedAppsFolder()
                 .resolve("netbeans")
                 .resolve("netbeans-" + i.getVersion() + ".zip");

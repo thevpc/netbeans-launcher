@@ -72,10 +72,12 @@ public class TableComponent implements CatalogComponent {
         return table;
     }
 
+    @Override
     public Equalizer getEqualizer() {
         return equalizer;
     }
 
+    @Override
     public void setEqualizer(Equalizer equalizer) {
         this.equalizer = equalizer;
     }

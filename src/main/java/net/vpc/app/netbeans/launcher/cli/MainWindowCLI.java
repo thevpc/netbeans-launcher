@@ -13,9 +13,9 @@ import net.vpc.app.nuts.NutsApplicationContext;
  * @author vpc
  */
 public class MainWindowCLI {
-    private NetbeansConfigService configService;
-    private NutsApplicationContext appContext;
-    private NbOptions options;
+    private final NetbeansConfigService configService;
+    private final NutsApplicationContext appContext;
+    private final NbOptions options;
 
     public static void launch(NutsApplicationContext appContext, NbOptions options) {
         MainWindowCLI cli = new MainWindowCLI(appContext, options);
@@ -23,7 +23,7 @@ public class MainWindowCLI {
     }
 
     private void run() {
-        appContext.session().out().println("CLI mode is not yet supported. Ignoring command");
+        appContext.getSession().out().println("CLI mode is not yet supported. Ignoring command");
     }
 
     public MainWindowCLI(NutsApplicationContext appContext, NbOptions options) {
