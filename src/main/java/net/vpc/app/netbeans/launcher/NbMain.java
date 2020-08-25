@@ -29,17 +29,7 @@ public class NbMain extends NutsApplication {
         NutsWorkspace ws = applicationContext.getWorkspace();
         NutsSession session = applicationContext.getSession();
         NutsId appId = applicationContext.getAppId();
-        NutsWorkspaceCommandAlias a = ws.config().findCommandAlias(preferredAlias, session);
-        if (a != null && a.getCommand() != null && a.getCommand().length > 0) {
-            NutsId i = ws.id().parse(a.getCommand()[0]);
-            if (i != null
-                    && (i.getShortName().equals(appId.getArtifactId())
-                    || (i.getShortName().equals(appId.getShortName())))
-                    && a.getOwner() != null && a.getOwner().getShortName().equals(appId.getShortName())) {
-                return a;
-            }
-        }
-        return null;
+        return ws.config().findCommandAlias(preferredAlias, appId,appId,session);
     }
 
     @Override
