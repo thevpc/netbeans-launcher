@@ -321,10 +321,12 @@ public class MainWindowSwing {
                     @Override
                     public void run() {
                         try {
+                            NbUtils.setTempRunning(w,true);
                             configService.run(w);
                         } catch (Exception ex) {
                             toolkit.showError(toolkit.msg("App.RunWorkspace.Error"), ex);
                         } finally {
+                            NbUtils.setTempRunning(w,false);
                             NbListPane.setStopped(getAppContext(), w);
                             onRefreshHeader();
                             updateList();

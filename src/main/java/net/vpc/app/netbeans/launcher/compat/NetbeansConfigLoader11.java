@@ -42,7 +42,7 @@ public class NetbeansConfigLoader11 {
     }
 
     public static NetbeansConfig load(Path file, NutsWorkspace ws) {
-        NutsJsonFormat json = ws.json();
+        NutsJsonFormat json = ws.formats().json();
         Map o = json.parse(file, Map.class);
         visit(o);
         StringWriter sw = new StringWriter();

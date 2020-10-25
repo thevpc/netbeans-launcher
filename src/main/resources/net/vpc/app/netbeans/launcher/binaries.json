@@ -1,37 +1,56 @@
 [
   {
+    "version": "12.1",
+    "packaging": "zip",
+    "url": "https://archive.apache.org/dist/netbeans/netbeans/12.1/netbeans-12.1-bin.zip",
+    "releaseDate": "2020-09-13T21:26:00Z"
+  },
+  {
     "version": "12.0",
     "packaging": "zip",
-    "url": "https://archive.apache.org/dist/netbeans/netbeans/12.0/netbeans-12.0-bin.zip"
+    "url": "https://archive.apache.org/dist/netbeans/netbeans/12.0/netbeans-12.0-bin.zip",
+    "releaseDate": "2020-06-09T15:53:00Z"
   },
   {
     "version": "11.3",
     "packaging": "zip",
-    "url": "https://archive.apache.org/dist/netbeans/netbeans/11.3/netbeans-11.3-bin.zip"
+    "url": "https://archive.apache.org/dist/netbeans/netbeans/11.3/netbeans-11.3-bin.zip",
+    "releaseDate": "2020-03-03T07:51:00Z"
   },
   {
     "version": "11.2",
     "packaging": "zip",
-    "url": "https://archive.apache.org/dist/netbeans/netbeans/11.2/netbeans-11.2-bin.zip"
+    "url": "https://archive.apache.org/dist/netbeans/netbeans/11.2/netbeans-11.2-bin.zip",
+    "releaseDate": "2019-10-31T11:29:00Z"
   },
   {
     "version": "11.1",
     "packaging": "zip",
-    "url": "https://archive.apache.org/dist/netbeans/netbeans/11.1/netbeans-11.1-bin.zip"
+    "url": "https://archive.apache.org/dist/netbeans/netbeans/11.1/netbeans-11.1-bin.zip",
+    "releaseDate": "2019-12-01T10:29:00Z"
   },
   {
     "version": "11.0",
     "packaging": "zip",
-    "url": "https://archive.apache.org/dist/incubator/netbeans/incubating-netbeans/incubating-11.0/incubating-netbeans-11.0-bin.zip"
+    "url": "https://archive.apache.org/dist/incubator/netbeans/incubating-netbeans/incubating-11.0/incubating-netbeans-11.0-bin.zip",
+    "releaseDate": "2019-07-27T01:54:00Z"
   },
   {
     "version": "10.0",
     "packaging": "zip",
-    "url": "https://archive.apache.org/dist/incubator/netbeans/incubating-netbeans/incubating-10.0/incubating-netbeans-10.0-bin.zip"
+    "url": "https://archive.apache.org/dist/incubator/netbeans/incubating-netbeans/incubating-10.0/incubating-netbeans-10.0-bin.zip",
+    "releaseDate": "2018-12-25T20:35:00Z"
   },
   {
     "version": "9.0",
     "packaging": "zip",
-    "url": "https://archive.apache.org/dist/incubator/netbeans/incubating-netbeans-java/incubating-9.0/incubating-netbeans-java-9.0-bin.zip"
+    "url": "https://archive.apache.org/dist/incubator/netbeans/incubating-netbeans-java/incubating-9.0/incubating-netbeans-java-9.0-bin.zip",
+    "releaseDate": "2018-07-29T05:25:00Z"
+  },
+  {
+    "version": "8.2",
+    "packaging": "zip",
+    "url": "https://download.netbeans.org/netbeans/8.2/final/zip/netbeans-8.2-201609300101.zip",
+    "releaseDate": "2016-09-30T01:01:00Z"
   }
 ]

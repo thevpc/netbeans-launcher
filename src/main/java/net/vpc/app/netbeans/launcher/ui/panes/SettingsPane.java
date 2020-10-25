@@ -178,7 +178,7 @@ public class SettingsPane extends AppPane {
                                 configService.addJdk(loc);
                                 updateJdkList();
                             } else {
-                                toolkit.showError(toolkit.msg("App.JdkInstalltion.Error"));
+                                toolkit.showError(toolkit.msg("App.JdkInstallation.Error"));
                             }
                         }
                     }
@@ -206,7 +206,7 @@ public class SettingsPane extends AppPane {
                                 }
 //                                updateNbList();
                             } else {
-                                toolkit.showError(toolkit.msg("App.NbInstalltion.Error"));
+                                toolkit.showError(toolkit.msg("App.NbInstallation.Error"));
                             }
                         }
                     }

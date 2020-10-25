@@ -6,6 +6,7 @@
 package net.vpc.app.netbeans.launcher.model;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.Objects;
 
 /**
@@ -17,6 +18,10 @@ public class NetbeansInstallation  extends NetbeansLocation implements Serializa
     public static final long serialVersionUID = 1;
     private String path;
     private String version;
+
+    private String fullVersion;
+
+    private Instant releaseDate;
     private String name;
     private String userdir;
     private String cachedir;
@@ -103,6 +108,24 @@ public class NetbeansInstallation  extends NetbeansLocation implements Serializa
         return this;
     }
 
+    public String getFullVersion() {
+        return fullVersion;
+    }
+
+    public NetbeansInstallation setFullVersion(String fullVersion) {
+        this.fullVersion = fullVersion;
+        return this;
+    }
+
+    public Instant getReleaseDate() {
+        return releaseDate;
+    }
+
+    public NetbeansInstallation setReleaseDate(Instant releaseDate) {
+        this.releaseDate = releaseDate;
+        return this;
+    }
+
     @Override
     public int hashCode() {
         int hash = 7;
@@ -111,6 +134,8 @@ public class NetbeansInstallation  extends NetbeansLocation implements Serializa
         hash = 29 * hash + Objects.hashCode(this.name);
         hash = 29 * hash + Objects.hashCode(this.options);
         hash = 29 * hash + Objects.hashCode(this.store);
+        hash = 29 * hash + Objects.hashCode(this.fullVersion);
+        hash = 29 * hash + Objects.hashCode(this.fullVersion);
         return hash;
     }
 
@@ -139,6 +164,12 @@ public class NetbeansInstallation  extends NetbeansLocation implements Serializa
             return false;
         }
         if (!Objects.equals(this.options, other.options)) {
+            return false;
+        }
+        if (!Objects.equals(this.fullVersion, other.fullVersion)) {
+            return false;
+        }
+        if (!Objects.equals(this.releaseDate, other.releaseDate)) {
             return false;
         }
         return true;

@@ -13,11 +13,7 @@ import java.awt.event.MouseMotionAdapter;
 import java.beans.PropertyChangeSupport;
 import java.io.*;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
@@ -228,7 +224,7 @@ public class NbUtils {
     }
 
     public static final NbOsConfig getNbOsConfig(NutsApplicationContext appContext) {
-        switch (appContext.getWorkspace().config().getOsFamily()) {
+        switch (appContext.getWorkspace().env().getOsFamily()) {
             case UNIX:
             case LINUX:
                 return NbUtils.LINUX_CONFIG;
@@ -451,22 +447,36 @@ public class NbUtils {
         Arrays.sort(aa);
         if (_last_getRunning == null || !Arrays.equals(aa, _last_getRunning)) {
             _last_getRunning = aa;
+            CACHED_PROCESSES_TEMP.clear();
             PROPERTIES.firePropertyChange("RunningNbProcessesChanged", false, true);
         }
         return aa;
     }
 
     private static CachedValue<NbProcess[]> CACHED_PROCESSES;
+    private static Map<NetbeansWorkspace,Boolean> CACHED_PROCESSES_TEMP=new HashMap<>();
+
+    public static void setTempRunning(NetbeansWorkspace nb, boolean value) {
+        CACHED_PROCESSES_TEMP.put(nb.copy(), value);
+    }
 
     public static boolean isRunningWithCache(NutsApplicationContext ctx, NetbeansWorkspace nb) {
         if (CACHED_PROCESSES == null) {
             CACHED_PROCESSES = new CachedValue<>(() -> getRunning(ctx), 60);
         }
         if (CACHED_PROCESSES.isValid()) {
+            Boolean t = CACHED_PROCESSES_TEMP.get(nb);
+            if(t!=null){
+                return t;
+            }
             NbProcess[] lv = CACHED_PROCESSES.getLastValue();
             return isRunning(nb, lv);
         }
         CACHED_PROCESSES.updateAsync();
+        Boolean t = CACHED_PROCESSES_TEMP.get(nb);
+        if(t!=null){
+            return t;
+        }
         return false;
     }
 

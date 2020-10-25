@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.vpc.app</groupId>
     <artifactId>netbeans-launcher</artifactId>
-    <version>1.2.5</version>
+    <version>1.2.6</version>
     <packaging>jar</packaging>
     <name>net.vpc.app.netbeans-launcher</name>
 
@@ -48,7 +48,7 @@
         <dependency>
             <groupId>net.vpc.app.nuts</groupId>
             <artifactId>nuts</artifactId>
-            <version>0.7.1</version>
+            <version>0.8.0</version>
         </dependency>
         <dependency>
             <groupId>net.vpc.common</groupId>

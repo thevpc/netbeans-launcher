@@ -128,14 +128,14 @@ public class NbListPane extends AppPane {
 //                    } else {
 //                        setBackground(MainWindowSwingHelper.color("ffdb9d"));
 //                    }
-                        setIcon(SwingUtils2.loadIcon("running.png", win.isCompact() ? 16 : 32));
+                        setIcon(SwingUtils2.loadIcon("anb.png", win.isCompact() ? 16 : 32));
                     } else {
                         if (!isSelected) {
                             setBackground(index % 2 == 0 ? Color.WHITE : SwingUtils2.color("f9f9f9"));
                         } else {
                             setBackground(SwingUtils2.color("0096c9"));
                         }
-                        setIcon(SwingUtils2.loadIcon("blank.png", win.isCompact() ? 16 : 32));
+                        setIcon(SwingUtils2.loadIcon("anbg.png", win.isCompact() ? 16 : 32));
                     }
                     return this;
                 }
@@ -174,14 +174,14 @@ public class NbListPane extends AppPane {
 //                        } else {
 //                            setBackground(SwingUtils2.color("0096c9"));
 //                        }
-                        setIcon(SwingUtils2.loadIcon("running.png", win.isCompact() ? 24 : 48));
+                        setIcon(SwingUtils2.loadIcon("anb.png", win.isCompact() ? 24 : 48));
                     } else {
 //                        if (!isSelected) {
 //                            setBackground(index % 2 == 0 ? Color.WHITE : SwingUtils2.color("f9f9f9"));
 //                        } else {
 //                            setBackground(SwingUtils2.color("0096c9"));
 //                        }
-                        setIcon(SwingUtils2.loadIcon("blank.png", win.isCompact() ? 24 : 48));
+                        setIcon(SwingUtils2.loadIcon("anbg.png", win.isCompact() ? 24 : 48));
                     }
                     return this;
                 }

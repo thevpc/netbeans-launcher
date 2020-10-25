@@ -6,6 +6,7 @@
 package net.vpc.app.netbeans.launcher.model;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.Objects;
 
 /**
@@ -16,5 +17,6 @@ public abstract class NetbeansLocation implements Serializable {
     public static final long serialVersionUID = 1;
 
     public abstract String getVersion();
+    public abstract Instant getReleaseDate();
 
 }

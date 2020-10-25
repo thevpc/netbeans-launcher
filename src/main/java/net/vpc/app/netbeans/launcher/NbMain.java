@@ -29,7 +29,7 @@ public class NbMain extends NutsApplication {
         NutsWorkspace ws = applicationContext.getWorkspace();
         NutsSession session = applicationContext.getSession();
         NutsId appId = applicationContext.getAppId();
-        return ws.config().findCommandAlias(preferredAlias, appId,appId,session);
+        return ws.aliases().find(preferredAlias, appId,appId,session);
     }
 
     @Override
@@ -39,7 +39,7 @@ public class NbMain extends NutsApplication {
         NutsSession session = applicationContext.getSession();
         NutsWorkspaceCommandAlias a = findDefaultAlias(applicationContext);
         if (a != null) {
-            ws.config().removeCommandAlias(preferredAlias, new NutsRemoveOptions().setSession(session));
+            ws.aliases().remove(preferredAlias, new NutsRemoveOptions().setSession(session));
         }
     }
 
@@ -58,11 +58,11 @@ public class NbMain extends NutsApplication {
         boolean add = false;
         if (a != null) {
             update = true;
-        } else if (ws.config().findCommandAlias(preferredAlias, session) == null) {
+        } else if (ws.aliases().find(preferredAlias, session) == null) {
             add = true;
         }
         if (update || add) {
-            ws.config().addCommandAlias(new NutsCommandAliasConfig()
+            ws.aliases().add(new NutsCommandAliasConfig()
                     .setName(preferredAlias)
                     .setOwner(applicationContext.getAppId())
                     .setCommand(applicationContext.getAppId().getShortName()),

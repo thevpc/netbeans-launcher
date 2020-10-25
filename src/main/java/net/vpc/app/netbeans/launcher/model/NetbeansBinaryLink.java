@@ -1,9 +1,12 @@
 package net.vpc.app.netbeans.launcher.model;
 
+import java.time.Instant;
+
 public class NetbeansBinaryLink extends NetbeansLocation{
     private String version;
     private String packaging;
     private String url;
+    private Instant releaseDate;
 
     public String getVersion() {
         return version;
@@ -29,6 +32,16 @@ public class NetbeansBinaryLink extends NetbeansLocation{
 
     public NetbeansBinaryLink setUrl(String url) {
         this.url = url;
+        return this;
+    }
+
+    @Override
+    public Instant getReleaseDate() {
+        return releaseDate;
+    }
+
+    public NetbeansBinaryLink setReleaseDate(Instant releaseDate) {
+        this.releaseDate = releaseDate;
         return this;
     }
 
