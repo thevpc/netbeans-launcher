@@ -164,7 +164,7 @@ public class NetbeansConfigService {
     }
 
     public NetbeansBinaryLink[] searchRemoteInstallableNbBinaries() {
-        NetbeansBinaryLink[] all = appContext.getWorkspace().formats().json().parse(getClass().getResource("/net/thevpc/app/netbeans/launcher/binaries.json"), NetbeansBinaryLink[].class);
+        NetbeansBinaryLink[] all = appContext.getWorkspace().formats().json().parse(getClass().getResource("/net/thevpc/netbeans/launcher/binaries.json"), NetbeansBinaryLink[].class);
         Set<String> locallyAvailable = Arrays.stream(getAllNb()).map(NetbeansInstallation::getVersion).collect(Collectors.toSet());
         return Arrays.stream(all).filter(x -> !locallyAvailable.contains(x.getVersion())).sorted(new Comparator<NetbeansBinaryLink>() {
             @Override
@@ -176,7 +176,7 @@ public class NetbeansConfigService {
     }
 
     public NetbeansBinaryLink[] searchRemoteNbBinaries() {
-        NetbeansBinaryLink[] all = appContext.getWorkspace().formats().json().parse(getClass().getResource("/net/thevpc/app/netbeans/launcher/binaries.json"), NetbeansBinaryLink[].class);
+        NetbeansBinaryLink[] all = appContext.getWorkspace().formats().json().parse(getClass().getResource("/net/thevpc/netbeans/launcher/binaries.json"), NetbeansBinaryLink[].class);
         return Arrays.stream(all).sorted(new Comparator<NetbeansBinaryLink>() {
             @Override
             public int compare(NetbeansBinaryLink o1, NetbeansBinaryLink o2) {
