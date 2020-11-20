@@ -8,9 +8,6 @@ package net.thevpc.netbeans.launcher;
 import net.thevpc.netbeans.launcher.model.*;
 import net.thevpc.netbeans.launcher.util.NbUtils;
 import net.thevpc.nuts.*;
-import net.thevpc.netbeans.launcher.compat.NetbeansConfigLoader11;
-import net.thevpc.netbeans.launcher.model.*;
-import net.thevpc.nuts.*;
 
 import java.io.*;
 import java.nio.file.*;
@@ -164,7 +161,7 @@ public class NetbeansConfigService {
     }
 
     public NetbeansBinaryLink[] searchRemoteInstallableNbBinaries() {
-        NetbeansBinaryLink[] all = appContext.getWorkspace().formats().json().parse(getClass().getResource("/net/thevpc/netbeans/launcher/binaries.json"), NetbeansBinaryLink[].class);
+        NetbeansBinaryLink[] all = appContext.getWorkspace().formats().element().setContentType(NutsContentType.JSON).parse(getClass().getResource("/net/thevpc/netbeans/launcher/binaries.json"), NetbeansBinaryLink[].class);
         Set<String> locallyAvailable = Arrays.stream(getAllNb()).map(NetbeansInstallation::getVersion).collect(Collectors.toSet());
         return Arrays.stream(all).filter(x -> !locallyAvailable.contains(x.getVersion())).sorted(new Comparator<NetbeansBinaryLink>() {
             @Override
@@ -176,7 +173,7 @@ public class NetbeansConfigService {
     }
 
     public NetbeansBinaryLink[] searchRemoteNbBinaries() {
-        NetbeansBinaryLink[] all = appContext.getWorkspace().formats().json().parse(getClass().getResource("/net/thevpc/netbeans/launcher/binaries.json"), NetbeansBinaryLink[].class);
+        NetbeansBinaryLink[] all = appContext.getWorkspace().formats().element().setContentType(NutsContentType.JSON).parse(getClass().getResource("/net/thevpc/netbeans/launcher/binaries.json"), NetbeansBinaryLink[].class);
         return Arrays.stream(all).sorted(new Comparator<NetbeansBinaryLink>() {
             @Override
             public int compare(NetbeansBinaryLink o1, NetbeansBinaryLink o2) {
@@ -855,7 +852,7 @@ public class NetbeansConfigService {
     }
 
     public void saveFile() {
-        appContext.getWorkspace().formats().json().value(config).print(appContext.getConfigFolder().resolve("config.json"));
+        appContext.getWorkspace().formats().element().setContentType(NutsContentType.JSON).setValue(config).print(appContext.getConfigFolder().resolve("config.json"));
     }
 
     public void loadFile() {
@@ -865,7 +862,7 @@ public class NetbeansConfigService {
         NutsWorkspace workspace = appContext.getWorkspace();
         if (Files.isRegularFile(validFile)) {
             try {
-                config = (NetbeansConfig) workspace.formats().json().parse(validFile, NetbeansConfig.class);
+                config = (NetbeansConfig) workspace.formats().element().setContentType(NutsContentType.JSON).parse(validFile, NetbeansConfig.class);
                 foundCurrVersionFile = config != null;
             } catch (Exception e) {
                 System.err.println("Unable to load config from " + validFile.toString());
@@ -908,7 +905,7 @@ public class NetbeansConfigService {
                 Path validFile2 = workspace.locations().getStoreLocation(olderVersion, NutsStoreLocation.CONFIG).resolve("config.json");
                 if (Files.isRegularFile(validFile2)) {
                     try {
-                        config = (NetbeansConfig) workspace.formats().json().parse(validFile2, NetbeansConfig.class);
+                        config = (NetbeansConfig) workspace.formats().element().setContentType(NutsContentType.JSON).parse(validFile2, NetbeansConfig.class);
                     } catch (Exception e) {
                         System.err.println("Unable to load config from " + validFile2.toString());
                         break;
