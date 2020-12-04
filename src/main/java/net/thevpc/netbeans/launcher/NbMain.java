@@ -68,7 +68,7 @@ public class NbMain extends NutsApplication {
                     .setName(preferredAlias)
                     .setOwner(applicationContext.getAppId())
                     .setCommand(applicationContext.getAppId().getShortName()),
-                    new NutsAddOptions().setSession(update ? session.copy().setYes(true) : session));
+                    new NutsAddOptions().setSession(update ? session.copy().setConfirm(NutsConfirmationMode.YES) : session));
         }
     }
 
