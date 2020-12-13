@@ -11,7 +11,7 @@ import javax.swing.JTabbedPane;
 
 /**
  *
- * @author vpc
+ * @author thevpc
  */
 public class NbTheme {
 

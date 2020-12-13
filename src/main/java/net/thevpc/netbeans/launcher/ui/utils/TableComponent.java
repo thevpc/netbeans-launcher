@@ -20,7 +20,7 @@ import javax.swing.event.ListSelectionListener;
 
 /**
  *
- * @author vpc
+ * @author thevpc
  */
 public class TableComponent implements CatalogComponent {
 

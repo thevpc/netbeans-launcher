@@ -7,7 +7,7 @@ package net.thevpc.netbeans.launcher.ui.utils;
 
 /**
  *
- * @author vpc
+ * @author thevpc
  */
 public interface Equalizer {
 

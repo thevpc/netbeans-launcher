@@ -9,7 +9,7 @@ import java.io.Serializable;
 import java.time.Instant;
 
 /**
- * @author vpc
+ * @author thevpc
  */
 public abstract class NetbeansLocation implements Serializable {
 

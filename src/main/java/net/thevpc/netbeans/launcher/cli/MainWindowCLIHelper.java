@@ -7,7 +7,7 @@ package net.thevpc.netbeans.launcher.cli;
 
 /**
  *
- * @author vpc
+ * @author thevpc
  */
 public class MainWindowCLIHelper {
 

@@ -10,7 +10,7 @@ import java.awt.Insets;
 
 /**
  *
- * @author vpc
+ * @author thevpc
  */
 public class Grid extends GridBagConstraints {
 

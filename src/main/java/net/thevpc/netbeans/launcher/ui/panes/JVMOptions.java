@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * @author vpc
+ * @author thevpc
  */
 public class JVMOptions extends AppPane {
     private AppPaneType lastPane;

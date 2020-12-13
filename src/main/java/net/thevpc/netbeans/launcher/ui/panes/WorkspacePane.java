@@ -32,7 +32,7 @@ import net.thevpc.netbeans.launcher.ui.utils.*;
 import net.thevpc.nuts.NutsSdkLocation;
 
 /**
- * @author vpc
+ * @author thevpc
  */
 public class WorkspacePane extends AppPane {
 

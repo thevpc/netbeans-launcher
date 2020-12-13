@@ -15,7 +15,7 @@ import javax.swing.ListModel;
 
 /**
  *
- * @author vpc
+ * @author thevpc
  */
 public abstract class JlistToStringer {
     private int maxLevel;

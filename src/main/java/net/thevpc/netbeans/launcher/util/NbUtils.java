@@ -27,7 +27,7 @@ import net.thevpc.netbeans.launcher.ui.utils.CachedValue;
 import net.thevpc.nuts.NutsApplicationContext;
 
 /**
- * @author vpc
+ * @author thevpc
  */
 public class NbUtils {
 

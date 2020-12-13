@@ -36,7 +36,7 @@ import net.thevpc.netbeans.launcher.ui.utils.ObjectTableModel;
 import net.thevpc.netbeans.launcher.ui.utils.TableComponent;
 
 /**
- * @author vpc
+ * @author thevpc
  */
 public class NbListPane extends AppPane {
 

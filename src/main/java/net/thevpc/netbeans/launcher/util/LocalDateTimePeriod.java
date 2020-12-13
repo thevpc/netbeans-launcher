@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 /**
- * @author vpc
+ * @author thevpc
  */
 public class LocalDateTimePeriod {
 

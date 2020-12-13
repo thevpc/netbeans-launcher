@@ -17,7 +17,7 @@ import net.thevpc.nuts.NutsWorkspace;
 
 /**
  *
- * @author vpc
+ * @author thevpc
  */
 public class JVMOptionsPanel1 extends JPanel {
 

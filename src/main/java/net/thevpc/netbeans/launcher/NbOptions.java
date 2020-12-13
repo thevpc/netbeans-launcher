@@ -7,7 +7,7 @@ package net.thevpc.netbeans.launcher;
 
 /**
  *
- * @author vpc
+ * @author thevpc
  */
 public class NbOptions {
 

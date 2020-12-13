@@ -27,7 +27,7 @@ import net.thevpc.netbeans.launcher.util.NbUtils;
 import net.thevpc.nuts.NutsExecutionException;
 
 /**
- * @author vpc
+ * @author thevpc
  */
 public class SwingToolkit {
 

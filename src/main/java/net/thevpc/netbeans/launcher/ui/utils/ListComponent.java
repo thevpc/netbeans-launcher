@@ -26,7 +26,7 @@ import net.thevpc.netbeans.launcher.util.JlistToStringer;
 
 /**
  *
- * @author vpc
+ * @author thevpc
  */
 public class ListComponent implements CatalogComponent {
 

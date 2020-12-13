@@ -25,7 +25,7 @@ import net.thevpc.netbeans.launcher.ui.utils.SwingUtils2;
 import net.thevpc.netbeans.launcher.util.NbUtils;
 
 /**
- * @author vpc
+ * @author thevpc
  */
 public abstract class AppPane extends JPanel {
     private static class Comps {

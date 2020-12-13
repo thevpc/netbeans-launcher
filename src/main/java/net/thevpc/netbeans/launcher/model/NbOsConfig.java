@@ -7,7 +7,7 @@ package net.thevpc.netbeans.launcher.model;
 
 /**
  *
- * @author vpc
+ * @author thevpc
  */
 public class NbOsConfig {
 

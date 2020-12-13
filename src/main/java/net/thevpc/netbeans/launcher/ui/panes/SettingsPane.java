@@ -39,7 +39,7 @@ import net.thevpc.netbeans.launcher.util.Workers;
 import net.thevpc.nuts.NutsSdkLocation;
 
 /**
- * @author vpc
+ * @author thevpc
  */
 public class SettingsPane extends AppPane {
 

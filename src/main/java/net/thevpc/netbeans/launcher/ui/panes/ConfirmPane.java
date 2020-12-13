@@ -20,7 +20,7 @@ import java.awt.*;
 import java.util.function.Consumer;
 
 /**
- * @author vpc
+ * @author thevpc
  */
 public class ConfirmPane extends AppPane {
     private AppPaneType lastPane;

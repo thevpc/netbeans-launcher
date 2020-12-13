@@ -9,7 +9,7 @@ import java.util.function.Supplier;
 
 /**
  *
- * @author vpc
+ * @author thevpc
  */
 public class CachedValue<T> {
 

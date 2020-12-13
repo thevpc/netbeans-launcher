@@ -10,7 +10,7 @@ import net.thevpc.netbeans.launcher.NbOptions;
 import net.thevpc.nuts.NutsApplicationContext;
 
 /**
- * @author vpc
+ * @author thevpc
  */
 public class MainWindowCLI {
     private final NetbeansConfigService configService;

@@ -6,7 +6,7 @@
 package net.thevpc.netbeans.launcher.ui;
 
 /**
- * @author vpc
+ * @author thevpc
  */
 public enum AppPaneType {
     LIST_WS, EDIT_WS, SETTINGS, JVM_OPTIONS,CONFIRM
