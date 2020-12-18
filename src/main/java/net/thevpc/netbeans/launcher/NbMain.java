@@ -77,7 +77,7 @@ public class NbMain extends NutsApplication {
         PrintStream out = appContext.getSession().out();
         PrintStream err = appContext.getSession().err();
         if (!NbUtils.isPlatformSupported()) {
-            err.println("Platform not supported");
+            err.println("platform not supported");
             if (System.console() == null) {
                 JOptionPane.showInputDialog("Platform not supported");
             }
