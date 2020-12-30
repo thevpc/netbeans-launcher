@@ -239,7 +239,7 @@ public class NetbeansConfigService {
     }
 
     public NutsSdkLocation detectJdk(String path) {
-        return appContext.getWorkspace().sdks().resolve("java", Paths.get(path), null, appContext.getSession());
+        return appContext.getWorkspace().sdks().resolve("java", path, null, appContext.getSession());
     }
 
     //    public JdkLocation addJdkLocation(String path, boolean registerNew) {
@@ -852,12 +852,12 @@ public class NetbeansConfigService {
     }
 
     public void saveFile() {
-        appContext.getWorkspace().formats().element().setContentType(NutsContentType.JSON).setValue(config).print(appContext.getConfigFolder().resolve("config.json"));
+        appContext.getWorkspace().formats().element().setContentType(NutsContentType.JSON).setValue(config).print(Paths.get(appContext.getConfigFolder()).resolve("config.json"));
     }
 
     public void loadFile() {
         boolean loaded = false;
-        Path validFile = appContext.getConfigFolder().resolve("config.json");
+        Path validFile = Paths.get(appContext.getConfigFolder()).resolve("config.json");
         boolean foundCurrVersionFile = false;
         NutsWorkspace workspace = appContext.getWorkspace();
         if (Files.isRegularFile(validFile)) {
@@ -902,7 +902,9 @@ public class NetbeansConfigService {
                     (a, b) -> b.getVersion().compareTo(a.getVersion())
             ).filter(x -> x.getVersion().compareTo(appContext.getAppId().getVersion()) < 0).collect(Collectors.toList());
             for (NutsId olderVersion : olderVersions) {
-                Path validFile2 = workspace.locations().getStoreLocation(olderVersion, NutsStoreLocation.CONFIG).resolve("config.json");
+                Path validFile2 = Paths.get(
+                        workspace.locations().getStoreLocation(olderVersion, NutsStoreLocation.CONFIG)
+                ).resolve("config.json");
                 if (Files.isRegularFile(validFile2)) {
                     try {
                         config = (NetbeansConfig) workspace.formats().element().setContentType(NutsContentType.JSON).parse(validFile2, NetbeansConfig.class);
@@ -1043,10 +1045,10 @@ public class NetbeansConfigService {
 
     public NetbeansInstallation installNetbeansBinary(NetbeansBinaryLink i) {
         NutsWorkspace ws = appContext.getWorkspace();
-        Path zipTo = appContext.getSharedAppsFolder()
+        Path zipTo = Paths.get(appContext.getSharedAppsFolder())
                 .resolve("netbeans")
                 .resolve("netbeans-" + i.getVersion() + ".zip");
-        Path folderTo = appContext.getSharedAppsFolder()
+        Path folderTo = Paths.get(appContext.getSharedAppsFolder())
                 .resolve("netbeans")
                 .resolve("netbeans-" + i.getVersion());
         //if (!Files.exists(zipTo)) {
