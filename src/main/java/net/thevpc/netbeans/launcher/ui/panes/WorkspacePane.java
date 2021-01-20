@@ -26,9 +26,6 @@ import net.thevpc.netbeans.launcher.model.NetbeansWorkspace;
 import net.thevpc.netbeans.launcher.ui.*;
 import net.thevpc.netbeans.launcher.ui.utils.*;
 import net.thevpc.netbeans.launcher.util.NbUtils;
-import net.thevpc.netbeans.launcher.model.*;
-import net.thevpc.netbeans.launcher.ui.*;
-import net.thevpc.netbeans.launcher.ui.utils.*;
 import net.thevpc.nuts.NutsSdkLocation;
 
 /**

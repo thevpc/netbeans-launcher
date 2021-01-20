@@ -25,6 +25,8 @@ import java.util.stream.Collectors;
  * @author thevpc
  */
 public class NetbeansConfigService {
+    private List<WritableLongOperation> operations = new ArrayList<>();
+    private List<LongOperationListener> operationListeners = new ArrayList<>();
 
     public static final NetbeansGroup NETBEANS_NO_GROUP = new NetbeansGroup("--no-group", "--no-group");
     public static final NetbeansGroup NETBEANS_CLOSE_GROUP = new NetbeansGroup("--close-group", "--close-group");
@@ -32,10 +34,8 @@ public class NetbeansConfigService {
     private static String[] prefix = {"Workspace", "WS", "NB", "Netbeans"};
     private static String[] suffix = {"-Perso", "-Work", "-Research", "-Edu", "-Fun", "-Test", "-Release", "-Test 1", "-Test 2", "-A", "-B", "-C", "-D", "-E"};
     private final NutsApplicationContext appContext;
-    private NetbeansConfig config = new NetbeansConfig();
+    private ObservableNetbeansConfig config = new ObservableNetbeansConfig();
     private File currentDirectory = new File(System.getProperty("user.home"));
-    private List<WritableLongOperation> operations = new ArrayList<>();
-    private List<LongOperationListener> operationListeners = new ArrayList<>();
 
     public NetbeansConfigService(NutsApplicationContext appContext) {
         this.appContext = appContext;
@@ -546,7 +546,7 @@ public class NetbeansConfigService {
     }
 
     public boolean setSumoMode(boolean b) {
-        config.setSumoMode(b);
+        config.getSumoMode().set(b);
         saveFile();
         return true;
     }
@@ -583,7 +583,7 @@ public class NetbeansConfigService {
     }
 
     public NutsSdkLocation[] getAllJdk() {
-        List<NutsSdkLocation> list = config.getJdkLocations();
+        List<NutsSdkLocation> list = config.getJdkLocations().list();
         list.sort((a, b) -> {
             int i = NbUtils.compareVersions(a.getVersion(), b.getVersion());
             if (i != 0) {
@@ -851,11 +851,12 @@ public class NetbeansConfigService {
                 .run();
     }
 
-    public void saveFile() {
+    public synchronized void saveFile() {
         appContext.getWorkspace().formats().element().setContentType(NutsContentType.JSON).setValue(config).print(Paths.get(appContext.getConfigFolder()).resolve("config.json"));
     }
 
     public void loadFile() {
+        NetbeansConfig config=null;
         boolean loaded = false;
         Path validFile = Paths.get(appContext.getConfigFolder()).resolve("config.json");
         boolean foundCurrVersionFile = false;
@@ -898,7 +899,9 @@ public class NetbeansConfigService {
             loaded = true;
         }
         if (!foundCurrVersionFile) {
-            List<NutsId> olderVersions = workspace.search().addInstallStatus(NutsInstallStatus.INSTALLED).addId(appContext.getAppId().builder().setVersion("").build()).getResultIds().stream().sorted(
+            List<NutsId> olderVersions = workspace.search().setInstallStatus(
+                    workspace.filters().installStatus().byInstalled()
+            ).addId(appContext.getAppId().builder().setVersion("").build()).getResultIds().stream().sorted(
                     (a, b) -> b.getVersion().compareTo(a.getVersion())
             ).filter(x -> x.getVersion().compareTo(appContext.getAppId().getVersion()) < 0).collect(Collectors.toList());
             for (NutsId olderVersion : olderVersions) {
@@ -924,9 +927,13 @@ public class NetbeansConfigService {
             config = new NetbeansConfig();
         }
         if (config.getInstallations().isEmpty()) {
-            configureDefaults();
             saveFile();
+            new Thread(()->{
+                configureDefaults();
+                saveFile();
+            }).start();
         }
+        this.config.setNetbeansConfig(config);
     }
 
     public void load() {
@@ -1040,7 +1047,7 @@ public class NetbeansConfigService {
     }
 
     public boolean isSumoMode() {
-        return config.isSumoMode();
+        return config.getSumoMode().get();
     }
 
     public NetbeansInstallation installNetbeansBinary(NetbeansBinaryLink i) {
@@ -1052,14 +1059,14 @@ public class NetbeansConfigService {
                 .resolve("netbeans")
                 .resolve("netbeans-" + i.getVersion());
         //if (!Files.exists(zipTo)) {
-        ws.io().copy().from(i.getUrl()).to(zipTo).logProgress()
-                .progressMonitor(new OpNutsInputStreamProgressMonitor(addOperation("Downloading " + i.toString()))).run();
+        ws.io().copy().from(i.getUrl()).to(zipTo).setLogProgress(true)
+                .setProgressMonitor(new OpNutsInputStreamProgressMonitor(addOperation("Downloading " + i.toString()))).run();
         //}
         ws.concurrent().lock().source(zipTo).run(() -> {
             if (Files.exists(folderTo.resolve("bin").resolve("netbeans"))) {
                 //already unzipped!!
             } else {
-                ws.io().uncompress().from(zipTo).to(folderTo).skipRoot()
+                ws.io().uncompress().from(zipTo).to(folderTo).setSkipRoot(true)
                         .progressMonitor(new OpNutsInputStreamProgressMonitor(addOperation("Unzipping " + i.toString())))
                         .run();
             }
@@ -1127,7 +1134,7 @@ public class NetbeansConfigService {
         return o;
     }
 
-    void fire(WritableLongOperation w) {
+    public void fire(WritableLongOperation w) {
         if (w.getStatus() == LongOperationStatus.ENDED) {
             operations.remove(w);
         }
@@ -1260,5 +1267,9 @@ public class NetbeansConfigService {
             op.setPercent(event.getPercent());
             return true;
         }
+    }
+
+    public ObservableNetbeansConfig getConfig() {
+        return config;
     }
 }

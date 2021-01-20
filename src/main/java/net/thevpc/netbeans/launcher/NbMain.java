@@ -20,6 +20,7 @@ import java.io.PrintStream;
  * @author thevpc
  */
 public class NbMain extends NutsApplication {
+    String preferredAlias = "nbl";
 
     public static void main(String[] args) {
         // just create an instance and call runAndExit in the main method
@@ -27,7 +28,6 @@ public class NbMain extends NutsApplication {
     }
 
     private NutsWorkspaceCommandAlias findDefaultAlias(NutsApplicationContext applicationContext) {
-        String preferredAlias = "nb";
         NutsWorkspace ws = applicationContext.getWorkspace();
         NutsSession session = applicationContext.getSession();
         NutsId appId = applicationContext.getAppId();
@@ -36,7 +36,6 @@ public class NbMain extends NutsApplication {
 
     @Override
     protected void onUninstallApplication(NutsApplicationContext applicationContext) {
-        String preferredAlias = "nb";
         NutsWorkspace ws = applicationContext.getWorkspace();
         NutsSession session = applicationContext.getSession();
         NutsWorkspaceCommandAlias a = findDefaultAlias(applicationContext);
@@ -52,7 +51,6 @@ public class NbMain extends NutsApplication {
 
     @Override
     protected void onInstallApplication(NutsApplicationContext applicationContext) {
-        String preferredAlias = "nb";
         NutsWorkspace ws = applicationContext.getWorkspace();
         NutsSession session = applicationContext.getSession();
         NutsWorkspaceCommandAlias a = findDefaultAlias(applicationContext);
@@ -79,7 +77,7 @@ public class NbMain extends NutsApplication {
         if (!NbUtils.isPlatformSupported()) {
             err.println("platform not supported");
             if (System.console() == null) {
-                JOptionPane.showInputDialog("Platform not supported");
+                JOptionPane.showInputDialog("platform not supported");
             }
             return;
         }

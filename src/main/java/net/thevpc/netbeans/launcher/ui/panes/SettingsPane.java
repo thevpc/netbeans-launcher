@@ -23,6 +23,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import net.thevpc.netbeans.launcher.model.NetbeansInstallation;
 import net.thevpc.netbeans.launcher.model.NetbeansInstallationStore;
 import net.thevpc.netbeans.launcher.model.NetbeansLocation;
+import net.thevpc.netbeans.launcher.model.NetbeansWorkspace;
 import net.thevpc.netbeans.launcher.ui.AppPane;
 import net.thevpc.netbeans.launcher.ui.AppPanePos;
 import net.thevpc.netbeans.launcher.ui.AppPaneType;
@@ -33,9 +34,7 @@ import net.thevpc.netbeans.launcher.ui.utils.JdkJlistToStringer;
 import net.thevpc.netbeans.launcher.ui.utils.ListComponent;
 import net.thevpc.netbeans.launcher.ui.utils.ObjectTableModel;
 import net.thevpc.netbeans.launcher.ui.utils.TableComponent;
-import net.thevpc.netbeans.launcher.util.JlistToStringer;
-import net.thevpc.netbeans.launcher.util.NbTheme;
-import net.thevpc.netbeans.launcher.util.Workers;
+import net.thevpc.netbeans.launcher.util.*;
 import net.thevpc.nuts.NutsSdkLocation;
 
 /**
@@ -65,6 +64,63 @@ public class SettingsPane extends AppPane {
     public SettingsPane(MainWindowSwing win) {
         super(AppPaneType.SETTINGS, new AppPanePos(2, 0), win);
         build();
+        win.getConfigService().getConfig()
+                .getJdkLocations().addListener(new ObservableList.ObservableListListener<NutsSdkLocation>() {
+            @Override
+            public void onAdd(ObservableListEvent<NutsSdkLocation> event) {
+                updateJdkList();
+            }
+
+            @Override
+            public void onRemove(ObservableListEvent<NutsSdkLocation> event) {
+                updateJdkList();
+            }
+
+            @Override
+            public void onUpdate(ObservableListEvent<NutsSdkLocation> event) {
+                updateJdkList();
+            }
+        });
+        win.getConfigService().getConfig()
+                .getInstallations().addListener(new ObservableList.ObservableListListener<NetbeansInstallation>() {
+            @Override
+            public void onAdd(ObservableListEvent<NetbeansInstallation> event) {
+                updateJdkList();
+            }
+
+            @Override
+            public void onRemove(ObservableListEvent<NetbeansInstallation> event) {
+                updateJdkList();
+            }
+
+            @Override
+            public void onUpdate(ObservableListEvent<NetbeansInstallation> event) {
+                updateJdkList();
+            }
+        });
+        win.getConfigService().getConfig()
+                .getWorkspaces().addListener(new ObservableList.ObservableListListener<NetbeansWorkspace>() {
+            @Override
+            public void onAdd(ObservableListEvent<NetbeansWorkspace> event) {
+                updateJdkList();
+            }
+
+            @Override
+            public void onRemove(ObservableListEvent<NetbeansWorkspace> event) {
+                updateJdkList();
+            }
+
+            @Override
+            public void onUpdate(ObservableListEvent<NetbeansWorkspace> event) {
+                updateJdkList();
+            }
+        });
+        win.getConfigService().getConfig().getSumoMode().addListener(new ObservableValue.ObservableValueListener<Boolean>() {
+            @Override
+            public void onChange(ObservableValueEvent<Boolean> t) {
+                //
+            }
+        });
     }
 
     @Override
