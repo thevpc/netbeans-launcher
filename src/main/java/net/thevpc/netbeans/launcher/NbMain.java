@@ -11,7 +11,6 @@ import net.thevpc.netbeans.launcher.cli.MainWindowCLI;
 import net.thevpc.netbeans.launcher.ui.MainWindowSwing;
 import net.thevpc.netbeans.launcher.util.NbUtils;
 import net.thevpc.nuts.*;
-import net.thevpc.nuts.*;
 
 import java.io.PrintStream;
 
@@ -20,7 +19,8 @@ import java.io.PrintStream;
  * @author thevpc
  */
 public class NbMain extends NutsApplication {
-    String preferredAlias = "nbl";
+
+    String PREFERRED_ALIAS = "nbl";
 
     public static void main(String[] args) {
         // just create an instance and call runAndExit in the main method
@@ -31,7 +31,7 @@ public class NbMain extends NutsApplication {
         NutsWorkspace ws = applicationContext.getWorkspace();
         NutsSession session = applicationContext.getSession();
         NutsId appId = applicationContext.getAppId();
-        return ws.aliases().find(preferredAlias, appId,appId,session);
+        return ws.aliases().find(PREFERRED_ALIAS, appId, appId, session);
     }
 
     @Override
@@ -40,7 +40,7 @@ public class NbMain extends NutsApplication {
         NutsSession session = applicationContext.getSession();
         NutsWorkspaceCommandAlias a = findDefaultAlias(applicationContext);
         if (a != null) {
-            ws.aliases().remove(preferredAlias, new NutsRemoveOptions().setSession(session));
+            ws.aliases().remove(PREFERRED_ALIAS, new NutsRemoveOptions().setSession(session));
         }
     }
 
@@ -58,12 +58,12 @@ public class NbMain extends NutsApplication {
         boolean add = false;
         if (a != null) {
             update = true;
-        } else if (ws.aliases().find(preferredAlias, session) == null) {
+        } else if (ws.aliases().find(PREFERRED_ALIAS, session) == null) {
             add = true;
         }
         if (update || add) {
             ws.aliases().add(new NutsCommandAliasConfig()
-                    .setName(preferredAlias)
+                    .setName(PREFERRED_ALIAS)
                     .setOwner(applicationContext.getAppId())
                     .setCommand(applicationContext.getAppId().getShortName()),
                     new NutsAddOptions().setSession(update ? session.copy().setConfirm(NutsConfirmationMode.YES) : session));
