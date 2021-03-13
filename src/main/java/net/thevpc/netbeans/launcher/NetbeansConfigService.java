@@ -900,7 +900,7 @@ public class NetbeansConfigService {
         }
         if (!foundCurrVersionFile) {
             List<NutsId> olderVersions = workspace.search().setInstallStatus(
-                    workspace.filters().installStatus().byInstalled()
+                    workspace.filters().installStatus().byInstalled(true)
             ).addId(appContext.getAppId().builder().setVersion("").build()).getResultIds().stream().sorted(
                     (a, b) -> b.getVersion().compareTo(a.getVersion())
             ).filter(x -> x.getVersion().compareTo(appContext.getAppId().getVersion()) < 0).collect(Collectors.toList());
