@@ -1,31 +1,29 @@
 package net.thevpc.netbeans.launcher.util;
 
-import net.thevpc.netbeans.launcher.model.NetbeansWorkspace;
-import net.thevpc.nuts.NutsDependencyManager;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-public class ObservableList<T> implements ObservableObject, Iterable<T>{
+public class ObservableList<T> implements ObservableObject, Iterable<T> {
+
     private List<T> data = new ArrayList<>();
     private List<ObservableListListener<T>> observers = new ArrayList<>();
 
     public ObservableList<T> setAll(List<T> others) {
-        if(others==null){
+        if (others == null) {
             clear();
-        }else{
+        } else {
             int r = others.size();
-            int m=Math.min(r,size());
-            while(size()>r){
-                removeAt(size()-1);
+            int m = Math.min(r, size());
+            while (size() > r) {
+                removeAt(size() - 1);
             }
             for (int i = 0; i < m; i++) {
-                setAt(i,others.get(i));
+                setAt(i, others.get(i));
             }
-            int s=size();
+            int s = size();
             for (int i = m; i < r; i++) {
                 add(others.get(i));
             }
@@ -38,11 +36,16 @@ public class ObservableList<T> implements ObservableObject, Iterable<T>{
         return this;
     }
 
+    public ObservableList<T> addListener(ObservableListItemListener<T> a) {
+        observers.add(new ObservableListAdapter<T>(a));
+        return this;
+    }
+
     public ObservableList<T> add(T a) {
         int index = data.size();
         data.add(a);
-        ObservableListEvent<T> event=new ObservableListEvent<>(
-                this, null,a,index, ObservableEvent.EventType.ADD_ELEMENT
+        ObservableListEvent<T> event = new ObservableListEvent<>(
+                this, null, a, index, ObservableEvent.EventType.ADD_ELEMENT
         );
         for (ObservableListListener<T> observer : observers) {
             observer.onAdd(event);
@@ -50,8 +53,8 @@ public class ObservableList<T> implements ObservableObject, Iterable<T>{
         return this;
     }
 
-    public void clear(){
-        while(size()>0){
+    public void clear() {
+        while (size() > 0) {
             removeAt(0);
         }
     }
@@ -63,8 +66,8 @@ public class ObservableList<T> implements ObservableObject, Iterable<T>{
             add(a);
         } else {
             data.add(index, a);
-            ObservableListEvent<T> event=new ObservableListEvent<>(
-                    this, null,a,index, ObservableEvent.EventType.ADD_ELEMENT
+            ObservableListEvent<T> event = new ObservableListEvent<>(
+                    this, null, a, index, ObservableEvent.EventType.ADD_ELEMENT
             );
             for (ObservableListListener<T> observer : observers) {
                 observer.onAdd(event);
@@ -76,9 +79,9 @@ public class ObservableList<T> implements ObservableObject, Iterable<T>{
     public ObservableList<T> setAt(int index, T a) {
         if (index >= data.size() || index < 0) {
             throw new IllegalArgumentException("invalid index");
-        }else {
-            T old=data.get(index);
-            if(!Objects.equals(old,a)) {
+        } else {
+            T old = data.get(index);
+            if (!Objects.equals(old, a)) {
                 data.set(index, a);
                 ObservableListEvent<T> event = new ObservableListEvent<>(
                         this, old, a, index, ObservableEvent.EventType.UPDATE_ELEMENT
@@ -110,8 +113,8 @@ public class ObservableList<T> implements ObservableObject, Iterable<T>{
     public ObservableList<T> removeAt(int index) {
         if (index >= 0 && index < data.size()) {
             T old = data.remove(index);
-            ObservableListEvent<T> event=new ObservableListEvent<>(
-                    this, old,null,index, ObservableEvent.EventType.REMOVE_ELEMENT
+            ObservableListEvent<T> event = new ObservableListEvent<>(
+                    this, old, null, index, ObservableEvent.EventType.REMOVE_ELEMENT
             );
             for (ObservableListListener<T> observer : observers) {
                 observer.onRemove(event);
@@ -128,7 +131,35 @@ public class ObservableList<T> implements ObservableObject, Iterable<T>{
         return data.toArray(a);
     }
 
+    public interface ObservableListItemListener<T> {
+        public void onChange(ObservableListEvent<T> event) ;
+    }
+    
+    public class ObservableListAdapter<T> implements ObservableListListener<T>{
+        private ObservableListItemListener<T> li;
+
+        public ObservableListAdapter(ObservableListItemListener<T> li) {
+            this.li = li;
+        }
+        
+        @Override
+        public void onAdd(ObservableListEvent<T> event) {
+            li.onChange(event);
+        }
+
+        @Override
+        public void onRemove(ObservableListEvent<T> event) {
+            li.onChange(event);
+        }
+
+        @Override
+        public void onUpdate(ObservableListEvent<T> event) {
+            li.onChange(event);
+        }
+    }
+    
     public interface ObservableListListener<T> {
+
         void onAdd(ObservableListEvent<T> event);
 
         void onRemove(ObservableListEvent<T> event);

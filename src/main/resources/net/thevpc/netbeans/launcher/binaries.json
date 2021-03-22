@@ -1,5 +1,11 @@
 [
   {
+    "version": "12.3",
+    "packaging": "zip",
+    "url": "https://archive.apache.org/dist/netbeans/netbeans/12.3/netbeans-12.3-bin.zip",
+    "releaseDate": "2021-02-25T16:35:00Z"
+  },
+  {
     "version": "12.2",
     "packaging": "zip",
     "url": "https://archive.apache.org/dist/netbeans/netbeans/12.2/netbeans-12.2-bin.zip",

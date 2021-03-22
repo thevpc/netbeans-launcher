@@ -852,7 +852,9 @@ public class NetbeansConfigService {
     }
 
     public synchronized void saveFile() {
-        appContext.getWorkspace().formats().element().setContentType(NutsContentType.JSON).setValue(config).print(Paths.get(appContext.getConfigFolder()).resolve("config.json"));
+        appContext.getWorkspace().formats().element().setContentType(NutsContentType.JSON)
+                .setValue(config.getNetbeansConfig())
+                .print(Paths.get(appContext.getConfigFolder()).resolve("config.json"));
     }
 
     public void loadFile() {
@@ -936,6 +938,10 @@ public class NetbeansConfigService {
         this.config.setNetbeansConfig(config);
     }
 
+    public void loadAsync() {
+        new Thread(()->load()).start();
+    }
+    
     public void load() {
         loadFile();
     }

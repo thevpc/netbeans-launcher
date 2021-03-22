@@ -139,11 +139,11 @@ public class SettingsPane extends AppPane {
                 public Object getValueAt(int row, String column, NutsSdkLocation t) {
                     switch (column) {
                         case "Name":
-                            return t.getName();
+                            return t==null?"<null>":t.getName();
                         case "Type":
-                            return t.getPackaging();
+                            return t==null?"<null>":t.getPackaging();
                         case "Location":
-                            return t.getPath();
+                            return t==null?"<null>":t.getPath();
                     }
                     return "";
                 }

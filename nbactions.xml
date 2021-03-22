@@ -10,8 +10,7 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
             </goals>
             <properties>
-                <exec.args>-Dnuts.debug=true -Dnuts.args="-w ~/ex -y --standalone" -classpath %classpath
-                    net.thevpc.netbeans.launcher.NbMain</exec.args>
+                <exec.args>-Dnuts.args='-ZSy' -classpath %classpath net.thevpc.netbeans.launcher.NbMain</exec.args>
                 <exec.executable>java</exec.executable>
             </properties>
         </action>
@@ -25,8 +24,7 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
             </goals>
             <properties>
-                <exec.args>-agentlib:jdwp=transport=dt_socket,server=n,address=${jpda.address} -Dnuts.debug=true
-                    -Dnuts.args="-w ~/ex -y --standalone" -classpath %classpath net.thevpc.netbeans.launcher.NbMain</exec.args>
+                <exec.args>-agentlib:jdwp=transport=dt_socket,server=n,address=${jpda.address} -Dnuts.args='-ZSy' -classpath %classpath net.thevpc.netbeans.launcher.NbMain</exec.args>
                 <exec.executable>java</exec.executable>
                 <jpda.listen>true</jpda.listen>
             </properties>
@@ -41,8 +39,7 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
             </goals>
             <properties>
-                <exec.args>-Dnuts.debug=true -Dnuts.args="-w ~/ex -y --standalone" -classpath %classpath
-                    net.thevpc.netbeans.launcher.NbMain</exec.args>
+                <exec.args>-Dnuts.args='-ZSy' -classpath %classpath net.thevpc.netbeans.launcher.NbMain</exec.args>
                 <exec.executable>java</exec.executable>
             </properties>
         </action>

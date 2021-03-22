@@ -24,7 +24,13 @@ import java.util.logging.Logger;
 import javax.swing.*;
 
 import net.thevpc.netbeans.launcher.NbOptions;
+import net.thevpc.netbeans.launcher.model.NetbeansInstallation;
+import net.thevpc.netbeans.launcher.util.ObservableList;
+import net.thevpc.netbeans.launcher.util.ObservableListEvent;
+import net.thevpc.netbeans.launcher.util.ObservableValue;
+import net.thevpc.netbeans.launcher.util.ObservableValueEvent;
 import net.thevpc.nuts.NutsApplicationContext;
+import net.thevpc.nuts.NutsSdkLocation;
 
 /**
  * @author thevpc
@@ -163,8 +169,11 @@ public class MainWindowSwing {
 
     public void start(JFrame primaryStage) { //int2troadmin
         toolkit = new SwingToolkit(primaryStage);
-        configService.load();
-        compact = !configService.isSumoMode();
+        configService.getConfig().getSumoMode().addListener(t -> setCompact(!t.getNewValue()));
+        configService.getConfig().getInstallations().addListener(e -> updateList());
+        configService.getConfig().getJdkLocations().addListener(e -> updateList());
+        configService.getConfig().getWorkspaces().addListener(e -> updateList());
+        compact = !configService.getConfig().getSumoMode().get();
         this.frame = primaryStage;
         primaryStage.setTitle("Netbeans Launcher " + NbUtils.getArtifactVersionOrDev());
         primaryStage.setIconImage(new ImageIcon(MainWindowSwing.class.getResource("nb.png")).getImage());
@@ -203,6 +212,7 @@ public class MainWindowSwing {
             SettingsPane s = (SettingsPane) getPane(AppPaneType.SETTINGS);
             s.setSettingType(SettingsPane.SettingType.NB_INSTALLATION);
         }
+        configService.loadAsync();
     }
 
     private JComponent createHeader() {
@@ -307,7 +317,7 @@ public class MainWindowSwing {
 
     public void startWorkspace(NetbeansWorkspace w) {
         if (w != null) {
-            if(NbListPane.isStarted(getAppContext(), w)){
+            if (NbListPane.isStarted(getAppContext(), w)) {
                 return;
             }
             NbListPane.setStarted(getAppContext(), w);
@@ -321,12 +331,12 @@ public class MainWindowSwing {
                     @Override
                     public void run() {
                         try {
-                            NbUtils.setTempRunning(w,true);
+                            NbUtils.setTempRunning(w, true);
                             configService.run(w);
                         } catch (Exception ex) {
                             toolkit.showError(toolkit.msg("App.RunWorkspace.Error"), ex);
                         } finally {
-                            NbUtils.setTempRunning(w,false);
+                            NbUtils.setTempRunning(w, false);
                             NbListPane.setStopped(getAppContext(), w);
                             onRefreshHeader();
                             updateList();
@@ -393,7 +403,7 @@ public class MainWindowSwing {
         showConfirmOkCancel(
                 toolkit.msg("App.Exit.Confirm.Title"),
                 toolkit.msg("App.Exit.Confirm.Message"),
-                 () -> System.exit(0)
+                () -> System.exit(0)
         );
     }
 
