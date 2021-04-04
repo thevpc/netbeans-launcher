@@ -12,9 +12,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import net.thevpc.netbeans.launcher.model.NetbeansConfig;
-import net.thevpc.nuts.NutsElementFormat;
 import net.thevpc.nuts.NutsContentType;
 import net.thevpc.nuts.NutsWorkspace;
+import net.thevpc.nuts.NutsElementFormat;
 
 /**
  *
