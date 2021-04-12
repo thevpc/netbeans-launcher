@@ -31,7 +31,7 @@ public class NbMain extends NutsApplication {
         NutsWorkspace ws = applicationContext.getWorkspace();
         NutsSession session = applicationContext.getSession();
         NutsId appId = applicationContext.getAppId();
-        return ws.aliases().find(PREFERRED_ALIAS, appId, appId, session);
+        return ws.aliases().setSession(session).find(PREFERRED_ALIAS, appId, appId);
     }
 
     @Override
@@ -40,7 +40,7 @@ public class NbMain extends NutsApplication {
         NutsSession session = applicationContext.getSession();
         NutsWorkspaceCommandAlias a = findDefaultAlias(applicationContext);
         if (a != null) {
-            ws.aliases().remove(PREFERRED_ALIAS, new NutsRemoveOptions().setSession(session));
+            ws.aliases().setSession(session).remove(PREFERRED_ALIAS);
         }
     }
 
@@ -58,15 +58,18 @@ public class NbMain extends NutsApplication {
         boolean add = false;
         if (a != null) {
             update = true;
-        } else if (ws.aliases().find(PREFERRED_ALIAS, session) == null) {
+        } else if (ws.aliases().setSession(session).find(PREFERRED_ALIAS) == null) {
             add = true;
         }
         if (update || add) {
-            ws.aliases().add(new NutsCommandAliasConfig()
-                    .setName(PREFERRED_ALIAS)
-                    .setOwner(applicationContext.getAppId())
-                    .setCommand(applicationContext.getAppId().getShortName()),
-                    new NutsAddOptions().setSession(update ? session.copy().setConfirm(NutsConfirmationMode.YES) : session));
+            ws.aliases()
+                    .setSession((update ? session.copy().setConfirm(NutsConfirmationMode.YES) : session))
+                    .add(
+                            new NutsCommandAliasConfig()
+                                    .setName(PREFERRED_ALIAS)
+                                    .setOwner(applicationContext.getAppId())
+                                    .setCommand(applicationContext.getAppId().getShortName())
+                    );
         }
     }
 

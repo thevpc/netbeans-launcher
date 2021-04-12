@@ -239,7 +239,7 @@ public class NetbeansConfigService {
     }
 
     public NutsSdkLocation detectJdk(String path) {
-        return appContext.getWorkspace().sdks().resolve("java", path, null, appContext.getSession());
+        return appContext.getWorkspace().sdks().resolve("java", path, null);
     }
 
     //    public JdkLocation addJdkLocation(String path, boolean registerNew) {
