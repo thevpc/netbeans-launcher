@@ -852,8 +852,9 @@ public class NetbeansConfigService {
     }
 
     public synchronized void saveFile() {
+        NetbeansConfig c = config.getNetbeansConfig();
         appContext.getWorkspace().formats().element().setContentType(NutsContentType.JSON)
-                .setValue(config.getNetbeansConfig())
+                .setValue(c).setNtf(false)
                 .print(Paths.get(appContext.getConfigFolder()).resolve("config.json"));
     }
 
@@ -1059,9 +1060,11 @@ public class NetbeansConfigService {
     public NetbeansInstallation installNetbeansBinary(NetbeansBinaryLink i) {
         NutsWorkspace ws = appContext.getWorkspace();
         Path zipTo = Paths.get(appContext.getSharedAppsFolder())
+                .resolve("org")
                 .resolve("netbeans")
                 .resolve("netbeans-" + i.getVersion() + ".zip");
         Path folderTo = Paths.get(appContext.getSharedAppsFolder())
+                .resolve("org")
                 .resolve("netbeans")
                 .resolve("netbeans-" + i.getVersion());
         //if (!Files.exists(zipTo)) {
