@@ -75,8 +75,8 @@ public class NbMain extends NutsApplication {
 
     @Override
     public void run(NutsApplicationContext appContext) {
-        PrintStream out = appContext.getSession().out();
-        PrintStream err = appContext.getSession().err();
+        NutsPrintStream out = appContext.getSession().out();
+        NutsPrintStream err = appContext.getSession().err();
         if (!NbUtils.isPlatformSupported()) {
             err.println("platform not supported");
             if (System.console() == null) {
