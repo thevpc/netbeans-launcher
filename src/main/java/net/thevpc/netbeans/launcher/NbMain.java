@@ -5,20 +5,17 @@
  */
 package net.thevpc.netbeans.launcher;
 
-import javax.swing.JOptionPane;
-
 import net.thevpc.netbeans.launcher.cli.MainWindowCLI;
 import net.thevpc.netbeans.launcher.ui.MainWindowSwing;
 import net.thevpc.netbeans.launcher.util.NbUtils;
 import net.thevpc.nuts.*;
 
-import java.io.PrintStream;
+import javax.swing.*;
 
 /**
- *
  * @author thevpc
  */
-public class NbMain extends NutsApplication {
+public class NbMain implements NutsApplication {
 
     String PREFERRED_ALIAS = "nbl";
 
@@ -27,50 +24,19 @@ public class NbMain extends NutsApplication {
         new NbMain().runAndExit(args);
     }
 
-    private NutsWorkspaceCommandAlias findDefaultAlias(NutsApplicationContext applicationContext) {
-        NutsWorkspace ws = applicationContext.getWorkspace();
-        NutsSession session = applicationContext.getSession();
-        NutsId appId = applicationContext.getAppId();
-        return ws.aliases().setSession(session).find(PREFERRED_ALIAS, appId, appId);
+    @Override
+    public void onInstallApplication(NutsApplicationContext applicationContext) {
+        addDesktopIntegration(applicationContext, false);
     }
 
     @Override
-    protected void onUninstallApplication(NutsApplicationContext applicationContext) {
-        NutsWorkspace ws = applicationContext.getWorkspace();
-        NutsSession session = applicationContext.getSession();
-        NutsWorkspaceCommandAlias a = findDefaultAlias(applicationContext);
-        if (a != null) {
-            ws.aliases().setSession(session).remove(PREFERRED_ALIAS);
-        }
-    }
-
-    @Override
-    protected void onUpdateApplication(NutsApplicationContext applicationContext) {
+    public void onUpdateApplication(NutsApplicationContext applicationContext) {
         onInstallApplication(applicationContext);
     }
 
     @Override
-    protected void onInstallApplication(NutsApplicationContext applicationContext) {
-        NutsWorkspace ws = applicationContext.getWorkspace();
-        NutsSession session = applicationContext.getSession();
-        NutsWorkspaceCommandAlias a = findDefaultAlias(applicationContext);
-        boolean update = false;
-        boolean add = false;
-        if (a != null) {
-            update = true;
-        } else if (ws.aliases().setSession(session).find(PREFERRED_ALIAS) == null) {
-            add = true;
-        }
-        if (update || add) {
-            ws.aliases()
-                    .setSession((update ? session.copy().setConfirm(NutsConfirmationMode.YES) : session))
-                    .add(
-                            new NutsCommandAliasConfig()
-                                    .setName(PREFERRED_ALIAS)
-                                    .setOwner(applicationContext.getAppId())
-                                    .setCommand(applicationContext.getAppId().getShortName())
-                    );
-        }
+    public void onUninstallApplication(NutsApplicationContext applicationContext) {
+        applicationContext.getWorkspace().commands().removeCommandIfExists(PREFERRED_ALIAS);
     }
 
     @Override
@@ -108,10 +74,17 @@ public class NbMain extends NutsApplication {
                 options.cli = true;
             } else if (cmdLine.next("--version") != null) {
                 options.version = true;
+            } else if (cmdLine.next("--install") != null) {
+                options.install = true;
             } else {
                 cmdLine.unexpectedArgument();
             }
         }
+
+        if (options.install) {
+            addDesktopIntegration(appContext, true);
+        }
+
         if (options.version) {
             out.println(appContext.getAppId().getVersion());
         } else if (options.cli && !options.swing_arg) {
@@ -122,5 +95,17 @@ public class NbMain extends NutsApplication {
             //will default to swing!!
             MainWindowSwing.launch(appContext, options, true);
         }
+    }
+
+    protected void addDesktopIntegration(NutsApplicationContext applicationContext, boolean installNadmin) {
+        NutsWorkspace ws = applicationContext.getWorkspace();
+        ws.commands().createLauncher(new NutsLauncherOptions()
+                .setId(applicationContext.getAppId())
+                .setAlias(PREFERRED_ALIAS)
+                .setCreateAlias(true)
+                .setCreateMenuShortcut(true)
+                .setCreateDesktopShortcut(true)
+                .setInstallExtensions(installNadmin)
+        );
     }
 }

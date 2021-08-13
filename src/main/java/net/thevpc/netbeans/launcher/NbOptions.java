@@ -12,6 +12,7 @@ package net.thevpc.netbeans.launcher;
 public class NbOptions {
 
     public boolean version = false;
+    public boolean install = false;
     public boolean cli = false;
     public boolean swing = false;
     public boolean cli_arg = false;

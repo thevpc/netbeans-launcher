@@ -1071,7 +1071,7 @@ public class NetbeansConfigService {
         ws.io().copy().from(i.getUrl()).to(zipTo).setLogProgress(true)
                 .setProgressMonitor(new OpNutsInputStreamProgressMonitor(addOperation("Downloading " + i.toString()))).run();
         //}
-        ws.concurrent().lock().source(zipTo).run(() -> {
+        ws.concurrent().lock().setSource(zipTo).run(() -> {
             if (Files.exists(folderTo.resolve("bin").resolve("netbeans"))) {
                 //already unzipped!!
             } else {
