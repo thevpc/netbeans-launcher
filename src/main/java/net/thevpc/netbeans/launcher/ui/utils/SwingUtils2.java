@@ -357,10 +357,6 @@ public class SwingUtils2 {
         return false;
     }
 
-    public static String trim(String s) {
-        return s == null ? "" : s.trim();
-    }
-
     public static void addEnterAction(JList list, ButtonAction action) {
         KeyStroke keyStroke = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
         InputMap im = list.getInputMap();

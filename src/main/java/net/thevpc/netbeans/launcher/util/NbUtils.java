@@ -25,6 +25,7 @@ import net.thevpc.netbeans.launcher.model.NbOsConfig;
 import net.thevpc.netbeans.launcher.model.NetbeansWorkspace;
 import net.thevpc.netbeans.launcher.ui.utils.CachedValue;
 import net.thevpc.nuts.NutsApplicationContext;
+import net.thevpc.nuts.NutsUtilStrings;
 
 /**
  * @author thevpc
@@ -102,10 +103,6 @@ public class NbUtils {
     }
     public static boolean isPlatformSupported() {
         return true;//isOsWindows() || isOsLinux() || isOsMac();
-    }
-
-    public static String trim(String cmd) {
-        return cmd == null ? "" : cmd.trim();
     }
 
     public static String coalesce(String... cmd) {
@@ -274,8 +271,8 @@ public class NbUtils {
     }
 
     public static int compareVersions(String v1, String v2) {
-        v1 = trim(v1);
-        v2 = trim(v2);
+        v1 = NutsUtilStrings.trim(v1);
+        v2 = NutsUtilStrings.trim(v2);
         if (v1.equals(v2)) {
             return 0;
         }
@@ -315,7 +312,7 @@ public class NbUtils {
     }
 
     private static String[] splitVersionParts(String v1) {
-        v1 = trim(v1);
+        v1 = NutsUtilStrings.trim(v1);
         List<String> parts = new ArrayList<>();
         StringBuilder last = new StringBuilder();
         for (char c : v1.toCharArray()) {
@@ -483,16 +480,16 @@ public class NbUtils {
         return Arrays.stream(all)
                 .filter(
                         x -> {
-                            String ud = trim(nb.getUserdir());
+                            String ud = NutsUtilStrings.trim(nb.getUserdir());
                             if (ud.isEmpty()) {
                                 return false;
                             }
-                            String cd = trim(nb.getCachedir());
+                            String cd = NutsUtilStrings.trim(nb.getCachedir());
                             if (cd.isEmpty()) {
                                 return false;
                             }
-                            return trim(x.getUserdir()).equals(resolveFile(ud).getPath())
-                            && trim(x.getCachedir()).equals(resolveFile(cd).getPath());
+                            return NutsUtilStrings.trim(x.getUserdir()).equals(resolveFile(ud).getPath())
+                            && NutsUtilStrings.trim(x.getCachedir()).equals(resolveFile(cd).getPath());
                         }
                 ).count() > 0;
     }

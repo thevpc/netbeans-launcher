@@ -842,7 +842,7 @@ public class NetbeansConfigService {
     public NutsExecCommand run(NetbeansWorkspace w) throws IOException {
         String[] cmd = createRunCommand(w);
         return appContext.getWorkspace().exec()
-                .userCmd()
+                .setExecutionType(NutsExecutionType.SYSTEM)
                 .setDirectory(w.getPath())
                 .addCommand(cmd)
                 .setRedirectErrorStream(true)
@@ -1010,7 +1010,7 @@ public class NetbeansConfigService {
     }
 
     public String getUserdirProposal(NetbeansWorkspace w) {
-        String n = NbUtils.trim(w.getName());
+        String n = NutsUtilStrings.trim(w.getName());
         if (NbUtils.isEmpty(n)) {
             n = "noname";
         }
@@ -1019,7 +1019,7 @@ public class NetbeansConfigService {
     }
 
     public String[] getUserdirProposals(NetbeansWorkspace w) {
-        String n = NbUtils.trim(w.getName());
+        String n = NutsUtilStrings.trim(w.getName());
         if (NbUtils.isEmpty(n)) {
             n = "noname";
         }
@@ -1032,7 +1032,7 @@ public class NetbeansConfigService {
     }
 
     public String[] getCachedirProposals(NetbeansWorkspace w) {
-        String n = NbUtils.trim(w.getName());
+        String n = NutsUtilStrings.trim(w.getName());
         if (NbUtils.isEmpty(n)) {
             n = "noname";
         }
@@ -1045,7 +1045,7 @@ public class NetbeansConfigService {
     }
 
     public String getCachedirProposal(NetbeansWorkspace w) {
-        String n = NbUtils.trim(w.getName());
+        String n = NutsUtilStrings.trim(w.getName());
         if (NbUtils.isEmpty(n)) {
             n = "noname";
         }

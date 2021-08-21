@@ -27,6 +27,7 @@ import net.thevpc.netbeans.launcher.ui.*;
 import net.thevpc.netbeans.launcher.ui.utils.*;
 import net.thevpc.netbeans.launcher.util.NbUtils;
 import net.thevpc.nuts.NutsSdkLocation;
+import net.thevpc.nuts.NutsUtilStrings;
 
 /**
  * @author thevpc
@@ -350,16 +351,16 @@ public class WorkspacePane extends AppPane {
     private void onSaveWorkspacePane() {
         try {
             NetbeansWorkspace w = getWorkspace();
-            if(SwingUtils2.trim(w.getName()).isEmpty()){
+            if(NutsUtilStrings.trim(w.getName()).isEmpty()){
                 throw new IllegalArgumentException("missing name");
             }
-            if(SwingUtils2.trim(w.getCachedir()).isEmpty()){
+            if(NutsUtilStrings.trim(w.getCachedir()).isEmpty()){
                 throw new IllegalArgumentException("missing cache dir");
             }
-            if(SwingUtils2.trim(w.getPath()).isEmpty()){
+            if(NutsUtilStrings.trim(w.getPath()).isEmpty()){
                 throw new IllegalArgumentException("missing path");
             }
-            if(SwingUtils2.trim(w.getUserdir()).isEmpty()){
+            if(NutsUtilStrings.trim(w.getUserdir()).isEmpty()){
                 throw new IllegalArgumentException("missing user dir");
             }
             configService.saveNbWorkspace(w);

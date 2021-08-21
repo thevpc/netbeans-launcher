@@ -410,7 +410,7 @@ public class SwingToolkit {
     }
 
     public void openFolder(String path) {
-        if (!NbUtils.trim(path).isEmpty()) {
+        if (!NutsUtils.trim(path).isEmpty()) {
             try {
                 final File f = NbUtils.resolveFile(path);
                 if (f.isDirectory()) {

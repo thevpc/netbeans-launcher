@@ -26,7 +26,6 @@ import net.thevpc.netbeans.launcher.ui.MainWindowSwing;
 import net.thevpc.netbeans.launcher.util.LocalDateTimePeriod;
 import net.thevpc.netbeans.launcher.util.NbTheme;
 import net.thevpc.netbeans.launcher.util.NbUtils;
-import net.thevpc.netbeans.launcher.ui.*;
 import net.thevpc.netbeans.launcher.ui.utils.CatalogComponent;
 import net.thevpc.netbeans.launcher.ui.utils.ListComponent;
 import net.thevpc.netbeans.launcher.ui.utils.SwingUtils2;
@@ -34,6 +33,7 @@ import net.thevpc.nuts.NutsApplicationContext;
 import net.thevpc.netbeans.launcher.ui.utils.Equalizer;
 import net.thevpc.netbeans.launcher.ui.utils.ObjectTableModel;
 import net.thevpc.netbeans.launcher.ui.utils.TableComponent;
+import net.thevpc.nuts.NutsUtilStrings;
 
 /**
  * @author thevpc
@@ -238,8 +238,8 @@ public class NbListPane extends AppPane {
     }
 
     public void updateList() {
-        Equalizer name = (a, b) -> a != null && b != null && SwingUtils2.trim(((NetbeansWorkspace) a).getName())
-                .equals(SwingUtils2.trim(((NetbeansWorkspace) b).getName()));
+        Equalizer name = (a, b) -> a != null && b != null && NutsUtilStrings.trim(((NetbeansWorkspace) a).getName())
+                .equals(NutsUtilStrings.trim(((NetbeansWorkspace) b).getName()));
         toolkit.updateTable(
                 getComps1().workspacesListView, configService.getAllNbWorkspaces(),
                 name,

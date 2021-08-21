@@ -26,7 +26,7 @@ public class NbMain implements NutsApplication {
 
     @Override
     public void onInstallApplication(NutsApplicationContext applicationContext) {
-        addDesktopIntegration(applicationContext, false);
+        addDesktopIntegration(applicationContext);
     }
 
     @Override
@@ -82,7 +82,7 @@ public class NbMain implements NutsApplication {
         }
 
         if (options.install) {
-            addDesktopIntegration(appContext, true);
+            addDesktopIntegration(appContext);
         }
 
         if (options.version) {
@@ -97,15 +97,14 @@ public class NbMain implements NutsApplication {
         }
     }
 
-    protected void addDesktopIntegration(NutsApplicationContext applicationContext, boolean installNadmin) {
+    protected void addDesktopIntegration(NutsApplicationContext applicationContext) {
         NutsWorkspace ws = applicationContext.getWorkspace();
-        ws.commands().createLauncher(new NutsLauncherOptions()
+        ws.env().addLauncher(new NutsLauncherOptions()
                 .setId(applicationContext.getAppId())
                 .setAlias(PREFERRED_ALIAS)
                 .setCreateAlias(true)
-                .setCreateMenuShortcut(true)
-                .setCreateDesktopShortcut(true)
-                .setInstallExtensions(installNadmin)
+                .setCreateMenuShortcut(NutsActionSupportCondition.PREFERRED)
+                .setCreateDesktopShortcut(NutsActionSupportCondition.PREFERRED)
         );
     }
 }
