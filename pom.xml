@@ -14,8 +14,11 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <nuts.application>true</nuts.application>
         <nuts.genericName>IDE Launcher</nuts.genericName>
-        <nuts.category>/Development</nuts.category>
-        <nuts.icon>classpath://net/thevpc/netbeans/launcher/ui/nb.png</nuts.icon>
+        <nuts.categories>/Development</nuts.categories>
+        <nuts.icons>
+            classpath://net/thevpc/netbeans/launcher/ui/nb.png
+            classpath://net/thevpc/netbeans/launcher/ui/nb.ico
+        </nuts.icons>
     </properties>
 
     <organization>
@@ -124,14 +127,6 @@
             </plugin>
 
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
-                <configuration>
-                    <showDeprecation>true</showDeprecation>
-                </configuration>
-            </plugin>
-            <plugin>
                 <artifactId>maven-deploy-plugin</artifactId>
                 <version>2.8.1</version>
                 <configuration>
@@ -177,7 +172,31 @@
                         </manifest>
                     </archive>
                 </configuration>
-            </plugin>            
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <executions>
+                    <execution>
+                        <id>compile</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>testCompile</id>
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>testCompile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <showDeprecation>true</showDeprecation>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     <repositories>
