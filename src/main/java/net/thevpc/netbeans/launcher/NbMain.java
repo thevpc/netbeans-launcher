@@ -103,8 +103,8 @@ public class NbMain implements NutsApplication {
                 .setId(applicationContext.getAppId())
                 .setAlias(PREFERRED_ALIAS)
                 .setCreateAlias(true)
-                .setCreateMenuShortcut(NutsActionSupportCondition.PREFERRED)
-                .setCreateDesktopShortcut(NutsActionSupportCondition.PREFERRED)
+                .setCreateMenuShortcut(NutsSupportCondition.PREFERRED)
+                .setCreateDesktopShortcut(NutsSupportCondition.PREFERRED)
         );
     }
 }
