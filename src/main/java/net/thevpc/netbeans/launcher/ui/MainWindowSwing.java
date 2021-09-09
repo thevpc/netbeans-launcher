@@ -24,13 +24,7 @@ import java.util.logging.Logger;
 import javax.swing.*;
 
 import net.thevpc.netbeans.launcher.NbOptions;
-import net.thevpc.netbeans.launcher.model.NetbeansInstallation;
-import net.thevpc.netbeans.launcher.util.ObservableList;
-import net.thevpc.netbeans.launcher.util.ObservableListEvent;
-import net.thevpc.netbeans.launcher.util.ObservableValue;
-import net.thevpc.netbeans.launcher.util.ObservableValueEvent;
 import net.thevpc.nuts.NutsApplicationContext;
-import net.thevpc.nuts.NutsSdkLocation;
 
 /**
  * @author thevpc

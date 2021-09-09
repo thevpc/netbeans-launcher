@@ -26,7 +26,7 @@ import net.thevpc.netbeans.launcher.model.NetbeansWorkspace;
 import net.thevpc.netbeans.launcher.ui.*;
 import net.thevpc.netbeans.launcher.ui.utils.*;
 import net.thevpc.netbeans.launcher.util.NbUtils;
-import net.thevpc.nuts.NutsSdkLocation;
+import net.thevpc.nuts.NutsPlatformLocation;
 import net.thevpc.nuts.NutsUtilStrings;
 
 /**
@@ -603,7 +603,7 @@ public class WorkspacePane extends AppPane {
     }
 
     public void setEditJdkhome(String p) {
-        NutsSdkLocation pp2 = configService.getJdk(p);
+        NutsPlatformLocation pp2 = configService.getJdk(p);
         if (pp2 != null) {
             getComps3().jdkhome.setSelectedItem(pp2);
         } else {
@@ -699,8 +699,8 @@ public class WorkspacePane extends AppPane {
 
     public String getEditJdkHome() {
         Object i = toolkit.getComboSelectedObject(getComps3().jdkhome);
-        if (i instanceof NutsSdkLocation) {
-            return ((NutsSdkLocation) i).getPath();
+        if (i instanceof NutsPlatformLocation) {
+            return ((NutsPlatformLocation) i).getPath();
         } else {
             return i == null ? null : String.valueOf(i);
         }

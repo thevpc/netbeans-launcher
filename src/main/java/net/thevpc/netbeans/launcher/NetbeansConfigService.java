@@ -140,7 +140,7 @@ public class NetbeansConfigService {
         });
         if (files != null) {
             for (File file : files) {
-                NutsSdkLocation o = findJdk(file.getPath());
+                NutsPlatformLocation o = findJdk(file.getPath());
                 if (o == null) {
                     o = detectJdk(file.getPath());
                     if (o != null) {
@@ -238,8 +238,8 @@ public class NetbeansConfigService {
         }
     }
 
-    public NutsSdkLocation detectJdk(String path) {
-        return appContext.getWorkspace().sdks().resolve("java", path, null);
+    public NutsPlatformLocation detectJdk(String path) {
+        return appContext.getWorkspace().env().platforms().resolve("java", path, null);
     }
 
     //    public JdkLocation addJdkLocation(String path, boolean registerNew) {
@@ -509,22 +509,22 @@ public class NetbeansConfigService {
         return null;
     }
 
-    public NutsSdkLocation findJdk(String path) {
+    public NutsPlatformLocation findJdk(String path) {
         if (path == null) {
             return null;
         }
-        for (NutsSdkLocation loc : config.getJdkLocations()) {
+        for (NutsPlatformLocation loc : config.getJdkLocations()) {
             if (NbUtils.equalsStr(path, loc.getPath())) {
                 return loc;
             }
         }
         if (!NbUtils.isPath(path)) {
-            for (NutsSdkLocation loc : config.getJdkLocations()) {
+            for (NutsPlatformLocation loc : config.getJdkLocations()) {
                 if (NbUtils.equalsStr(path, loc.getName())) {
                     return loc;
                 }
             }
-            for (NutsSdkLocation loc : config.getJdkLocations()) {
+            for (NutsPlatformLocation loc : config.getJdkLocations()) {
                 if (NbUtils.equalsStr(path, loc.getVersion())) {
                     return loc;
                 }
@@ -551,8 +551,8 @@ public class NetbeansConfigService {
         return true;
     }
 
-    public boolean addJdk(NutsSdkLocation netbeansInstallation) {
-        for (NutsSdkLocation installation : config.getJdkLocations()) {
+    public boolean addJdk(NutsPlatformLocation netbeansInstallation) {
+        for (NutsPlatformLocation installation : config.getJdkLocations()) {
             if (NbUtils.equalsStr(netbeansInstallation.getPath(), installation.getPath())) {
                 return false;
             }
@@ -582,8 +582,8 @@ public class NetbeansConfigService {
         return w;
     }
 
-    public NutsSdkLocation[] getAllJdk() {
-        List<NutsSdkLocation> list = config.getJdkLocations().list();
+    public NutsPlatformLocation[] getAllJdk() {
+        List<NutsPlatformLocation> list = config.getJdkLocations().list();
         list.sort((a, b) -> {
             int i = NbUtils.compareVersions(a.getVersion(), b.getVersion());
             if (i != 0) {
@@ -591,7 +591,7 @@ public class NetbeansConfigService {
             }
             return a.getName().compareTo(b.getName());
         });
-        return list.toArray(new NutsSdkLocation[0]);
+        return list.toArray(new NutsPlatformLocation[0]);
     }
 
     public NetbeansInstallation[] getAllNb() {
@@ -637,11 +637,11 @@ public class NetbeansConfigService {
         return o;
     }
 
-    public NutsSdkLocation getJdk(String path) {
+    public NutsPlatformLocation getJdk(String path) {
         if (path == null) {
             return null;
         }
-        NutsSdkLocation o = findJdk(path);
+        NutsPlatformLocation o = findJdk(path);
         if (o == null) {
             o = detectJdk(path);
             if (o != null) {
@@ -732,7 +732,7 @@ public class NetbeansConfigService {
     }
 
     public void removeJdk(String path) {
-        NutsSdkLocation o = findJdk(path);
+        NutsPlatformLocation o = findJdk(path);
         if (o != null) {
             for (NetbeansWorkspace w : getWorkspacesByJdk(o.getPath())) {
                 removeNbWorkspace(w);
