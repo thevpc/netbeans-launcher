@@ -239,7 +239,7 @@ public class NetbeansConfigService {
     }
 
     public NutsPlatformLocation detectJdk(String path) {
-        return appContext.getWorkspace().env().platforms().resolve("java", path, null);
+        return appContext.getSession().env().platforms().resolvePlatform(NutsPlatformType.JAVA, path, null);
     }
 
     //    public JdkLocation addJdkLocation(String path, boolean registerNew) {
@@ -291,7 +291,7 @@ public class NetbeansConfigService {
                         }
                     }
                 }
-                return all.toArray(new NetbeansGroup[all.size()]);
+                return all.toArray(new NetbeansGroup[0]);
             }
         } catch (IOException ex) {
             LOG.log(Level.SEVERE, null, ex);
