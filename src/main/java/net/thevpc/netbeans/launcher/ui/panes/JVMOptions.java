@@ -242,7 +242,7 @@ public class JVMOptions extends AppPane {
         while (m.getRowCount() > 0) {
             m.removeRow(0);
         }
-        for (String a : win.getAppContext().getWorkspace().commandLine().parse(args).toStringArray()) {
+        for (String a : win.getAppContext().getSession().commandLine().parse(args).toStringArray()) {
             m.addRow(new Object[]{a});
         }
     }
@@ -254,6 +254,6 @@ public class JVMOptions extends AppPane {
             a.add("" + m.getValueAt(i, 0));
 
         }
-        return win.getAppContext().getWorkspace().commandLine().create(a).toString();
+        return win.getAppContext().getSession().commandLine().create(a).toString();
     }
 }

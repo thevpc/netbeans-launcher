@@ -36,7 +36,7 @@ public class NbMain implements NutsApplication {
 
     @Override
     public void onUninstallApplication(NutsApplicationContext applicationContext) {
-        applicationContext.getWorkspace().commands().removeCommandIfExists(PREFERRED_ALIAS);
+        applicationContext.getSession().commands().removeCommandIfExists(PREFERRED_ALIAS);
     }
 
     @Override
@@ -98,8 +98,8 @@ public class NbMain implements NutsApplication {
     }
 
     protected void addDesktopIntegration(NutsApplicationContext applicationContext) {
-        NutsWorkspace ws = applicationContext.getWorkspace();
-        ws.env().addLauncher(new NutsLauncherOptions()
+        NutsSession session = applicationContext.getSession();
+        session.env().addLauncher(new NutsLauncherOptions()
                 .setId(applicationContext.getAppId())
                 .setAlias(PREFERRED_ALIAS)
                 .setCreateAlias(true)

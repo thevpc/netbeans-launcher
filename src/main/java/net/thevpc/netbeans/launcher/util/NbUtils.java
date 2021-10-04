@@ -220,7 +220,7 @@ public class NbUtils {
     }
 
     public static final NbOsConfig getNbOsConfig(NutsApplicationContext appContext) {
-        switch (appContext.getWorkspace().env().getOsFamily()) {
+        switch (appContext.getSession().env().getOsFamily()) {
             case UNIX:
             case LINUX:
                 return NbUtils.LINUX_CONFIG;
@@ -437,9 +437,9 @@ public class NbUtils {
     private static NbProcess[] _last_getRunning = null;
 
     public static NbProcess[] getRunning(NutsApplicationContext ctx) {
-        NbProcess[] aa = ctx.getWorkspace().io().ps().type("java").getResultList()
+        NbProcess[] aa = ctx.getSession().io().ps().type("java").getResultList()
                 .stream().filter((p) -> p.getName().equals("org.netbeans.Main"))
-                .map(x -> new NbProcess(ctx.getWorkspace(), x)).toArray(NbProcess[]::new);
+                .map(x -> new NbProcess(ctx.getSession(), x)).toArray(NbProcess[]::new);
         Arrays.sort(aa);
         if (_last_getRunning == null || !Arrays.equals(aa, _last_getRunning)) {
             _last_getRunning = aa;
