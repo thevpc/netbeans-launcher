@@ -47,7 +47,7 @@ public class NetbeansConfigLoader11 {
         Map o = json.parse(file, Map.class);
         visit(o);
         StringWriter sw = new StringWriter();
-        json.setValue(o).print(sw);
+        json.setNtf(false).setValue(o).print(sw);
         NetbeansConfig c = json.parse(new StringReader(sw.toString()), NetbeansConfig.class);
         return c;
     }
