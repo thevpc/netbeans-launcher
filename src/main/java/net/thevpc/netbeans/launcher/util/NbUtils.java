@@ -25,6 +25,8 @@ import net.thevpc.netbeans.launcher.model.NbOsConfig;
 import net.thevpc.netbeans.launcher.model.NetbeansWorkspace;
 import net.thevpc.netbeans.launcher.ui.utils.CachedValue;
 import net.thevpc.nuts.NutsApplicationContext;
+import net.thevpc.nuts.NutsPs;
+import net.thevpc.nuts.NutsSession;
 import net.thevpc.nuts.NutsUtilStrings;
 
 /**
@@ -437,9 +439,10 @@ public class NbUtils {
     private static NbProcess[] _last_getRunning = null;
 
     public static NbProcess[] getRunning(NutsApplicationContext ctx) {
-        NbProcess[] aa = ctx.getSession().io().ps().type("java").getResultList()
+        NutsSession session = ctx.getSession();
+        NbProcess[] aa = NutsPs.of(session).type("java").getResultList()
                 .stream().filter((p) -> p.getName().equals("org.netbeans.Main"))
-                .map(x -> new NbProcess(ctx.getSession(), x)).toArray(NbProcess[]::new);
+                .map(x -> new NbProcess(session, x)).toArray(NbProcess[]::new);
         Arrays.sort(aa);
         if (_last_getRunning == null || !Arrays.equals(aa, _last_getRunning)) {
             _last_getRunning = aa;

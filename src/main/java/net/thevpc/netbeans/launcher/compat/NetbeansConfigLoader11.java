@@ -5,16 +5,16 @@
  */
 package net.thevpc.netbeans.launcher.compat;
 
+import net.thevpc.netbeans.launcher.model.NetbeansConfig;
+import net.thevpc.nuts.NutsElements;
+import net.thevpc.nuts.NutsSession;
+
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import net.thevpc.netbeans.launcher.model.NetbeansConfig;
-import net.thevpc.nuts.NutsContentType;
-import net.thevpc.nuts.NutsWorkspace;
-import net.thevpc.nuts.NutsElementFormat;
 
 /**
  *
@@ -42,8 +42,8 @@ public class NetbeansConfigLoader11 {
         }
     }
 
-    public static NetbeansConfig load(Path file, NutsWorkspace ws) {
-        NutsElementFormat json = ws.formats().element().setContentType(NutsContentType.JSON);
+    public static NetbeansConfig load(Path file, NutsSession ws) {
+        NutsElements json = NutsElements.of(ws).json();
         Map o = json.parse(file, Map.class);
         visit(o);
         StringWriter sw = new StringWriter();

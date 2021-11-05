@@ -17,6 +17,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+
+import net.thevpc.nuts.NutsCommandLine;
+import net.thevpc.nuts.NutsSession;
 import net.thevpc.nuts.NutsWorkspace;
 
 /**
@@ -31,10 +34,10 @@ public class JVMOptionsPanel2 extends JPanel {
     private JButton up = new JButton("up");
     private JButton down = new JButton("down");
     private JTextField text = new JTextField("");
-    private NutsWorkspace ws;
+    private NutsSession ws;
     private Component parent;
 
-    public JVMOptionsPanel2(NutsWorkspace ws, Component parent) {
+    public JVMOptionsPanel2(NutsSession ws, Component parent) {
         super(new BorderLayout());
         this.ws = ws;
         this.parent = parent;
@@ -153,7 +156,7 @@ public class JVMOptionsPanel2 extends JPanel {
     public void setArguments(String args) {
         DefaultListModel<String> m = getListModel();
         m.clear();
-        for (String a : ws.commandLine().parse(args).toStringArray()) {
+        for (String a : NutsCommandLine.parse(args,ws).toStringArray()) {
             m.addElement(a);
         }
     }
@@ -164,7 +167,7 @@ public class JVMOptionsPanel2 extends JPanel {
         for (Object object : m.toArray()) {
             a.add(String.valueOf(object));
         }
-        return ws.commandLine().create(a).toString();
+        return NutsCommandLine.of(a,ws).toString();
     }
 
     private DefaultListModel<String> getListModel() {

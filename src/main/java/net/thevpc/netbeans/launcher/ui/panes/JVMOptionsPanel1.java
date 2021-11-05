@@ -13,6 +13,8 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
 import net.thevpc.netbeans.launcher.ui.utils.SwingToolkit;
+import net.thevpc.nuts.NutsCommandLine;
+import net.thevpc.nuts.NutsSession;
 import net.thevpc.nuts.NutsWorkspace;
 
 /**
@@ -27,11 +29,11 @@ public class JVMOptionsPanel1 extends JPanel {
     private JComponent add;
     private JComponent up;
     private JComponent down;
-    private NutsWorkspace ws;
+    private NutsSession ws;
     private Component parent;
     private SwingToolkit toolkit;
 
-    public JVMOptionsPanel1(NutsWorkspace ws, Component parent, SwingToolkit toolkit) {
+    public JVMOptionsPanel1(NutsSession ws, Component parent, SwingToolkit toolkit) {
         super(new BorderLayout());
         this.ws = ws;
         this.toolkit = toolkit;
@@ -170,7 +172,7 @@ public class JVMOptionsPanel1 extends JPanel {
         while (m.getRowCount() > 0) {
             m.removeRow(0);
         }
-        for (String a : ws.commandLine().parse(args).toStringArray()) {
+        for (String a : NutsCommandLine.parse(args,ws).toStringArray()) {
             m.addRow(new Object[]{a});
         }
     }
@@ -180,9 +182,8 @@ public class JVMOptionsPanel1 extends JPanel {
         List<String> a = new ArrayList<>();
         for (int i = 0; i < m.getRowCount(); i++) {
             a.add("" + m.getValueAt(i, 0));
-
         }
-        return ws.commandLine().create(a).toString();
+        return NutsCommandLine.of(a,ws).toString();
     }
 
     private DefaultTableModel getListModel() {

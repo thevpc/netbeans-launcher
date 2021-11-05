@@ -16,7 +16,7 @@ public class NbProcess implements Comparable<NbProcess> {
     private final String cachedir;
 
     public NbProcess(NutsSession session, NutsProcessInfo jpsResult) {
-        NutsCommandLine cmd = session.commandLine().parse(jpsResult.getCommandLine());
+        NutsCommandLine cmd = NutsCommandLine.parse(jpsResult.getCommandLine(),session);
         NutsArgument a;
         pid = jpsResult.getPid();
         className = jpsResult.getName();

@@ -161,23 +161,25 @@ public class NetbeansConfigService {
     }
 
     public NetbeansBinaryLink[] searchRemoteInstallableNbBinaries() {
-        NetbeansBinaryLink[] all = appContext.getSession().formats().element().setContentType(NutsContentType.JSON).parse(getClass().getResource("/net/thevpc/netbeans/launcher/binaries.json"), NetbeansBinaryLink[].class);
+        NutsSession session = appContext.getSession();
+        NetbeansBinaryLink[] all = NutsElements.of(session).json().parse(getClass().getResource("/net/thevpc/netbeans/launcher/binaries.json"), NetbeansBinaryLink[].class);
         Set<String> locallyAvailable = Arrays.stream(getAllNb()).map(NetbeansInstallation::getVersion).collect(Collectors.toSet());
         return Arrays.stream(all).filter(x -> !locallyAvailable.contains(x.getVersion())).sorted(new Comparator<NetbeansBinaryLink>() {
             @Override
             public int compare(NetbeansBinaryLink o1, NetbeansBinaryLink o2) {
-                return -appContext.getSession().version().parser().parse(o1.getVersion())
+                return -NutsVersion.of(o1.getVersion(),session)
                         .compareTo(o2.getVersion());
             }
         }).toArray(NetbeansBinaryLink[]::new);
     }
 
     public NetbeansBinaryLink[] searchRemoteNbBinaries() {
-        NetbeansBinaryLink[] all = appContext.getSession().formats().element().setContentType(NutsContentType.JSON).parse(getClass().getResource("/net/thevpc/netbeans/launcher/binaries.json"), NetbeansBinaryLink[].class);
+        NutsSession session = appContext.getSession();
+        NetbeansBinaryLink[] all = NutsElements.of(session).json().parse(getClass().getResource("/net/thevpc/netbeans/launcher/binaries.json"), NetbeansBinaryLink[].class);
         return Arrays.stream(all).sorted(new Comparator<NetbeansBinaryLink>() {
             @Override
             public int compare(NetbeansBinaryLink o1, NetbeansBinaryLink o2) {
-                return -appContext.getSession().version().parser().parse(o1.getVersion())
+                return -NutsVersion.of(o1.getVersion(),session)
                         .compareTo(o2.getVersion());
             }
         }).toArray(NetbeansBinaryLink[]::new);
@@ -853,7 +855,8 @@ public class NetbeansConfigService {
 
     public synchronized void saveFile() {
         NetbeansConfig c = config.getNetbeansConfig();
-        appContext.getSession().formats().element().setContentType(NutsContentType.JSON)
+        NutsSession session = appContext.getSession();
+        NutsElements.of(session).json()
                 .setValue(c).setNtf(false)
                 .print(Paths.get(appContext.getConfigFolder()).resolve("config.json"));
     }
@@ -866,7 +869,7 @@ public class NetbeansConfigService {
         NutsSession session = appContext.getSession();
         if (Files.isRegularFile(validFile)) {
             try {
-                config = (NetbeansConfig) session.formats().element().setContentType(NutsContentType.JSON).parse(validFile, NetbeansConfig.class);
+                config = (NetbeansConfig) NutsElements.of(session).json().parse(validFile, NetbeansConfig.class);
                 foundCurrVersionFile = config != null;
             } catch (Exception e) {
                 System.err.println("Unable to load config from " + validFile.toString());
@@ -903,7 +906,7 @@ public class NetbeansConfigService {
         }
         if (!foundCurrVersionFile) {
             List<NutsId> olderVersions = session.search().setInstallStatus(
-                    session.filters().installStatus().byInstalled(true)
+                    NutsInstallStatusFilters.of(session).byInstalled(true)
             ).addId(appContext.getAppId().builder().setVersion("").build()).getResultIds().stream().sorted(
                     (a, b) -> b.getVersion().compareTo(a.getVersion())
             ).filter(x -> x.getVersion().compareTo(appContext.getAppId().getVersion()) < 0).collect(Collectors.toList());
@@ -913,7 +916,7 @@ public class NetbeansConfigService {
                 ).resolve("config.json");
                 if (Files.isRegularFile(validFile2)) {
                     try {
-                        config = (NetbeansConfig) session.formats().element().setContentType(NutsContentType.JSON).parse(validFile2, NetbeansConfig.class);
+                        config = (NetbeansConfig) NutsElements.of(session).json().parse(validFile2, NetbeansConfig.class);
                     } catch (Exception e) {
                         System.err.println("Unable to load config from " + validFile2.toString());
                         break;
@@ -1068,14 +1071,14 @@ public class NetbeansConfigService {
                 .resolve("netbeans")
                 .resolve("netbeans-" + i.getVersion());
         //if (!Files.exists(zipTo)) {
-        session.io().copy().from(i.getUrl()).to(zipTo).setLogProgress(true)
+        NutsCp.of(session).from(i.getUrl()).to(zipTo).setLogProgress(true)
                 .setProgressMonitor(new OpNutsInputStreamProgressMonitor(addOperation("Downloading " + i.toString()))).run();
         //}
-        session.concurrent().lock().setSource(zipTo).run(() -> {
+        NutsLocks.of(session).setSource(zipTo).run(() -> {
             if (Files.exists(folderTo.resolve("bin").resolve("netbeans"))) {
                 //already unzipped!!
             } else {
-                session.io().uncompress().from(zipTo).to(folderTo).setSkipRoot(true)
+                NutsUncompress.of(session).from(zipTo).to(folderTo).setSkipRoot(true)
                         .progressMonitor(new OpNutsInputStreamProgressMonitor(addOperation("Unzipping " + i.toString())))
                         .run();
             }
