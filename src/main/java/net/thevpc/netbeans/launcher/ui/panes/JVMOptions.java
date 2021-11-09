@@ -9,7 +9,6 @@ import net.thevpc.netbeans.launcher.ui.AppPane;
 import net.thevpc.netbeans.launcher.ui.AppPanePos;
 import net.thevpc.netbeans.launcher.ui.AppPaneType;
 import net.thevpc.netbeans.launcher.ui.MainWindowSwing;
-import net.thevpc.netbeans.launcher.ui.*;
 import net.thevpc.nuts.NutsCommandLine;
 
 import javax.swing.*;
@@ -243,7 +242,7 @@ public class JVMOptions extends AppPane {
         while (m.getRowCount() > 0) {
             m.removeRow(0);
         }
-        for (String a : NutsCommandLine.parse(args,win.getAppContext().getSession()).toStringArray()) {
+        for (String a : NutsCommandLine.of(args,win.getAppContext().getSession()).toStringArray()) {
             m.addRow(new Object[]{a});
         }
     }

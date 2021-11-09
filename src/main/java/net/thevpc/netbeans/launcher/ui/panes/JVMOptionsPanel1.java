@@ -15,7 +15,6 @@ import javax.swing.table.DefaultTableModel;
 import net.thevpc.netbeans.launcher.ui.utils.SwingToolkit;
 import net.thevpc.nuts.NutsCommandLine;
 import net.thevpc.nuts.NutsSession;
-import net.thevpc.nuts.NutsWorkspace;
 
 /**
  *
@@ -172,7 +171,7 @@ public class JVMOptionsPanel1 extends JPanel {
         while (m.getRowCount() > 0) {
             m.removeRow(0);
         }
-        for (String a : NutsCommandLine.parse(args,ws).toStringArray()) {
+        for (String a : NutsCommandLine.of(args,ws).toStringArray()) {
             m.addRow(new Object[]{a});
         }
     }

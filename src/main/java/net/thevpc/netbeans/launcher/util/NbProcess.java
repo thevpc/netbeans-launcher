@@ -5,7 +5,6 @@ import java.util.Objects;
 import net.thevpc.nuts.NutsArgument;
 import net.thevpc.nuts.NutsCommandLine;
 import net.thevpc.nuts.NutsProcessInfo;
-import net.thevpc.nuts.NutsWorkspace;
 import net.thevpc.nuts.*;
 
 public class NbProcess implements Comparable<NbProcess> {
@@ -16,7 +15,7 @@ public class NbProcess implements Comparable<NbProcess> {
     private final String cachedir;
 
     public NbProcess(NutsSession session, NutsProcessInfo jpsResult) {
-        NutsCommandLine cmd = NutsCommandLine.parse(jpsResult.getCommandLine(),session);
+        NutsCommandLine cmd = NutsCommandLine.of(jpsResult.getCommandLine(),session);
         NutsArgument a;
         pid = jpsResult.getPid();
         className = jpsResult.getName();

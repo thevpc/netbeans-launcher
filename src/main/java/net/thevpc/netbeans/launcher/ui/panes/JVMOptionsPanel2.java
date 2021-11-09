@@ -20,7 +20,6 @@ import javax.swing.JTextField;
 
 import net.thevpc.nuts.NutsCommandLine;
 import net.thevpc.nuts.NutsSession;
-import net.thevpc.nuts.NutsWorkspace;
 
 /**
  *
@@ -156,7 +155,7 @@ public class JVMOptionsPanel2 extends JPanel {
     public void setArguments(String args) {
         DefaultListModel<String> m = getListModel();
         m.clear();
-        for (String a : NutsCommandLine.parse(args,ws).toStringArray()) {
+        for (String a : NutsCommandLine.of(args,ws).toStringArray()) {
             m.addElement(a);
         }
     }
