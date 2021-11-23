@@ -151,39 +151,75 @@ public class NetbeansConfigService {
         }
     }
 
-    public NetbeansBinaryLink searchNetbeansBinaryLinkForInstallation(NetbeansInstallation netbeansInstallation) {
-        for (NetbeansBinaryLink netbeansBinaryLink : searchRemoteNbBinaries()) {
-            if (netbeansInstallation.getVersion().equals(netbeansBinaryLink.getVersion())) {
-                return netbeansBinaryLink;
-            }
-        }
-        return null;
-    }
+//    public NetbeansBinaryLink searchNetbeansBinaryLinkForInstallation(NetbeansInstallation netbeansInstallation) {
+//        for (NetbeansBinaryLink netbeansBinaryLink : searchRemoteNbBinaries()) {
+//            if (netbeansInstallation.getVersion().equals(netbeansBinaryLink.getVersion())) {
+//                return netbeansBinaryLink;
+//            }
+//        }
+//        return null;
+//    }
 
     public NetbeansBinaryLink[] searchRemoteInstallableNbBinaries() {
         NutsSession session = appContext.getSession();
-        NetbeansBinaryLink[] all = NutsElements.of(session).json().parse(getClass().getResource("/net/thevpc/netbeans/launcher/binaries.json"), NetbeansBinaryLink[].class);
-        Set<String> locallyAvailable = Arrays.stream(getAllNb()).map(NetbeansInstallation::getVersion).collect(Collectors.toSet());
-        return Arrays.stream(all).filter(x -> !locallyAvailable.contains(x.getVersion())).sorted(new Comparator<NetbeansBinaryLink>() {
-            @Override
-            public int compare(NetbeansBinaryLink o1, NetbeansBinaryLink o2) {
-                return -NutsVersion.of(o1.getVersion(),session)
-                        .compareTo(o2.getVersion());
+        List<NetbeansBinaryLink> all = new ArrayList<>(
+                Arrays.asList(NutsElements.of(session).json().parse(getClass().getResource("/net/thevpc/netbeans/launcher/binaries.json"), NetbeansBinaryLink[].class))
+        );
+
+        //nuts supports out of the box navigating apache website using htmlfs
+        for (NutsPath p : NutsPath.of("htmlfs:https://archive.apache.org/dist/netbeans/netbeans/", session).list()) {
+            if(p.isDirectory()){
+                ///12.0/netbeans-12.0-bin.zip
+                String version = p.getName();
+                NutsPath b = NutsPath.of("https://archive.apache.org/dist/netbeans/netbeans/" + version + "/netbeans-" + version + "-bin.zip", session);
+                if(b.exists()){
+                    all.add(new NetbeansBinaryLink()
+                            .setPackaging("zip")
+                            .setVersion(version)
+                            .setUrl(b.toString())
+                            .setReleaseDate(b.getCreationInstant())
+                    );
+                }
             }
-        }).toArray(NetbeansBinaryLink[]::new);
+        }
+
+        Set<String> locallyAvailable = Arrays.stream(getAllNb()).map(NetbeansInstallation::getVersion).collect(Collectors.toSet());
+        return all.stream().filter(x -> !locallyAvailable.contains(x.getVersion()))
+                .sorted((o1, o2) -> -NutsVersion.of(o1.getVersion(),session).compareTo(o2.getVersion()))
+                .toArray(NetbeansBinaryLink[]::new);
     }
 
-    public NetbeansBinaryLink[] searchRemoteNbBinaries() {
-        NutsSession session = appContext.getSession();
-        NetbeansBinaryLink[] all = NutsElements.of(session).json().parse(getClass().getResource("/net/thevpc/netbeans/launcher/binaries.json"), NetbeansBinaryLink[].class);
-        return Arrays.stream(all).sorted(new Comparator<NetbeansBinaryLink>() {
-            @Override
-            public int compare(NetbeansBinaryLink o1, NetbeansBinaryLink o2) {
-                return -NutsVersion.of(o1.getVersion(),session)
-                        .compareTo(o2.getVersion());
-            }
-        }).toArray(NetbeansBinaryLink[]::new);
-    }
+//    public NetbeansBinaryLink[] searchRemoteNbBinaries() {
+//        NutsSession session = appContext.getSession();
+//
+//        List<NetbeansBinaryLink> all =
+//                Arrays.asList(
+//                        NutsElements.of(session).json().parse(getClass().getResource("/net/thevpc/netbeans/launcher/binaries.json"), NetbeansBinaryLink[].class)
+//                );
+//        //nuts supports out of the box navigating apache website!
+//        for (NutsPath p : NutsPath.of("htmlfs:https://archive.apache.org/dist/netbeans/netbeans/", session).list()) {
+//            if(p.isDirectory()){
+//                ///12.0/netbeans-12.0-bin.zip
+//                String version = p.getName();
+//                NutsPath b = NutsPath.of("https://archive.apache.org/dist/netbeans/netbeans/" + version + "/netbeans-" + version + "-bin.zip", session);
+//                if(b.exists()){
+//                    all.add(new NetbeansBinaryLink()
+//                            .setPackaging("zip")
+//                            .setVersion(version)
+//                            .setUrl(b.toString())
+//                            .setReleaseDate(b.getCreationInstant())
+//                    );
+//                }
+//            }
+//        }
+//        return all.stream().sorted(new Comparator<NetbeansBinaryLink>() {
+//            @Override
+//            public int compare(NetbeansBinaryLink o1, NetbeansBinaryLink o2) {
+//                return -NutsVersion.of(o1.getVersion(),session)
+//                        .compareTo(o2.getVersion());
+//            }
+//        }).toArray(NetbeansBinaryLink[]::new);
+//    }
 
     public void configureDefaults() {
         configureDefaultJdk();
@@ -858,16 +894,16 @@ public class NetbeansConfigService {
         NutsSession session = appContext.getSession();
         NutsElements.of(session).json()
                 .setValue(c).setNtf(false)
-                .print(Paths.get(appContext.getConfigFolder()).resolve("config.json"));
+                .print(appContext.getConfigFolder().resolve("config.json"));
     }
 
     public void loadFile() {
         NetbeansConfig config=null;
         boolean loaded = false;
-        Path validFile = Paths.get(appContext.getConfigFolder()).resolve("config.json");
+        NutsPath validFile = appContext.getConfigFolder().resolve("config.json");
         boolean foundCurrVersionFile = false;
         NutsSession session = appContext.getSession();
-        if (Files.isRegularFile(validFile)) {
+        if (validFile.isRegularFile()) {
             try {
                 config = (NetbeansConfig) NutsElements.of(session).json().parse(validFile, NetbeansConfig.class);
                 foundCurrVersionFile = config != null;
@@ -875,14 +911,9 @@ public class NetbeansConfigService {
                 System.err.println("Unable to load config from " + validFile.toString());
                 int i = 2;
                 while (true) {
-                    Path f2 = Paths.get(validFile.toString() + "." + i + ".save");
-                    if (!Files.exists(f2)) {
-                        try {
-                            Files.move(validFile, f2);
-                        } catch (IOException ex) {
-                            Logger.getLogger(NetbeansConfigService.class.getName()).log(Level.SEVERE, null, ex);
-                            throw new UncheckedIOException(ex);
-                        }
+                    NutsPath f2 = validFile.resolveSibling(validFile.getName()+ "." + i + ".save");
+                    if (!f2.exists()) {
+                        validFile.moveTo(f2);
                         break;
                     }
                     i++;
@@ -911,10 +942,10 @@ public class NetbeansConfigService {
                     (a, b) -> b.getVersion().compareTo(a.getVersion())
             ).filter(x -> x.getVersion().compareTo(appContext.getAppId().getVersion()) < 0).collect(Collectors.toList());
             for (NutsId olderVersion : olderVersions) {
-                Path validFile2 = Paths.get(
+                NutsPath validFile2 =
                         session.locations().getStoreLocation(olderVersion, NutsStoreLocation.CONFIG)
-                ).resolve("config.json");
-                if (Files.isRegularFile(validFile2)) {
+                .resolve("config.json");
+                if (validFile2.isRegularFile()) {
                     try {
                         config = (NetbeansConfig) NutsElements.of(session).json().parse(validFile2, NetbeansConfig.class);
                     } catch (Exception e) {
@@ -1062,24 +1093,24 @@ public class NetbeansConfigService {
 
     public NetbeansInstallation installNetbeansBinary(NetbeansBinaryLink i) {
         NutsSession session = appContext.getSession();
-        Path zipTo = Paths.get(appContext.getSharedAppsFolder())
+        NutsPath zipTo = appContext.getSharedAppsFolder()
                 .resolve("org")
                 .resolve("netbeans")
                 .resolve("netbeans-" + i.getVersion() + ".zip");
-        Path folderTo = Paths.get(appContext.getSharedAppsFolder())
+        NutsPath folderTo = appContext.getSharedAppsFolder()
                 .resolve("org")
                 .resolve("netbeans")
                 .resolve("netbeans-" + i.getVersion());
         //if (!Files.exists(zipTo)) {
-        NutsCp.of(session).from(i.getUrl()).to(zipTo).setLogProgress(true)
-                .setProgressMonitor(new OpNutsInputStreamProgressMonitor(addOperation("Downloading " + i.toString()))).run();
+        NutsCp.of(session).from(i.getUrl()).to(zipTo).addOptions(NutsPathOption.LOG)
+                .setProgressMonitor(new OpNutsInputStreamProgressMonitor(addOperation("Downloading " + i))).run();
         //}
         NutsLocks.of(session).setSource(zipTo).run(() -> {
-            if (Files.exists(folderTo.resolve("bin").resolve("netbeans"))) {
+            if (folderTo.resolve("bin").resolve("netbeans").exists()) {
                 //already unzipped!!
             } else {
                 NutsUncompress.of(session).from(zipTo).to(folderTo).setSkipRoot(true)
-                        .progressMonitor(new OpNutsInputStreamProgressMonitor(addOperation("Unzipping " + i.toString())))
+                        .progressMonitor(new OpNutsInputStreamProgressMonitor(addOperation("Unzipping " + i)))
                         .run();
             }
         });

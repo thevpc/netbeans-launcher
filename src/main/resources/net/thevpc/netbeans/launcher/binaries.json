@@ -1,53 +1,5 @@
 [
   {
-    "version": "12.4",
-    "packaging": "zip",
-    "url": "https://archive.apache.org/dist/netbeans/netbeans/12.4/netbeans-12.4-bin.zip",
-    "releaseDate": "2021-05-14T20:53:00Z"
-  },
-  {
-    "version": "12.3",
-    "packaging": "zip",
-    "url": "https://archive.apache.org/dist/netbeans/netbeans/12.3/netbeans-12.3-bin.zip",
-    "releaseDate": "2021-02-25T16:35:00Z"
-  },
-  {
-    "version": "12.2",
-    "packaging": "zip",
-    "url": "https://archive.apache.org/dist/netbeans/netbeans/12.2/netbeans-12.2-bin.zip",
-    "releaseDate": "2020-12-05T15:28:00Z"
-  },
-  {
-    "version": "12.1",
-    "packaging": "zip",
-    "url": "https://archive.apache.org/dist/netbeans/netbeans/12.1/netbeans-12.1-bin.zip",
-    "releaseDate": "2020-09-13T21:26:00Z"
-  },
-  {
-    "version": "12.0",
-    "packaging": "zip",
-    "url": "https://archive.apache.org/dist/netbeans/netbeans/12.0/netbeans-12.0-bin.zip",
-    "releaseDate": "2020-06-09T15:53:00Z"
-  },
-  {
-    "version": "11.3",
-    "packaging": "zip",
-    "url": "https://archive.apache.org/dist/netbeans/netbeans/11.3/netbeans-11.3-bin.zip",
-    "releaseDate": "2020-03-03T07:51:00Z"
-  },
-  {
-    "version": "11.2",
-    "packaging": "zip",
-    "url": "https://archive.apache.org/dist/netbeans/netbeans/11.2/netbeans-11.2-bin.zip",
-    "releaseDate": "2019-10-31T11:29:00Z"
-  },
-  {
-    "version": "11.1",
-    "packaging": "zip",
-    "url": "https://archive.apache.org/dist/netbeans/netbeans/11.1/netbeans-11.1-bin.zip",
-    "releaseDate": "2019-12-01T10:29:00Z"
-  },
-  {
     "version": "11.0",
     "packaging": "zip",
     "url": "https://archive.apache.org/dist/incubator/netbeans/incubating-netbeans/incubating-11.0/incubating-netbeans-11.0-bin.zip",
