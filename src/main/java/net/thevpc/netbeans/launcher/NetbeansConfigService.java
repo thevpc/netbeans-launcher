@@ -277,7 +277,7 @@ public class NetbeansConfigService {
     }
 
     public NutsPlatformLocation detectJdk(String path) {
-        return appContext.getSession().env().platforms().resolvePlatform(NutsPlatformType.JAVA, path, null);
+        return appContext.getSession().env().platforms().resolvePlatform(NutsPlatformFamily.JAVA, path, null);
     }
 
     //    public JdkLocation addJdkLocation(String path, boolean registerNew) {
