@@ -1102,7 +1102,7 @@ public class NetbeansConfigService {
                 .resolve("netbeans")
                 .resolve("netbeans-" + i.getVersion());
         //if (!Files.exists(zipTo)) {
-        NutsCp.of(session).from(i.getUrl()).to(zipTo).addOptions(NutsPathOption.LOG)
+        NutsCp.of(session).from(i.getUrl()).to(zipTo).addOptions(NutsPathOption.LOG,NutsPathOption.TRACE)
                 .setProgressMonitor(new OpNutsInputStreamProgressMonitor(addOperation("Downloading " + i))).run();
         //}
         NutsLocks.of(session).setSource(zipTo).run(() -> {
