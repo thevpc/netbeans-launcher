@@ -2,8 +2,12 @@ package net.thevpc.netbeans.launcher.ui.utils;
 
 import net.thevpc.netbeans.launcher.NbOptions;
 import net.thevpc.netbeans.launcher.ui.MainWindowSwing;
+import net.thevpc.nuts.NutsBlankable;
+import net.thevpc.swing.plaf.UIPlafManager;
 
 import javax.swing.*;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -11,8 +15,6 @@ import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
 
 /**
  * thank you
@@ -297,44 +299,15 @@ public class SwingUtils2 {
     public static void prepareLaunch(NbOptions options) {
         String plaf = options.plaf;
         try {
-            if (plaf == null) {
-                plaf = "nimbus";
+            if (NutsBlankable.isBlank(plaf)) {
+//                plaf = "FlatDark";
+                plaf = "FlatLight";
             }
-
-            if (plaf.equals("metal")) {
-                UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
-            } else if (plaf.equals("gtk")) {
-                for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-                    if ("GTK+".equals(info.getName())) {
-                        UIManager.setLookAndFeel(info.getClassName());
-                        break;
-                    }
-                }
-            } else if (plaf.equals("motif")) {
-                for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-                    if ("CDE/Motif".equals(info.getName())) {
-                        UIManager.setLookAndFeel(info.getClassName());
-                        break;
-                    }
-                }
-            } else if (plaf.equals("nimbus")) {
-                for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-                    if ("Nimbus".equals(info.getName())) {
-                        UIManager.setLookAndFeel(info.getClassName());
-                        break;
-                    }
-                }
-            }
+            UIPlafManager.INSTANCE.apply(plaf);
             // Set cross-platform Java L&F (also called "Metal")
 //            UIManager.setLookAndFeel(
 //                    UIManager.getCrossPlatformLookAndFeelClassName());
-        } catch (UnsupportedLookAndFeelException e) {
-            // handle exception
-        } catch (ClassNotFoundException e) {
-            // handle exception
-        } catch (InstantiationException e) {
-            // handle exception
-        } catch (IllegalAccessException e) {
+        } catch (Exception e) {
             // handle exception
         }
 
@@ -345,7 +318,7 @@ public class SwingUtils2 {
             return true;
         } else if (arg.equalsIgnoreCase("--metal")) {
             return true;
-        } else if (arg.equalsIgnoreCase("--numbus")) {
+        } else if (arg.equalsIgnoreCase("--nimbus")) {
             return true;
         } else if (arg.equalsIgnoreCase("--system")) {
             return true;
@@ -404,7 +377,7 @@ public class SwingUtils2 {
             } else {
                 f = percentages[percentages.length - 1] / t;
             }
-            allColumns[i]=f;
+            allColumns[i] = f;
         }
         for (int columnIndex = 0; columnIndex < allColumns.length; columnIndex++) {
             TableColumn column = model.getColumn(columnIndex);

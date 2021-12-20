@@ -24,10 +24,7 @@ import javax.swing.JFrame;
 import net.thevpc.netbeans.launcher.model.NbOsConfig;
 import net.thevpc.netbeans.launcher.model.NetbeansWorkspace;
 import net.thevpc.netbeans.launcher.ui.utils.CachedValue;
-import net.thevpc.nuts.NutsApplicationContext;
-import net.thevpc.nuts.NutsPs;
-import net.thevpc.nuts.NutsSession;
-import net.thevpc.nuts.NutsUtilStrings;
+import net.thevpc.nuts.*;
 
 /**
  * @author thevpc
@@ -120,39 +117,18 @@ public class NbUtils {
         return cmd == null || cmd.trim().isEmpty();
     }
 
-    public static String response(List<String> cmd) throws IOException {
-        return response(cmd.toArray(new String[0]));
+    public static String response(List<String> cmd,NutsSession session) throws IOException {
+        return response(cmd.toArray(new String[0]),session);
     }
 
-    public static String response(String[] cmd) throws IOException {
-//        for (String string : cmd) {
-//            System.out.print(" \"" + string + "\"");
-//        }
-//        System.out.println();
-        ProcessBuilder b = new ProcessBuilder(cmd);
-        b.redirectErrorStream(true);
-        Process proc = b.start();
-        new Thread() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(NbUtils.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                if (proc.isAlive()) {
-                    proc.destroy();
-                }
-            }
-        }.start();
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        byte[] buffer = new byte[512];
-        int r = 0;
-        InputStream outTream = proc.getInputStream();
-        while ((r = outTream.read(buffer)) > 0) {
-            out.write(buffer, 0, r);
-        }
-        return new String(out.toByteArray());
+    public static String response(String[] cmd,NutsSession session) {
+        NutsExecCommand e = session.exec().setExecutionType(NutsExecutionType.SYSTEM)
+                .addCommand(cmd)
+                .setFailFast(true)
+                .setSleepMillis(500)
+                .grabOutputString()
+                .grabErrorString();
+        return e.getOutputString();
     }
 
     public static boolean equalsStr(String s1, String s2) {
@@ -165,12 +141,6 @@ public class NbUtils {
         return s1.equals(s2);
     }
 
-    public static String getArtifactVersionOrDev() {
-        String groupId = "net.thevpc";
-        String artifactId = "netbeans-launcher";
-        return getArtifactVersionOrDev(groupId, artifactId);
-    }
-
     public static Properties loadProperties(File file) {
         Properties p = new Properties();
         if (file.isFile()) {
@@ -181,24 +151,6 @@ public class NbUtils {
             }
         }
         return p;
-    }
-
-    public static String getArtifactVersionOrDev(String groupId, String artifactId) {
-        URL url = Thread.currentThread().getContextClassLoader().getResource("META-INF/maven/" + groupId + "/" + artifactId + "/pom.properties");
-
-        if (url != null) {
-            Properties p = new Properties();
-            try {
-                p.load(url.openStream());
-            } catch (IOException e) {
-                //
-            }
-            String version = p.getProperty("version");
-            if (!isEmpty(version)) {
-                return version;
-            }
-        }
-        return "DEV";
     }
 
     public static String toOsPath(String s) {

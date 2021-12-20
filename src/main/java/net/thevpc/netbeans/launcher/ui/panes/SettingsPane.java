@@ -5,11 +5,7 @@
  */
 package net.thevpc.netbeans.launcher.ui.panes;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Graphics;
+import java.awt.*;
 import java.io.File;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
@@ -404,16 +400,24 @@ public class SettingsPane extends AppPane {
             Font font = getFont();
             Font font2 = font.deriveFont(Font.BOLD | Font.ITALIC, 16);
             Color darker = new Color(37, 73, 110);
+            Color shadow = new Color(210, 210, 210);
 
             @Override
             public void paint(Graphics g) {
                 super.paint(g);
                 Dimension s = getSize();
                 g.setFont(font2);
+                Graphics2D g2=(Graphics2D) g;
+                RenderingHints rh = new RenderingHints(
+                        RenderingHints.KEY_TEXT_ANTIALIASING,
+                        RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+                g2.setRenderingHints(rh);
 //                g.setColor(darker);
 //                g.drawString("Settings...", (int) (s.getWidth() - 80+1), 18);
+                g.setColor(shadow);
+                g.drawString("Settings...", (int) (s.getWidth() - 80), 24);
                 g.setColor(darker);
-                g.drawString("Settings...", (int) (s.getWidth() - 80), 18);
+                g.drawString("Settings...", (int) (s.getWidth() - 80), 22);
             }
 
         });

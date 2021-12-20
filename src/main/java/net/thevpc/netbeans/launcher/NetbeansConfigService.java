@@ -25,15 +25,14 @@ import java.util.stream.Collectors;
  * @author thevpc
  */
 public class NetbeansConfigService {
-    private List<WritableLongOperation> operations = new ArrayList<>();
-    private List<LongOperationListener> operationListeners = new ArrayList<>();
-
     public static final NetbeansGroup NETBEANS_NO_GROUP = new NetbeansGroup("--no-group", "--no-group");
     public static final NetbeansGroup NETBEANS_CLOSE_GROUP = new NetbeansGroup("--close-group", "--close-group");
     private static final Logger LOG = Logger.getLogger(NetbeansConfigService.class.getName());
     private static String[] prefix = {"Workspace", "WS", "NB", "Netbeans"};
     private static String[] suffix = {"-Perso", "-Work", "-Research", "-Edu", "-Fun", "-Test", "-Release", "-Test 1", "-Test 2", "-A", "-B", "-C", "-D", "-E"};
     private final NutsApplicationContext appContext;
+    private List<WritableLongOperation> operations = new ArrayList<>();
+    private List<LongOperationListener> operationListeners = new ArrayList<>();
     private ObservableNetbeansConfig config = new ObservableNetbeansConfig();
     private File currentDirectory = new File(System.getProperty("user.home"));
 
@@ -50,45 +49,45 @@ public class NetbeansConfigService {
         return null;
     }
 
-    public static VersionData parseVersionData(String version,Instant releaseDate) {
+    public static VersionData parseVersionData(String version, Instant releaseDate) {
         if (version == null) {
             version = "";
         }
         version = version.trim();
         Matcher m;
         if (version.startsWith("20160930")) {
-            return new VersionData("8.2", version,Instant.parse("2016-09-30T01:01:00Z"));
-        }else if ((m = match("(incubator-)?netbeans-release-(?<bn>[0-9]+)-on-(?<bd>[0-9]+)", version)) != null) {
+            return new VersionData("8.2", version, Instant.parse("2016-09-30T01:01:00Z"));
+        } else if ((m = match("(incubator-)?netbeans-release-(?<bn>[0-9]+)-on-(?<bd>[0-9]+)", version)) != null) {
             String bn = m.group("bn");
             String bd = m.group("bd");
             int ibn = Integer.parseInt(bn);
             if (ibn < 334) {
-                return new VersionData("8.x", version,releaseDate);
+                return new VersionData("8.x", version, releaseDate);
             } else if (ibn == 334) {
-                return new VersionData("9.0", version,releaseDate);
+                return new VersionData("9.0", version, releaseDate);
             } else if (ibn < 380) {
-                return new VersionData("9.x", version,releaseDate);
+                return new VersionData("9.x", version, releaseDate);
             } else if (ibn == 380) {
-                return new VersionData("10.0", version,releaseDate);
+                return new VersionData("10.0", version, releaseDate);
             } else if (ibn < 404) {
-                return new VersionData("10.x", version,releaseDate);
+                return new VersionData("10.x", version, releaseDate);
             } else if (ibn == 404) {
-                return new VersionData("11.0", version,releaseDate);
+                return new VersionData("11.0", version, releaseDate);
             } else if (ibn < 428) {
-                return new VersionData("11.0.x", version,releaseDate);
+                return new VersionData("11.0.x", version, releaseDate);
             } else if (ibn == 428) {
-                return new VersionData("11.1", version,releaseDate);
+                return new VersionData("11.1", version, releaseDate);
             } else {
-                return new VersionData("11.1.x", version,releaseDate);
+                return new VersionData("11.1.x", version, releaseDate);
             }
         } else if ((m = match("(?<bn>[0-9]+[.][0-9]+)-(?<bd>.*)", version)) != null) {
             String v = m.group("bn");
-            return new VersionData(v, version,releaseDate);
+            return new VersionData(v, version, releaseDate);
         } else if ((m = match("(?<bn>[0-9.]+)(?<bd>.*)", version)) != null) {
             String bn = m.group("bn");
-            return new VersionData(bn, version,releaseDate);
+            return new VersionData(bn, version, releaseDate);
         } else {
-            return new VersionData(version, version,releaseDate);
+            return new VersionData(version, version, releaseDate);
         }
     }
 
@@ -151,15 +150,6 @@ public class NetbeansConfigService {
         }
     }
 
-//    public NetbeansBinaryLink searchNetbeansBinaryLinkForInstallation(NetbeansInstallation netbeansInstallation) {
-//        for (NetbeansBinaryLink netbeansBinaryLink : searchRemoteNbBinaries()) {
-//            if (netbeansInstallation.getVersion().equals(netbeansBinaryLink.getVersion())) {
-//                return netbeansBinaryLink;
-//            }
-//        }
-//        return null;
-//    }
-
     public NetbeansBinaryLink[] searchRemoteInstallableNbBinaries() {
         NutsSession session = appContext.getSession();
         List<NetbeansBinaryLink> all = new ArrayList<>(
@@ -168,16 +158,16 @@ public class NetbeansConfigService {
 
         //nuts supports out of the box navigating apache website using htmlfs
         for (NutsPath p : NutsPath.of("htmlfs:https://archive.apache.org/dist/netbeans/netbeans/", session).list()) {
-            if(p.isDirectory()){
+            if (p.isDirectory()) {
                 ///12.0/netbeans-12.0-bin.zip
                 String version = p.getName();
                 NutsPath b = NutsPath.of("https://archive.apache.org/dist/netbeans/netbeans/" + version + "/netbeans-" + version + "-bin.zip", session);
-                if(b.exists()){
+                if (b.exists()) {
                     all.add(new NetbeansBinaryLink()
                             .setPackaging("zip")
                             .setVersion(version)
                             .setUrl(b.toString())
-                            .setReleaseDate(b.getCreationInstant())
+                            .setReleaseDate(b.getLastModifiedInstant())
                     );
                 }
             }
@@ -185,41 +175,9 @@ public class NetbeansConfigService {
 
         Set<String> locallyAvailable = Arrays.stream(getAllNb()).map(NetbeansInstallation::getVersion).collect(Collectors.toSet());
         return all.stream().filter(x -> !locallyAvailable.contains(x.getVersion()))
-                .sorted((o1, o2) -> -NutsVersion.of(o1.getVersion(),session).compareTo(o2.getVersion()))
+                .sorted((o1, o2) -> -NutsVersion.of(o1.getVersion(), session).compareTo(o2.getVersion()))
                 .toArray(NetbeansBinaryLink[]::new);
     }
-
-//    public NetbeansBinaryLink[] searchRemoteNbBinaries() {
-//        NutsSession session = appContext.getSession();
-//
-//        List<NetbeansBinaryLink> all =
-//                Arrays.asList(
-//                        NutsElements.of(session).json().parse(getClass().getResource("/net/thevpc/netbeans/launcher/binaries.json"), NetbeansBinaryLink[].class)
-//                );
-//        //nuts supports out of the box navigating apache website!
-//        for (NutsPath p : NutsPath.of("htmlfs:https://archive.apache.org/dist/netbeans/netbeans/", session).list()) {
-//            if(p.isDirectory()){
-//                ///12.0/netbeans-12.0-bin.zip
-//                String version = p.getName();
-//                NutsPath b = NutsPath.of("https://archive.apache.org/dist/netbeans/netbeans/" + version + "/netbeans-" + version + "-bin.zip", session);
-//                if(b.exists()){
-//                    all.add(new NetbeansBinaryLink()
-//                            .setPackaging("zip")
-//                            .setVersion(version)
-//                            .setUrl(b.toString())
-//                            .setReleaseDate(b.getCreationInstant())
-//                    );
-//                }
-//            }
-//        }
-//        return all.stream().sorted(new Comparator<NetbeansBinaryLink>() {
-//            @Override
-//            public int compare(NetbeansBinaryLink o1, NetbeansBinaryLink o2) {
-//                return -NutsVersion.of(o1.getVersion(),session)
-//                        .compareTo(o2.getVersion());
-//            }
-//        }).toArray(NetbeansBinaryLink[]::new);
-//    }
 
     public void configureDefaults() {
         configureDefaultJdk();
@@ -280,13 +238,6 @@ public class NetbeansConfigService {
         return appContext.getSession().env().platforms().resolvePlatform(NutsPlatformFamily.JAVA, path, null);
     }
 
-    //    public JdkLocation addJdkLocation(String path, boolean registerNew) {
-//        JdkLocation loc = resolveJdkLocation(path);
-//        if (registerNew) {
-//            addJdkLocation(loc);
-//        }
-//        return loc;
-//    }
     public NetbeansGroup[] detectNbGroups(NetbeansWorkspace w) {
         try {
             if (w.getPath() == null) {
@@ -313,7 +264,7 @@ public class NetbeansConfigService {
             cmd.add("--nosplash");
             cmd.add("--list-groups");
 
-            String s = NbUtils.response(cmd);
+            String s = NbUtils.response(cmd, appContext.getSession());
             List<NetbeansGroup> all = new ArrayList<>();
             if (s != null) {
                 all.add(NETBEANS_NO_GROUP);
@@ -353,7 +304,7 @@ public class NetbeansConfigService {
                         version = line.substring("number:".length()).trim();
                     } else if (line.toLowerCase().startsWith("date:")) {
                         String dateStr = line.substring("date:".length()).trim();
-                        if(!dateStr.startsWith("$")) {
+                        if (!dateStr.startsWith("$")) {
                             try {
                                 String[] split = dateStr.split(" +");
                                 Calendar c = Calendar.getInstance();
@@ -437,10 +388,10 @@ public class NetbeansConfigService {
 
 
     public NetbeansInstallation[] detectNbs(String path, boolean autoAdd, NetbeansInstallationStore store) {
-        return detectNbs(path,autoAdd,store,3);
+        return detectNbs(path, autoAdd, store, 3);
     }
 
-    public NetbeansInstallation[] detectNbs(String path, boolean autoAdd, NetbeansInstallationStore store,int levels) {
+    public NetbeansInstallation[] detectNbs(String path, boolean autoAdd, NetbeansInstallationStore store, int levels) {
         if (path == null) {
             return new NetbeansInstallation[0];
         }
@@ -451,7 +402,7 @@ public class NetbeansConfigService {
             }
             return new NetbeansInstallation[]{a};
         }
-        if(levels>0) {
+        if (levels > 0) {
             List<NetbeansInstallation> subNetbeans = new ArrayList<>();
             File f = NbUtils.resolveFile(path);
             if (f.isDirectory()) {
@@ -479,7 +430,7 @@ public class NetbeansConfigService {
         if (versionAndDate == null) {
             return null;
         }
-        VersionData vd = parseVersionData(versionAndDate.getVersion(),versionAndDate.getDate());
+        VersionData vd = parseVersionData(versionAndDate.getVersion(), versionAndDate.getDate());
         NetbeansInstallation netbeansInstallation = new NetbeansInstallation();
         netbeansInstallation.setName("Netbeans IDE " + vd.getVersion());
         netbeansInstallation.setVersion(vd.getVersion());
@@ -657,7 +608,7 @@ public class NetbeansConfigService {
         if (o == null) {
             o = detectNb(path, store);
             if (o == null) {
-                throw new NoSuchElementException("Invalid Netbeans installation directory " + path);
+                throw new NutsIllegalArgumentException(appContext.getSession(), NutsMessage.cstyle("invalid Netbeans installation directory %s", path));
             }
             addNb(o);
         }
@@ -884,7 +835,6 @@ public class NetbeansConfigService {
                 .setDirectory(w.getPath())
                 .addCommand(cmd)
                 .setRedirectErrorStream(true)
-                .grabOutputString()
                 .setFailFast(true)
                 .run();
     }
@@ -898,7 +848,7 @@ public class NetbeansConfigService {
     }
 
     public void loadFile() {
-        NetbeansConfig config=null;
+        NetbeansConfig config = null;
         boolean loaded = false;
         NutsPath validFile = appContext.getConfigFolder().resolve("config.json");
         boolean foundCurrVersionFile = false;
@@ -911,7 +861,7 @@ public class NetbeansConfigService {
                 System.err.println("Unable to load config from " + validFile.toString());
                 int i = 2;
                 while (true) {
-                    NutsPath f2 = validFile.resolveSibling(validFile.getName()+ "." + i + ".save");
+                    NutsPath f2 = validFile.resolveSibling(validFile.getName() + "." + i + ".save");
                     if (!f2.exists()) {
                         validFile.moveTo(f2);
                         break;
@@ -944,7 +894,7 @@ public class NetbeansConfigService {
             for (NutsId olderVersion : olderVersions) {
                 NutsPath validFile2 =
                         session.locations().getStoreLocation(olderVersion, NutsStoreLocation.CONFIG)
-                .resolve("config.json");
+                                .resolve("config.json");
                 if (validFile2.isRegularFile()) {
                     try {
                         config = (NetbeansConfig) NutsElements.of(session).json().parse(validFile2, NetbeansConfig.class);
@@ -965,7 +915,7 @@ public class NetbeansConfigService {
         }
         if (config.getInstallations().isEmpty()) {
             saveFile();
-            new Thread(()->{
+            new Thread(() -> {
                 configureDefaults();
                 saveFile();
             }).start();
@@ -974,9 +924,10 @@ public class NetbeansConfigService {
     }
 
     public void loadAsync() {
-        new Thread(()->load()).start();
+        NutsScheduler.of(appContext.getSession())
+                .executorService().submit(this::load);
     }
-    
+
     public void load() {
         loadFile();
     }
@@ -1102,7 +1053,7 @@ public class NetbeansConfigService {
                 .resolve("netbeans")
                 .resolve("netbeans-" + i.getVersion());
         //if (!Files.exists(zipTo)) {
-        NutsCp.of(session).from(i.getUrl()).to(zipTo).addOptions(NutsPathOption.LOG,NutsPathOption.TRACE)
+        NutsCp.of(session).from(i.getUrl()).to(zipTo).addOptions(NutsPathOption.LOG, NutsPathOption.TRACE)
                 .setProgressMonitor(new OpNutsInputStreamProgressMonitor(addOperation("Downloading " + i))).run();
         //}
         NutsLocks.of(session).setSource(zipTo).run(() -> {
@@ -1206,6 +1157,10 @@ public class NetbeansConfigService {
         return d;
     }
 
+    public ObservableNetbeansConfig getConfig() {
+        return config;
+    }
+
     public static class ConfigResult {
         private int found = 0;
         private int installed = 0;
@@ -1260,10 +1215,10 @@ public class NetbeansConfigService {
         private String fullVersion;
         private Instant releaseDate;
 
-        public VersionData(String version, String fullVersion,Instant releaseDate) {
+        public VersionData(String version, String fullVersion, Instant releaseDate) {
             this.setVersion(version);
             this.setFullVersion(fullVersion);
-            this.releaseDate=releaseDate;
+            this.releaseDate = releaseDate;
         }
 
         public Instant getReleaseDate() {
@@ -1310,9 +1265,5 @@ public class NetbeansConfigService {
             op.setPercent(event.getPercent());
             return true;
         }
-    }
-
-    public ObservableNetbeansConfig getConfig() {
-        return config;
     }
 }
