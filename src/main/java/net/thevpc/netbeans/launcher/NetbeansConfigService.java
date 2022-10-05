@@ -8,6 +8,14 @@ package net.thevpc.netbeans.launcher;
 import net.thevpc.netbeans.launcher.model.*;
 import net.thevpc.netbeans.launcher.util.NbUtils;
 import net.thevpc.nuts.*;
+import net.thevpc.nuts.concurrent.NutsLocks;
+import net.thevpc.nuts.concurrent.NutsScheduler;
+import net.thevpc.nuts.elem.NutsElements;
+import net.thevpc.nuts.io.NutsCp;
+import net.thevpc.nuts.io.NutsPath;
+import net.thevpc.nuts.io.NutsPathOption;
+import net.thevpc.nuts.io.NutsUncompress;
+import net.thevpc.nuts.util.*;
 
 import java.io.*;
 import java.nio.file.*;
@@ -175,7 +183,7 @@ public class NetbeansConfigService {
 
         Set<String> locallyAvailable = Arrays.stream(getAllNb()).map(NetbeansInstallation::getVersion).collect(Collectors.toSet());
         return all.stream().filter(x -> !locallyAvailable.contains(x.getVersion()))
-                .sorted((o1, o2) -> -NutsVersion.of(o1.getVersion(), session).compareTo(o2.getVersion()))
+                .sorted((o1, o2) -> -NutsVersion.of(o1.getVersion()).get().compareTo(o2.getVersion()))
                 .toArray(NetbeansBinaryLink[]::new);
     }
 
@@ -608,7 +616,7 @@ public class NetbeansConfigService {
         if (o == null) {
             o = detectNb(path, store);
             if (o == null) {
-                throw new NutsIllegalArgumentException(appContext.getSession(), NutsMessage.cstyle("invalid Netbeans installation directory %s", path));
+                throw new NutsIllegalArgumentException(appContext.getSession(), NutsMessage.ofCstyle("invalid Netbeans installation directory %s", path));
             }
             addNb(o);
         }
@@ -995,7 +1003,7 @@ public class NetbeansConfigService {
     }
 
     public String getUserdirProposal(NetbeansWorkspace w) {
-        String n = NutsUtilStrings.trim(w.getName());
+        String n = NutsStringUtils.trim(w.getName());
         if (NbUtils.isEmpty(n)) {
             n = "noname";
         }
@@ -1004,7 +1012,7 @@ public class NetbeansConfigService {
     }
 
     public String[] getUserdirProposals(NetbeansWorkspace w) {
-        String n = NutsUtilStrings.trim(w.getName());
+        String n = NutsStringUtils.trim(w.getName());
         if (NbUtils.isEmpty(n)) {
             n = "noname";
         }
@@ -1017,7 +1025,7 @@ public class NetbeansConfigService {
     }
 
     public String[] getCachedirProposals(NetbeansWorkspace w) {
-        String n = NutsUtilStrings.trim(w.getName());
+        String n = NutsStringUtils.trim(w.getName());
         if (NbUtils.isEmpty(n)) {
             n = "noname";
         }
@@ -1030,7 +1038,7 @@ public class NetbeansConfigService {
     }
 
     public String getCachedirProposal(NetbeansWorkspace w) {
-        String n = NutsUtilStrings.trim(w.getName());
+        String n = NutsStringUtils.trim(w.getName());
         if (NbUtils.isEmpty(n)) {
             n = "noname";
         }
@@ -1053,8 +1061,9 @@ public class NetbeansConfigService {
                 .resolve("netbeans")
                 .resolve("netbeans-" + i.getVersion());
         //if (!Files.exists(zipTo)) {
-        NutsCp.of(session).from(i.getUrl()).to(zipTo).addOptions(NutsPathOption.LOG, NutsPathOption.TRACE)
-                .setProgressMonitor(new OpNutsInputStreamProgressMonitor(addOperation("Downloading " + i))).run();
+        NutsCp.of(session).from(NutsPath.of(i.getUrl(), session)).to(zipTo).addOptions(NutsPathOption.LOG, NutsPathOption.TRACE)
+                .setProgressMonitor(new OpNutsInputStreamProgressMonitor(addOperation("Downloading " + i)))
+                .run();
         //}
         NutsLocks.of(session).setSource(zipTo).run(() -> {
             if (folderTo.resolve("bin").resolve("netbeans").exists()) {
@@ -1242,7 +1251,7 @@ public class NetbeansConfigService {
         }
     }
 
-    private static class OpNutsInputStreamProgressMonitor implements NutsProgressMonitor {
+    private static class OpNutsInputStreamProgressMonitor implements NutsProgressListener {
 
         private final WritableLongOperation op;
 
@@ -1251,18 +1260,21 @@ public class NetbeansConfigService {
         }
 
         @Override
-        public void onStart(NutsProgressEvent event) {
-            op.start(event.isIndeterminate());
-        }
-
-        @Override
-        public void onComplete(NutsProgressEvent event) {
-            op.end();
-        }
-
-        @Override
         public boolean onProgress(NutsProgressEvent event) {
-            op.setPercent(event.getPercent());
+            switch (event.getState()) {
+                case START: {
+                    op.start(event.isIndeterminate());
+                    break;
+                }
+                case COMPLETE: {
+                    op.end();
+                    break;
+                }
+                case PROGRESS: {
+                    op.setPercent((float) (event.getProgress() * 100));
+                    break;
+                }
+            }
             return true;
         }
     }

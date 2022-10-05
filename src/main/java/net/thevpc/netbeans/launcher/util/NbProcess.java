@@ -2,10 +2,10 @@ package net.thevpc.netbeans.launcher.util;
 
 import java.util.Objects;
 
-import net.thevpc.nuts.NutsArgument;
-import net.thevpc.nuts.NutsCommandLine;
-import net.thevpc.nuts.NutsProcessInfo;
 import net.thevpc.nuts.*;
+import net.thevpc.nuts.cmdline.NutsArgument;
+import net.thevpc.nuts.cmdline.NutsCommandLine;
+import net.thevpc.nuts.io.NutsPsInfo;
 
 public class NbProcess implements Comparable<NbProcess> {
 
@@ -14,18 +14,18 @@ public class NbProcess implements Comparable<NbProcess> {
     private final String userdir;
     private final String cachedir;
 
-    public NbProcess(NutsSession session, NutsProcessInfo jpsResult) {
-        NutsCommandLine cmd = NutsCommandLine.of(jpsResult.getCommandLine(),session);
+    public NbProcess(NutsSession session, NutsPsInfo jpsResult) {
+        NutsCommandLine cmd = NutsCommandLine.parseDefault(jpsResult.getCommandLine()).get();
         NutsArgument a;
         pid = jpsResult.getPid();
         className = jpsResult.getName();
         String _userdir = null;
         String _cachedir = null;
         while (cmd.hasNext()) {
-            if ((a = cmd.nextString("--userdir")) != null) {
-                _userdir = a.getValue().getString();
-            } else if ((a = cmd.nextString("--cachedir")) != null) {
-                _cachedir = a.getValue().getString();
+            if ((a = cmd.nextString("--userdir").orNull()) != null) {
+                _userdir = a.getValue().asString().get();
+            } else if ((a = cmd.nextString("--cachedir").orNull()) != null) {
+                _cachedir = a.getValue().asString().get();
             } else {
                 cmd.skip();
             }

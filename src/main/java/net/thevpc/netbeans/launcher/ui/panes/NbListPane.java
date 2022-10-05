@@ -33,7 +33,7 @@ import net.thevpc.nuts.NutsApplicationContext;
 import net.thevpc.netbeans.launcher.ui.utils.Equalizer;
 import net.thevpc.netbeans.launcher.ui.utils.ObjectTableModel;
 import net.thevpc.netbeans.launcher.ui.utils.TableComponent;
-import net.thevpc.nuts.NutsUtilStrings;
+import net.thevpc.nuts.util.NutsStringUtils;
 
 /**
  * @author thevpc
@@ -238,8 +238,8 @@ public class NbListPane extends AppPane {
     }
 
     public void updateList() {
-        Equalizer name = (a, b) -> a != null && b != null && NutsUtilStrings.trim(((NetbeansWorkspace) a).getName())
-                .equals(NutsUtilStrings.trim(((NetbeansWorkspace) b).getName()));
+        Equalizer name = (a, b) -> a != null && b != null && NutsStringUtils.trim(((NetbeansWorkspace) a).getName())
+                .equals(NutsStringUtils.trim(((NetbeansWorkspace) b).getName()));
         toolkit.updateTable(
                 getComps1().workspacesListView, configService.getAllNbWorkspaces(),
                 name,

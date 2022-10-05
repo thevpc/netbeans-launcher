@@ -9,6 +9,8 @@ import net.thevpc.netbeans.launcher.cli.MainWindowCLI;
 import net.thevpc.netbeans.launcher.ui.MainWindowSwing;
 import net.thevpc.netbeans.launcher.util.NbUtils;
 import net.thevpc.nuts.*;
+import net.thevpc.nuts.cmdline.NutsCommandLine;
+import net.thevpc.nuts.io.NutsPrintStream;
 
 import javax.swing.*;
 
@@ -41,8 +43,9 @@ public class NbMain implements NutsApplication {
 
     @Override
     public void run(NutsApplicationContext appContext) {
-        NutsPrintStream out = appContext.getSession().out();
-        NutsPrintStream err = appContext.getSession().err();
+        NutsSession session = appContext.getSession();
+        NutsPrintStream out = session.out();
+        NutsPrintStream err = session.err();
         if (!NbUtils.isPlatformSupported()) {
             err.println("platform not supported");
             if (System.console() == null) {
@@ -77,7 +80,7 @@ public class NbMain implements NutsApplication {
             } else if (cmdLine.next("--install") != null) {
                 options.install = true;
             } else {
-                cmdLine.unexpectedArgument();
+                cmdLine.throwUnexpectedArgument(session);
             }
         }
 
@@ -103,8 +106,8 @@ public class NbMain implements NutsApplication {
                 .setId(applicationContext.getAppId())
                 .setAlias(PREFERRED_ALIAS)
                 .setCreateAlias(true)
-                .setCreateMenuShortcut(NutsSupportCondition.PREFERRED)
-                .setCreateDesktopShortcut(NutsSupportCondition.PREFERRED)
+                .setCreateMenuLauncher(NutsSupportMode.PREFERRED)
+                .setCreateDesktopLauncher(NutsSupportMode.PREFERRED)
         );
     }
 }

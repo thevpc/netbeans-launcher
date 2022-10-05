@@ -6,8 +6,8 @@
 package net.thevpc.netbeans.launcher.compat;
 
 import net.thevpc.netbeans.launcher.model.NetbeansConfig;
-import net.thevpc.nuts.NutsElements;
 import net.thevpc.nuts.NutsSession;
+import net.thevpc.nuts.elem.NutsElements;
 
 import java.io.StringReader;
 import java.io.StringWriter;

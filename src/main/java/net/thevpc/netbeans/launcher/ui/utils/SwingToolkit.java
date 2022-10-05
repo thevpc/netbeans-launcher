@@ -25,7 +25,7 @@ import javax.swing.*;
 
 import net.thevpc.netbeans.launcher.util.NbUtils;
 import net.thevpc.nuts.NutsExecutionException;
-import net.thevpc.nuts.NutsUtilStrings;
+import net.thevpc.nuts.util.NutsStringUtils;
 
 /**
  * @author thevpc
@@ -411,7 +411,7 @@ public class SwingToolkit {
     }
 
     public void openFolder(String path) {
-        if (!NutsUtilStrings.trim(path).isEmpty()) {
+        if (!NutsStringUtils.trim(path).isEmpty()) {
             try {
                 final File f = NbUtils.resolveFile(path);
                 if (f.isDirectory()) {
