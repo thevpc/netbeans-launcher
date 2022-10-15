@@ -22,6 +22,9 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,9 +46,38 @@ public class NetbeansConfigService {
     private List<LongOperationListener> operationListeners = new ArrayList<>();
     private ObservableNetbeansConfig config = new ObservableNetbeansConfig();
     private File currentDirectory = new File(System.getProperty("user.home"));
+    private List<ConfigListener> configListeners = new ArrayList<>();
+    private List<NetbeansBinaryLink> cachedNetbeansBinaryLink = null;
+    private boolean configLoaded;
 
     public NetbeansConfigService(NutsApplicationContext appContext) {
         this.appContext = appContext;
+    }
+
+    private class OnceConfigListener implements ConfigListener {
+        ConfigListener c;
+
+        public OnceConfigListener(ConfigListener c) {
+            this.c = c;
+        }
+
+        @Override
+        public void onConfigLoaded() {
+            c.onConfigLoaded();
+            NetbeansConfigService.this.removeConfigListener(this);
+        }
+    }
+
+    public void addOnceConfigListener(ConfigListener conf) {
+        addConfigListener(new OnceConfigListener(conf));
+    }
+
+    public void addConfigListener(ConfigListener conf) {
+        configListeners.add(conf);
+    }
+
+    public void removeConfigListener(ConfigListener conf) {
+        configListeners.remove(conf);
     }
 
     private static Matcher match(String expr, String str) {
@@ -156,6 +188,16 @@ public class NetbeansConfigService {
                 }
             }
         }
+    }
+
+    public NetbeansBinaryLink[] searchRemoteInstallableNbBinariesWithCache(boolean cached) {
+        if(cached && cachedNetbeansBinaryLink!=null){
+            return cachedNetbeansBinaryLink.toArray(new NetbeansBinaryLink[0]);
+        }
+        cachedNetbeansBinaryLink=new ArrayList<>(
+                Arrays.asList(searchRemoteInstallableNbBinaries())
+        );
+        return cachedNetbeansBinaryLink.toArray(new NetbeansBinaryLink[0]);
     }
 
     public NetbeansBinaryLink[] searchRemoteInstallableNbBinaries() {
@@ -855,7 +897,7 @@ public class NetbeansConfigService {
                 .print(appContext.getConfigFolder().resolve("config.json"));
     }
 
-    public void loadFile() {
+    public <T> void loadFile() {
         NetbeansConfig config = null;
         boolean loaded = false;
         NutsPath validFile = appContext.getConfigFolder().resolve("config.json");
@@ -929,6 +971,10 @@ public class NetbeansConfigService {
             }).start();
         }
         this.config.setNetbeansConfig(config);
+        this.configLoaded = true;
+        for (ConfigListener configListener : configListeners.toArray(new ConfigListener[0])) {
+            configListener.onConfigLoaded();
+        }
     }
 
     public void loadAsync() {
@@ -1278,4 +1324,24 @@ public class NetbeansConfigService {
             return true;
         }
     }
+
+    public void waitForConfigLoaded() {
+        if (configLoaded) {
+            return;
+        }
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        addOnceConfigListener(new ConfigListener() {
+            @Override
+            public void onConfigLoaded() {
+                countDownLatch.countDown();
+            }
+        });
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
 }

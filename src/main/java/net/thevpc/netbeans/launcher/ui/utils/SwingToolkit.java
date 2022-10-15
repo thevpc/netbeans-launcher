@@ -335,37 +335,39 @@ public class SwingToolkit {
     }
 
     public void updateTable(CatalogComponent table, Object[] values, Equalizer e, Comparator comp) {
-        Equalizer e2 = new Equalizer() {
-            @Override
-            public boolean equals(Object a, Object b) {
-                if (a == null && b == null) {
-                    return true;
-                } else if (a == null || b == null) {
-                    return false;
-                } else {
-                    return a.equals(b);
+        SwingUtilities.invokeLater(() -> {
+            Equalizer e2 = new Equalizer() {
+                @Override
+                public boolean equals(Object a, Object b) {
+                    if (a == null && b == null) {
+                        return true;
+                    } else if (a == null || b == null) {
+                        return false;
+                    } else {
+                        return a.equals(b);
+                    }
+                }
+            };
+            if (comp != null) {
+                Arrays.sort(values, comp);
+            }
+            Object old = table.getSelectedValue();
+            Object ok = null;
+            int okIndex = -1;
+            java.util.List<Object> newVals = new ArrayList<Object>();
+            for (int i = 0; i < values.length; i++) {
+                Object loc = values[i];
+                newVals.add(loc);
+                if (e != null ? e.equals(old, loc) : e2.equals(old, loc)) {
+                    ok = loc;
+                    okIndex = i;
                 }
             }
-        };
-        if (comp != null) {
-            Arrays.sort(values, comp);
-        }
-        Object old = table.getSelectedValue();
-        Object ok = null;
-        int okIndex = -1;
-        java.util.List<Object> newVals = new ArrayList<Object>();
-        for (int i = 0; i < values.length; i++) {
-            Object loc = values[i];
-            newVals.add(loc);
-            if (e != null ? e.equals(old, loc) : e2.equals(old, loc)) {
-                ok = loc;
-                okIndex = i;
+            table.setValues(newVals);
+            if (okIndex >= 0) {
+                table.setSelectedIndex(okIndex);
             }
-        }
-        table.setValues(newVals);
-        if (okIndex >= 0) {
-            table.setSelectedIndex(okIndex);
-        }
+        });
     }
 
     public JComponent createIconButton0(String icon, String tooltip, ButtonAction action, boolean compact) {

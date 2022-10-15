@@ -6,6 +6,7 @@ import net.thevpc.netbeans.launcher.model.NetbeansBinaryLink;
 import net.thevpc.netbeans.launcher.model.NetbeansInstallation;
 import net.thevpc.netbeans.launcher.model.NetbeansLocation;
 import net.thevpc.netbeans.launcher.ui.utils.CatalogComponent;
+import net.thevpc.netbeans.launcher.ui.utils.Equalizer;
 import net.thevpc.netbeans.launcher.util.SwingWorker;
 import net.thevpc.netbeans.launcher.util.Workers;
 import net.thevpc.netbeans.launcher.ui.AppPaneType;
@@ -81,11 +82,11 @@ public abstract class NbListComponent {
                     win.getToolkit().msg("App.Download.Confirm.Message").with("name", i.toString()),
                     () -> {
                         w.run(() -> {
-                            NetbeansInstallation n = win.getConfigService().installNetbeansBinary(w.load("i"));
-                            if (n != null) {
-                                w.store("n", n);
-                            }
-                        })
+                                    NetbeansInstallation n = win.getConfigService().installNetbeansBinary(w.load("i"));
+                                    if (n != null) {
+                                        w.store("n", n);
+                                    }
+                                })
                                 .onError(ex -> win.getToolkit().showError(win.getToolkit().msg("App.Download.Error"), ex))
                                 .onSuccess(() -> {
                                     win.updateList();
@@ -117,46 +118,45 @@ public abstract class NbListComponent {
             ws.setSelectedWorkspace((NetbeansInstallation) v);
         }
     }
-    private String extractUniformVersion(String version){
-        if(version==null){
+
+    private String extractUniformVersion(String version) {
+        if (version == null) {
             return null;
         }
         int e = version.indexOf('-');
-        if(e>=0){
-            return version.substring(0,e);
+        if (e >= 0) {
+            return version.substring(0, e);
         }
         return version;
     }
-    
-    public NetbeansLocation[] load() {
+
+    public NetbeansLocation[] load(boolean withRemote, boolean cached) {
+        win.getConfigService().waitForConfigLoaded();
         java.util.List<NetbeansLocation> rr = new ArrayList<>();
         Set<String> versions = new TreeSet<>();
         for (NetbeansInstallation netbeansInstallation : win.getConfigService().getAllNb()) {
             rr.add(netbeansInstallation);
             versions.add(extractUniformVersion(netbeansInstallation.getVersion()));
         }
-        for (NetbeansBinaryLink netbeansBinaryLink : win.getConfigService().searchRemoteInstallableNbBinaries()) {
-            if (!versions.contains(extractUniformVersion(netbeansBinaryLink.getVersion()))) {
-                rr.add(netbeansBinaryLink);
+        if (withRemote) {
+            for (NetbeansBinaryLink netbeansBinaryLink : win.getConfigService().searchRemoteInstallableNbBinariesWithCache(cached)) {
+                if (!versions.contains(extractUniformVersion(netbeansBinaryLink.getVersion()))) {
+                    rr.add(netbeansBinaryLink);
+                }
             }
         }
         return rr.toArray(new NetbeansLocation[0]);
     }
 
     public void refresh() {
-        win.getToolkit().updateTable(table, load(),
-                (a, b) -> {
-                    if (a == null || b == null) {
-                        return a == b;
-                    }
-                    if (a instanceof NetbeansBinaryLink && b instanceof NetbeansBinaryLink) {
-                        return ((NetbeansBinaryLink) a).getVersion().equals(((NetbeansBinaryLink) b).getVersion());
-                    }
-                    if (a instanceof NetbeansInstallation && b instanceof NetbeansInstallation) {
-                        return ((NetbeansInstallation) a).getName().equals(((NetbeansInstallation) b).getName());
-                    }
-                    return false;
-                }, null);
+        refresh(true);
+    }
+
+    public void refresh(boolean cached) {
+        new Thread(() -> {
+            win.getToolkit().updateTable(table, load(false, cached), new NetbeansInstallOrBinaryEqualizer(), null);
+            win.getToolkit().updateTable(table, load(true, cached), new NetbeansInstallOrBinaryEqualizer(), null);
+        }).start();
         table.setElementHeight(win.isCompact() ? 30 : 50);
     }
 
@@ -202,4 +202,19 @@ public abstract class NbListComponent {
         });
     }
 
+    private static class NetbeansInstallOrBinaryEqualizer implements Equalizer {
+        @Override
+        public boolean equals(Object a, Object b) {
+            if (a == null || b == null) {
+                return a == b;
+            }
+            if (a instanceof NetbeansBinaryLink && b instanceof NetbeansBinaryLink) {
+                return ((NetbeansBinaryLink) a).getVersion().equals(((NetbeansBinaryLink) b).getVersion());
+            }
+            if (a instanceof NetbeansInstallation && b instanceof NetbeansInstallation) {
+                return ((NetbeansInstallation) a).getName().equals(((NetbeansInstallation) b).getName());
+            }
+            return false;
+        }
+    }
 }
