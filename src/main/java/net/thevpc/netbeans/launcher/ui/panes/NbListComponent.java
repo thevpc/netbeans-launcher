@@ -89,7 +89,7 @@ public abstract class NbListComponent {
                                 })
                                 .onError(ex -> win.getToolkit().showError(win.getToolkit().msg("App.Download.Error"), ex))
                                 .onSuccess(() -> {
-                                    win.updateList();
+                                    win.updateList(true);
                                     win.setSelectedPane(AppPaneType.LIST_WS);
                                     NetbeansInstallation n = w.load("n");
                                     if (n != null) {
@@ -148,9 +148,9 @@ public abstract class NbListComponent {
         return rr.toArray(new NetbeansLocation[0]);
     }
 
-    public void refresh() {
-        refresh(true);
-    }
+//    public void refresh() {
+//        refresh(true);
+//    }
 
     public void refresh(boolean cached) {
         new Thread(() -> {

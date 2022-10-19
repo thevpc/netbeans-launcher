@@ -83,7 +83,7 @@ public class ConfirmPane extends AppPane {
         this.desc = desc;
         this.supp = supp;
         this.yesNoCancel = false;
-        updateAll();
+        updateAll(true);
     }
 
     public void initYesNoCancel(AppPaneType lastType, SwingToolkit.Message title, SwingToolkit.Message desc, Consumer<ConfirmResult> supp) {
@@ -92,7 +92,7 @@ public class ConfirmPane extends AppPane {
         this.desc = desc;
         this.supp = supp;
         this.yesNoCancel = true;
-        updateAll();
+        updateAll(true);
     }
 
     private void onOk() {
@@ -160,7 +160,7 @@ public class ConfirmPane extends AppPane {
     }
 
     @Override
-    public void updateAll() {
+    public void updateAll(boolean cached) {
         onRequiredUpdateButtonStatuses();
         getComps1().title.setText(title == null ? "Attention" : title.getText());
         getComps1().desc.setText(desc == null ? "" : desc.getText());

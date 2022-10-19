@@ -80,7 +80,7 @@ public class JVMOptions extends AppPane {
     public void init(AppPaneType lastType, Consumer<Boolean> supp) {
         this.lastPane = lastType;
         this.supp = supp;
-        updateAll();
+        updateAll(true);
     }
 
     private void onUp() {
@@ -176,7 +176,7 @@ public class JVMOptions extends AppPane {
     }
 
     @Override
-    public void updateAll() {
+    public void updateAll(boolean cached) {
         onRequiredUpdateButtonStatuses();
     }
 

@@ -364,7 +364,7 @@ public class WorkspacePane extends AppPane {
                 throw new IllegalArgumentException("missing user dir");
             }
             configService.saveNbWorkspace(w);
-            win.updateList();
+            win.updateList(true);
             win.setSelectedPane(AppPaneType.LIST_WS);
         } catch (Exception ex) {
             toolkit.showError(toolkit.msg("App.SaveWorkspace.Error"), ex);
