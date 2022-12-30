@@ -30,7 +30,7 @@ import net.thevpc.netbeans.launcher.ui.utils.ListComponent;
 import net.thevpc.netbeans.launcher.ui.utils.ObjectTableModel;
 import net.thevpc.netbeans.launcher.ui.utils.TableComponent;
 import net.thevpc.netbeans.launcher.util.*;
-import net.thevpc.nuts.NutsPlatformLocation;
+import net.thevpc.nuts.NPlatformLocation;
 
 /**
  * @author thevpc
@@ -60,19 +60,19 @@ public class SettingsPane extends AppPane {
         super(AppPaneType.SETTINGS, new AppPanePos(2, 0), win);
         build();
         win.getConfigService().getConfig()
-                .getJdkLocations().addListener(new ObservableList.ObservableListListener<NutsPlatformLocation>() {
+                .getJdkLocations().addListener(new ObservableList.ObservableListListener<NPlatformLocation>() {
             @Override
-            public void onAdd(ObservableListEvent<NutsPlatformLocation> event) {
+            public void onAdd(ObservableListEvent<NPlatformLocation> event) {
                 updateJdkList();
             }
 
             @Override
-            public void onRemove(ObservableListEvent<NutsPlatformLocation> event) {
+            public void onRemove(ObservableListEvent<NPlatformLocation> event) {
                 updateJdkList();
             }
 
             @Override
-            public void onUpdate(ObservableListEvent<NutsPlatformLocation> event) {
+            public void onUpdate(ObservableListEvent<NPlatformLocation> event) {
                 updateJdkList();
             }
         });
@@ -129,9 +129,9 @@ public class SettingsPane extends AppPane {
         if (jdkListView instanceof ListComponent) {
             ((ListComponent) jdkListView).setStringer(jdkStringer);
         } else if (jdkListView instanceof TableComponent) {
-            ((TableComponent) jdkListView).setColumns(new ObjectTableModel.NamedColumns<NutsPlatformLocation>(new String[]{"Name", "Location"}) {
+            ((TableComponent) jdkListView).setColumns(new ObjectTableModel.NamedColumns<NPlatformLocation>(new String[]{"Name", "Location"}) {
                 @Override
-                public Object getValueAt(int row, String column, NutsPlatformLocation t) {
+                public Object getValueAt(int row, String column, NPlatformLocation t) {
                     switch (column) {
                         case "Name":
                             return t==null?"<null>":t.getName();
@@ -228,7 +228,7 @@ public class SettingsPane extends AppPane {
                         final File f = c.getSelectedFile();
                         if (f != null) {
                             configService.setCurrentDirectory(f);
-                            NutsPlatformLocation loc = configService.detectJdk(f.getPath());
+                            NPlatformLocation loc = configService.detectJdk(f.getPath());
                             if (loc != null) {
                                 configService.addJdk(loc);
                                 updateJdkList();
@@ -278,7 +278,7 @@ public class SettingsPane extends AppPane {
         try {
             switch (getSettingType()) {
                 case JDK_INSTALLATION: {
-                    NutsPlatformLocation loc = getSelectedJdkLocation();
+                    NPlatformLocation loc = getSelectedJdkLocation();
                     if (loc != null) {
                         configService.removeJdk(loc.getPath());
                         updateJdkList();
@@ -331,7 +331,7 @@ public class SettingsPane extends AppPane {
     }
 
     public void updateJdkList() {
-        toolkit.updateTable(getComps2().jdkListView, configService.getAllJdk(), (a, b) -> a != null && b != null && ((NutsPlatformLocation) a).getName().equals(((NutsPlatformLocation) b).getName()), null);
+        toolkit.updateTable(getComps2().jdkListView, configService.getAllJdk(), (a, b) -> a != null && b != null && ((NPlatformLocation) a).getName().equals(((NPlatformLocation) b).getName()), null);
     }
 
     public void updateNbList() {
@@ -364,8 +364,8 @@ public class SettingsPane extends AppPane {
 //        }
 //        return null;
 //    }
-    public NutsPlatformLocation getSelectedJdkLocation() {
-        NutsPlatformLocation w = (NutsPlatformLocation) getComps2().jdkListView.getSelectedValue();
+    public NPlatformLocation getSelectedJdkLocation() {
+        NPlatformLocation w = (NPlatformLocation) getComps2().jdkListView.getSelectedValue();
         if (w != null) {
             return w;
         }

@@ -2,12 +2,12 @@ package net.thevpc.netbeans.launcher.model;
 
 import net.thevpc.netbeans.launcher.util.ObservableList;
 import net.thevpc.netbeans.launcher.util.ObservableValue;
-import net.thevpc.nuts.NutsPlatformLocation;
+import net.thevpc.nuts.NPlatformLocation;
 
 public class ObservableNetbeansConfig {
     private final ObservableList<NetbeansInstallation> installations = new ObservableList<>();
     private final ObservableList<NetbeansWorkspace> workspaces = new ObservableList<>();
-    private final ObservableList<NutsPlatformLocation> jdkLocations = new ObservableList<>();
+    private final ObservableList<NPlatformLocation> jdkLocations = new ObservableList<>();
     private final ObservableValue<Boolean> sumoMode = new ObservableValue<>(false);
 
     public void setNetbeansConfig(NetbeansConfig c){
@@ -41,7 +41,7 @@ public class ObservableNetbeansConfig {
         return workspaces;
     }
 
-    public ObservableList<NutsPlatformLocation> getJdkLocations() {
+    public ObservableList<NPlatformLocation> getJdkLocations() {
         return jdkLocations;
     }
 

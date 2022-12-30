@@ -9,7 +9,7 @@ import net.thevpc.netbeans.launcher.ui.AppPane;
 import net.thevpc.netbeans.launcher.ui.AppPanePos;
 import net.thevpc.netbeans.launcher.ui.AppPaneType;
 import net.thevpc.netbeans.launcher.ui.MainWindowSwing;
-import net.thevpc.nuts.cmdline.NutsCommandLine;
+import net.thevpc.nuts.cmdline.NCommandLine;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -242,7 +242,7 @@ public class JVMOptions extends AppPane {
         while (m.getRowCount() > 0) {
             m.removeRow(0);
         }
-        for (String a : NutsCommandLine.parseDefault(args).get().toStringArray()) {
+        for (String a : NCommandLine.parseDefault(args).get().toStringArray()) {
             m.addRow(new Object[]{a});
         }
     }
@@ -254,6 +254,6 @@ public class JVMOptions extends AppPane {
             a.add("" + m.getValueAt(i, 0));
 
         }
-        return NutsCommandLine.of(a).toString();
+        return NCommandLine.of(a).toString();
     }
 }

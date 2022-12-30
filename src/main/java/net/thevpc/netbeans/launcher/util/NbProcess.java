@@ -3,9 +3,9 @@ package net.thevpc.netbeans.launcher.util;
 import java.util.Objects;
 
 import net.thevpc.nuts.*;
-import net.thevpc.nuts.cmdline.NutsArgument;
-import net.thevpc.nuts.cmdline.NutsCommandLine;
-import net.thevpc.nuts.io.NutsPsInfo;
+import net.thevpc.nuts.cmdline.NArgument;
+import net.thevpc.nuts.cmdline.NCommandLine;
+import net.thevpc.nuts.io.NPsInfo;
 
 public class NbProcess implements Comparable<NbProcess> {
 
@@ -14,9 +14,9 @@ public class NbProcess implements Comparable<NbProcess> {
     private final String userdir;
     private final String cachedir;
 
-    public NbProcess(NutsSession session, NutsPsInfo jpsResult) {
-        NutsCommandLine cmd = NutsCommandLine.parseDefault(jpsResult.getCommandLine()).get();
-        NutsArgument a;
+    public NbProcess(NSession session, NPsInfo jpsResult) {
+        NCommandLine cmd = NCommandLine.parseDefault(jpsResult.getCommandLine()).get();
+        NArgument a;
         pid = jpsResult.getPid();
         className = jpsResult.getName();
         String _userdir = null;

@@ -7,17 +7,17 @@ package net.thevpc.netbeans.launcher.cli;
 
 import net.thevpc.netbeans.launcher.NetbeansConfigService;
 import net.thevpc.netbeans.launcher.NbOptions;
-import net.thevpc.nuts.NutsApplicationContext;
+import net.thevpc.nuts.NApplicationContext;
 
 /**
  * @author thevpc
  */
 public class MainWindowCLI {
     private final NetbeansConfigService configService;
-    private final NutsApplicationContext appContext;
+    private final NApplicationContext appContext;
     private final NbOptions options;
 
-    public static void launch(NutsApplicationContext appContext, NbOptions options) {
+    public static void launch(NApplicationContext appContext, NbOptions options) {
         MainWindowCLI cli = new MainWindowCLI(appContext, options);
         cli.run();
     }
@@ -26,7 +26,7 @@ public class MainWindowCLI {
         appContext.getSession().out().println("CLI mode is not yet supported. Ignoring command");
     }
 
-    public MainWindowCLI(NutsApplicationContext appContext, NbOptions options) {
+    public MainWindowCLI(NApplicationContext appContext, NbOptions options) {
         this.configService = new NetbeansConfigService(appContext);
         this.appContext = appContext;
         this.options = options;

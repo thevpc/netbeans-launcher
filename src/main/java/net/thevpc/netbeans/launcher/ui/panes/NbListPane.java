@@ -29,11 +29,11 @@ import net.thevpc.netbeans.launcher.util.NbUtils;
 import net.thevpc.netbeans.launcher.ui.utils.CatalogComponent;
 import net.thevpc.netbeans.launcher.ui.utils.ListComponent;
 import net.thevpc.netbeans.launcher.ui.utils.SwingUtils2;
-import net.thevpc.nuts.NutsApplicationContext;
+import net.thevpc.nuts.NApplicationContext;
 import net.thevpc.netbeans.launcher.ui.utils.Equalizer;
 import net.thevpc.netbeans.launcher.ui.utils.ObjectTableModel;
 import net.thevpc.netbeans.launcher.ui.utils.TableComponent;
-import net.thevpc.nuts.util.NutsStringUtils;
+import net.thevpc.nuts.util.NStringUtils;
 
 /**
  * @author thevpc
@@ -42,7 +42,7 @@ public class NbListPane extends AppPane {
 
     protected final static Set<String> running = new HashSet<String>();
 
-    public static boolean isStarted(NutsApplicationContext ctx, NetbeansWorkspace w) {
+    public static boolean isStarted(NApplicationContext ctx, NetbeansWorkspace w) {
         String name = w.getName();
         synchronized (running) {
             if (running.contains(name)) {
@@ -52,7 +52,7 @@ public class NbListPane extends AppPane {
         return NbUtils.isRunningWithCache(ctx, w);
     }
 
-    public static boolean setStopped(NutsApplicationContext ctx, NetbeansWorkspace w) {
+    public static boolean setStopped(NApplicationContext ctx, NetbeansWorkspace w) {
         String name = w.getName();
         synchronized (running) {
             if (running.remove(name)) {
@@ -62,7 +62,7 @@ public class NbListPane extends AppPane {
         return false;
     }
 
-    public static boolean setStarted(NutsApplicationContext ctx, NetbeansWorkspace w) {
+    public static boolean setStarted(NApplicationContext ctx, NetbeansWorkspace w) {
         synchronized (running) {
             if (isStarted(ctx, w)) {
                 String name = w.getName();
@@ -238,8 +238,8 @@ public class NbListPane extends AppPane {
     }
 
     public void updateList() {
-        Equalizer name = (a, b) -> a != null && b != null && NutsStringUtils.trim(((NetbeansWorkspace) a).getName())
-                .equals(NutsStringUtils.trim(((NetbeansWorkspace) b).getName()));
+        Equalizer name = (a, b) -> a != null && b != null && NStringUtils.trim(((NetbeansWorkspace) a).getName())
+                .equals(NStringUtils.trim(((NetbeansWorkspace) b).getName()));
         toolkit.updateTable(
                 getComps1().workspacesListView, configService.getAllNbWorkspaces(),
                 name,

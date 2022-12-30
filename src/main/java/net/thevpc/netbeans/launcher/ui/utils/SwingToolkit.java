@@ -24,8 +24,8 @@ import java.util.regex.Pattern;
 import javax.swing.*;
 
 import net.thevpc.netbeans.launcher.util.NbUtils;
-import net.thevpc.nuts.NutsExecutionException;
-import net.thevpc.nuts.util.NutsStringUtils;
+import net.thevpc.nuts.NExecutionException;
+import net.thevpc.nuts.util.NStringUtils;
 
 /**
  * @author thevpc
@@ -205,7 +205,7 @@ public class SwingToolkit {
             message = msg("Toolkit.ShowError.Message").getText();
         }
         if (ex != null) {
-            message += " : " + ((ex instanceof NutsExecutionException) ? ex.getMessage() : ex.toString());
+            message += " : " + ((ex instanceof NExecutionException) ? ex.getMessage() : ex.toString());
         }
         JOptionPane.showMessageDialog(parent, message, title, JOptionPane.ERROR_MESSAGE, null);
     }
@@ -413,7 +413,7 @@ public class SwingToolkit {
     }
 
     public void openFolder(String path) {
-        if (!NutsStringUtils.trim(path).isEmpty()) {
+        if (!NStringUtils.trim(path).isEmpty()) {
             try {
                 final File f = NbUtils.resolveFile(path);
                 if (f.isDirectory()) {

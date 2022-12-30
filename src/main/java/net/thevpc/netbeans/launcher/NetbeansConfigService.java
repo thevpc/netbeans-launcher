@@ -8,13 +8,13 @@ package net.thevpc.netbeans.launcher;
 import net.thevpc.netbeans.launcher.model.*;
 import net.thevpc.netbeans.launcher.util.NbUtils;
 import net.thevpc.nuts.*;
-import net.thevpc.nuts.concurrent.NutsLocks;
-import net.thevpc.nuts.concurrent.NutsScheduler;
-import net.thevpc.nuts.elem.NutsElements;
-import net.thevpc.nuts.io.NutsCp;
-import net.thevpc.nuts.io.NutsPath;
-import net.thevpc.nuts.io.NutsPathOption;
-import net.thevpc.nuts.io.NutsUncompress;
+import net.thevpc.nuts.concurrent.NLocks;
+import net.thevpc.nuts.concurrent.NScheduler;
+import net.thevpc.nuts.elem.NElements;
+import net.thevpc.nuts.io.NCp;
+import net.thevpc.nuts.io.NPath;
+import net.thevpc.nuts.io.NPathOption;
+import net.thevpc.nuts.io.NUncompress;
 import net.thevpc.nuts.util.*;
 
 import java.io.*;
@@ -23,8 +23,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,7 +39,7 @@ public class NetbeansConfigService {
     private static final Logger LOG = Logger.getLogger(NetbeansConfigService.class.getName());
     private static String[] prefix = {"Workspace", "WS", "NB", "Netbeans"};
     private static String[] suffix = {"-Perso", "-Work", "-Research", "-Edu", "-Fun", "-Test", "-Release", "-Test 1", "-Test 2", "-A", "-B", "-C", "-D", "-E"};
-    private final NutsApplicationContext appContext;
+    private final NApplicationContext appContext;
     private List<WritableLongOperation> operations = new ArrayList<>();
     private List<LongOperationListener> operationListeners = new ArrayList<>();
     private ObservableNetbeansConfig config = new ObservableNetbeansConfig();
@@ -50,7 +48,7 @@ public class NetbeansConfigService {
     private List<NetbeansBinaryLink> cachedNetbeansBinaryLink = null;
     private boolean configLoaded;
 
-    public NetbeansConfigService(NutsApplicationContext appContext) {
+    public NetbeansConfigService(NApplicationContext appContext) {
         this.appContext = appContext;
     }
 
@@ -179,7 +177,7 @@ public class NetbeansConfigService {
         });
         if (files != null) {
             for (File file : files) {
-                NutsPlatformLocation o = findJdk(file.getPath());
+                NPlatformLocation o = findJdk(file.getPath());
                 if (o == null) {
                     o = detectJdk(file.getPath());
                     if (o != null) {
@@ -201,17 +199,17 @@ public class NetbeansConfigService {
     }
 
     public NetbeansBinaryLink[] searchRemoteInstallableNbBinaries() {
-        NutsSession session = appContext.getSession();
+        NSession session = appContext.getSession();
         List<NetbeansBinaryLink> all = new ArrayList<>(
-                Arrays.asList(NutsElements.of(session).json().parse(getClass().getResource("/net/thevpc/netbeans/launcher/binaries.json"), NetbeansBinaryLink[].class))
+                Arrays.asList(NElements.of(session).json().parse(getClass().getResource("/net/thevpc/netbeans/launcher/binaries.json"), NetbeansBinaryLink[].class))
         );
 
         //nuts supports out of the box navigating apache website using htmlfs
-        for (NutsPath p : NutsPath.of("htmlfs:https://archive.apache.org/dist/netbeans/netbeans/", session).list()) {
+        for (NPath p : NPath.of("htmlfs:https://archive.apache.org/dist/netbeans/netbeans/", session).stream()) {
             if (p.isDirectory()) {
                 ///12.0/netbeans-12.0-bin.zip
                 String version = p.getName();
-                NutsPath b = NutsPath.of("https://archive.apache.org/dist/netbeans/netbeans/" + version + "/netbeans-" + version + "-bin.zip", session);
+                NPath b = NPath.of("https://archive.apache.org/dist/netbeans/netbeans/" + version + "/netbeans-" + version + "-bin.zip", session);
                 if (b.exists()) {
                     all.add(new NetbeansBinaryLink()
                             .setPackaging("zip")
@@ -225,7 +223,7 @@ public class NetbeansConfigService {
 
         Set<String> locallyAvailable = Arrays.stream(getAllNb()).map(NetbeansInstallation::getVersion).collect(Collectors.toSet());
         return all.stream().filter(x -> !locallyAvailable.contains(x.getVersion()))
-                .sorted((o1, o2) -> -NutsVersion.of(o1.getVersion()).get().compareTo(o2.getVersion()))
+                .sorted((o1, o2) -> -NVersion.of(o1.getVersion()).get().compareTo(o2.getVersion()))
                 .toArray(NetbeansBinaryLink[]::new);
     }
 
@@ -284,8 +282,8 @@ public class NetbeansConfigService {
         }
     }
 
-    public NutsPlatformLocation detectJdk(String path) {
-        return appContext.getSession().env().platforms().resolvePlatform(NutsPlatformFamily.JAVA, path, null);
+    public NPlatformLocation detectJdk(String path) {
+        return appContext.getSession().env().platforms().resolvePlatform(NPlatformFamily.JAVA, path, null);
     }
 
     public NetbeansGroup[] detectNbGroups(NetbeansWorkspace w) {
@@ -548,22 +546,22 @@ public class NetbeansConfigService {
         return null;
     }
 
-    public NutsPlatformLocation findJdk(String path) {
+    public NPlatformLocation findJdk(String path) {
         if (path == null) {
             return null;
         }
-        for (NutsPlatformLocation loc : config.getJdkLocations()) {
+        for (NPlatformLocation loc : config.getJdkLocations()) {
             if (NbUtils.equalsStr(path, loc.getPath())) {
                 return loc;
             }
         }
         if (!NbUtils.isPath(path)) {
-            for (NutsPlatformLocation loc : config.getJdkLocations()) {
+            for (NPlatformLocation loc : config.getJdkLocations()) {
                 if (NbUtils.equalsStr(path, loc.getName())) {
                     return loc;
                 }
             }
-            for (NutsPlatformLocation loc : config.getJdkLocations()) {
+            for (NPlatformLocation loc : config.getJdkLocations()) {
                 if (NbUtils.equalsStr(path, loc.getVersion())) {
                     return loc;
                 }
@@ -590,8 +588,8 @@ public class NetbeansConfigService {
         return true;
     }
 
-    public boolean addJdk(NutsPlatformLocation netbeansInstallation) {
-        for (NutsPlatformLocation installation : config.getJdkLocations()) {
+    public boolean addJdk(NPlatformLocation netbeansInstallation) {
+        for (NPlatformLocation installation : config.getJdkLocations()) {
             if (NbUtils.equalsStr(netbeansInstallation.getPath(), installation.getPath())) {
                 return false;
             }
@@ -621,8 +619,8 @@ public class NetbeansConfigService {
         return w;
     }
 
-    public NutsPlatformLocation[] getAllJdk() {
-        List<NutsPlatformLocation> list = config.getJdkLocations().list();
+    public NPlatformLocation[] getAllJdk() {
+        List<NPlatformLocation> list = config.getJdkLocations().list();
         list.sort((a, b) -> {
             int i = NbUtils.compareVersions(a.getVersion(), b.getVersion());
             if (i != 0) {
@@ -630,7 +628,7 @@ public class NetbeansConfigService {
             }
             return a.getName().compareTo(b.getName());
         });
-        return list.toArray(new NutsPlatformLocation[0]);
+        return list.toArray(new NPlatformLocation[0]);
     }
 
     public NetbeansInstallation[] getAllNb() {
@@ -658,7 +656,7 @@ public class NetbeansConfigService {
         if (o == null) {
             o = detectNb(path, store);
             if (o == null) {
-                throw new NutsIllegalArgumentException(appContext.getSession(), NutsMessage.ofCstyle("invalid Netbeans installation directory %s", path));
+                throw new NIllegalArgumentException(appContext.getSession(), NMsg.ofCstyle("invalid Netbeans installation directory %s", path));
             }
             addNb(o);
         }
@@ -676,11 +674,11 @@ public class NetbeansConfigService {
         return o;
     }
 
-    public NutsPlatformLocation getJdk(String path) {
+    public NPlatformLocation getJdk(String path) {
         if (path == null) {
             return null;
         }
-        NutsPlatformLocation o = findJdk(path);
+        NPlatformLocation o = findJdk(path);
         if (o == null) {
             o = detectJdk(path);
             if (o != null) {
@@ -771,7 +769,7 @@ public class NetbeansConfigService {
     }
 
     public void removeJdk(String path) {
-        NutsPlatformLocation o = findJdk(path);
+        NPlatformLocation o = findJdk(path);
         if (o != null) {
             for (NetbeansWorkspace w : getWorkspacesByJdk(o.getPath())) {
                 removeNbWorkspace(w);
@@ -878,10 +876,10 @@ public class NetbeansConfigService {
         return cmd.toArray(new String[0]);
     }
 
-    public NutsExecCommand run(NetbeansWorkspace w) throws IOException {
+    public NExecCommand run(NetbeansWorkspace w) throws IOException {
         String[] cmd = createRunCommand(w);
         return appContext.getSession().exec()
-                .setExecutionType(NutsExecutionType.SYSTEM)
+                .setExecutionType(NExecutionType.SYSTEM)
                 .setDirectory(w.getPath())
                 .addCommand(cmd)
                 .setRedirectErrorStream(true)
@@ -891,8 +889,8 @@ public class NetbeansConfigService {
 
     public synchronized void saveFile() {
         NetbeansConfig c = config.getNetbeansConfig();
-        NutsSession session = appContext.getSession();
-        NutsElements.of(session).json()
+        NSession session = appContext.getSession();
+        NElements.of(session).json()
                 .setValue(c).setNtf(false)
                 .print(appContext.getConfigFolder().resolve("config.json"));
     }
@@ -900,18 +898,18 @@ public class NetbeansConfigService {
     public <T> void loadFile() {
         NetbeansConfig config = null;
         boolean loaded = false;
-        NutsPath validFile = appContext.getConfigFolder().resolve("config.json");
+        NPath validFile = appContext.getConfigFolder().resolve("config.json");
         boolean foundCurrVersionFile = false;
-        NutsSession session = appContext.getSession();
+        NSession session = appContext.getSession();
         if (validFile.isRegularFile()) {
             try {
-                config = (NetbeansConfig) NutsElements.of(session).json().parse(validFile, NetbeansConfig.class);
+                config = (NetbeansConfig) NElements.of(session).json().parse(validFile, NetbeansConfig.class);
                 foundCurrVersionFile = config != null;
             } catch (Exception e) {
                 System.err.println("Unable to load config from " + validFile.toString());
                 int i = 2;
                 while (true) {
-                    NutsPath f2 = validFile.resolveSibling(validFile.getName() + "." + i + ".save");
+                    NPath f2 = validFile.resolveSibling(validFile.getName() + "." + i + ".save");
                     if (!f2.exists()) {
                         validFile.moveTo(f2);
                         break;
@@ -936,18 +934,18 @@ public class NetbeansConfigService {
             loaded = true;
         }
         if (!foundCurrVersionFile) {
-            List<NutsId> olderVersions = session.search().setInstallStatus(
-                    NutsInstallStatusFilters.of(session).byInstalled(true)
+            List<NId> olderVersions = session.search().setInstallStatus(
+                    NInstallStatusFilters.of(session).byInstalled(true)
             ).addId(appContext.getAppId().builder().setVersion("").build()).getResultIds().stream().sorted(
                     (a, b) -> b.getVersion().compareTo(a.getVersion())
             ).filter(x -> x.getVersion().compareTo(appContext.getAppId().getVersion()) < 0).collect(Collectors.toList());
-            for (NutsId olderVersion : olderVersions) {
-                NutsPath validFile2 =
-                        session.locations().getStoreLocation(olderVersion, NutsStoreLocation.CONFIG)
+            for (NId olderVersion : olderVersions) {
+                NPath validFile2 =
+                        session.locations().getStoreLocation(olderVersion, NStoreLocation.CONFIG)
                                 .resolve("config.json");
                 if (validFile2.isRegularFile()) {
                     try {
-                        config = (NetbeansConfig) NutsElements.of(session).json().parse(validFile2, NetbeansConfig.class);
+                        config = (NetbeansConfig) NElements.of(session).json().parse(validFile2, NetbeansConfig.class);
                     } catch (Exception e) {
                         System.err.println("Unable to load config from " + validFile2.toString());
                         break;
@@ -978,7 +976,7 @@ public class NetbeansConfigService {
     }
 
     public void loadAsync() {
-        NutsScheduler.of(appContext.getSession())
+        NScheduler.of(appContext.getSession())
                 .executorService().submit(this::load);
     }
 
@@ -1049,7 +1047,7 @@ public class NetbeansConfigService {
     }
 
     public String getUserdirProposal(NetbeansWorkspace w) {
-        String n = NutsStringUtils.trim(w.getName());
+        String n = NStringUtils.trim(w.getName());
         if (NbUtils.isEmpty(n)) {
             n = "noname";
         }
@@ -1058,7 +1056,7 @@ public class NetbeansConfigService {
     }
 
     public String[] getUserdirProposals(NetbeansWorkspace w) {
-        String n = NutsStringUtils.trim(w.getName());
+        String n = NStringUtils.trim(w.getName());
         if (NbUtils.isEmpty(n)) {
             n = "noname";
         }
@@ -1071,7 +1069,7 @@ public class NetbeansConfigService {
     }
 
     public String[] getCachedirProposals(NetbeansWorkspace w) {
-        String n = NutsStringUtils.trim(w.getName());
+        String n = NStringUtils.trim(w.getName());
         if (NbUtils.isEmpty(n)) {
             n = "noname";
         }
@@ -1084,7 +1082,7 @@ public class NetbeansConfigService {
     }
 
     public String getCachedirProposal(NetbeansWorkspace w) {
-        String n = NutsStringUtils.trim(w.getName());
+        String n = NStringUtils.trim(w.getName());
         if (NbUtils.isEmpty(n)) {
             n = "noname";
         }
@@ -1097,26 +1095,26 @@ public class NetbeansConfigService {
     }
 
     public NetbeansInstallation installNetbeansBinary(NetbeansBinaryLink i) {
-        NutsSession session = appContext.getSession();
-        NutsPath zipTo = appContext.getSharedAppsFolder()
+        NSession session = appContext.getSession();
+        NPath zipTo = appContext.getSharedAppsFolder()
                 .resolve("org")
                 .resolve("netbeans")
                 .resolve("netbeans-" + i.getVersion() + ".zip");
-        NutsPath folderTo = appContext.getSharedAppsFolder()
+        NPath folderTo = appContext.getSharedAppsFolder()
                 .resolve("org")
                 .resolve("netbeans")
                 .resolve("netbeans-" + i.getVersion());
         //if (!Files.exists(zipTo)) {
-        NutsCp.of(session).from(NutsPath.of(i.getUrl(), session)).to(zipTo).addOptions(NutsPathOption.LOG, NutsPathOption.TRACE)
-                .setProgressMonitor(new OpNutsInputStreamProgressMonitor(addOperation("Downloading " + i)))
+        NCp.of(session).from(NPath.of(i.getUrl(), session)).to(zipTo).addOptions(NPathOption.LOG, NPathOption.TRACE)
+                .setProgressMonitor(new OpNInputStreamProgressMonitor(addOperation("Downloading " + i)))
                 .run();
         //}
-        NutsLocks.of(session).setSource(zipTo).run(() -> {
+        NLocks.of(session).setSource(zipTo).run(() -> {
             if (folderTo.resolve("bin").resolve("netbeans").exists()) {
                 //already unzipped!!
             } else {
-                NutsUncompress.of(session).from(zipTo).to(folderTo).setSkipRoot(true)
-                        .progressMonitor(new OpNutsInputStreamProgressMonitor(addOperation("Unzipping " + i)))
+                NUncompress.of(session).from(zipTo).to(folderTo).setSkipRoot(true)
+                        .progressMonitor(new OpNInputStreamProgressMonitor(addOperation("Unzipping " + i)))
                         .run();
             }
         });
@@ -1297,16 +1295,16 @@ public class NetbeansConfigService {
         }
     }
 
-    private static class OpNutsInputStreamProgressMonitor implements NutsProgressListener {
+    private static class OpNInputStreamProgressMonitor implements NProgressListener {
 
         private final WritableLongOperation op;
 
-        public OpNutsInputStreamProgressMonitor(WritableLongOperation op) {
+        public OpNInputStreamProgressMonitor(WritableLongOperation op) {
             this.op = op;
         }
 
         @Override
-        public boolean onProgress(NutsProgressEvent event) {
+        public boolean onProgress(NProgressEvent event) {
             switch (event.getState()) {
                 case START: {
                     op.start(event.isIndeterminate());

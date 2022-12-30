@@ -13,8 +13,8 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
 import net.thevpc.netbeans.launcher.ui.utils.SwingToolkit;
-import net.thevpc.nuts.NutsSession;
-import net.thevpc.nuts.cmdline.NutsCommandLine;
+import net.thevpc.nuts.NSession;
+import net.thevpc.nuts.cmdline.NCommandLine;
 
 /**
  *
@@ -28,11 +28,11 @@ public class JVMOptionsPanel1 extends JPanel {
     private JComponent add;
     private JComponent up;
     private JComponent down;
-    private NutsSession ws;
+    private NSession ws;
     private Component parent;
     private SwingToolkit toolkit;
 
-    public JVMOptionsPanel1(NutsSession ws, Component parent, SwingToolkit toolkit) {
+    public JVMOptionsPanel1(NSession ws, Component parent, SwingToolkit toolkit) {
         super(new BorderLayout());
         this.ws = ws;
         this.toolkit = toolkit;
@@ -171,7 +171,7 @@ public class JVMOptionsPanel1 extends JPanel {
         while (m.getRowCount() > 0) {
             m.removeRow(0);
         }
-        for (String a : NutsCommandLine.parseDefault(args).get().toStringArray()) {
+        for (String a : NCommandLine.parseDefault(args).get().toStringArray()) {
             m.addRow(new Object[]{a});
         }
     }
@@ -182,7 +182,7 @@ public class JVMOptionsPanel1 extends JPanel {
         for (int i = 0; i < m.getRowCount(); i++) {
             a.add("" + m.getValueAt(i, 0));
         }
-        return NutsCommandLine.of(a).toString();
+        return NCommandLine.of(a).toString();
     }
 
     private DefaultTableModel getListModel() {
