@@ -123,7 +123,7 @@ public class NbUtils {
     }
 
     public static String response(String[] cmd, NSession session) {
-        NExecCommand e = session.exec().setExecutionType(NExecutionType.SYSTEM)
+        NExecCommand e = NExecCommand.of(session).setExecutionType(NExecutionType.SYSTEM)
                 .addCommand(cmd)
                 .setFailFast(true)
                 .setSleepMillis(500)
@@ -175,7 +175,7 @@ public class NbUtils {
     }
 
     public static final NbOsConfig getNbOsConfig(NApplicationContext appContext) {
-        switch (appContext.getSession().env().getOsFamily()) {
+        switch (NEnvs.of(appContext.getSession()).getOsFamily()) {
             case UNIX:
             case LINUX:
                 return NbUtils.LINUX_CONFIG;

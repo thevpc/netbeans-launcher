@@ -189,10 +189,10 @@ public class NetbeansConfigService {
     }
 
     public NetbeansBinaryLink[] searchRemoteInstallableNbBinariesWithCache(boolean cached) {
-        if(cached && cachedNetbeansBinaryLink!=null){
+        if (cached && cachedNetbeansBinaryLink != null) {
             return cachedNetbeansBinaryLink.toArray(new NetbeansBinaryLink[0]);
         }
-        cachedNetbeansBinaryLink=new ArrayList<>(
+        cachedNetbeansBinaryLink = new ArrayList<>(
                 Arrays.asList(searchRemoteInstallableNbBinaries())
         );
         return cachedNetbeansBinaryLink.toArray(new NetbeansBinaryLink[0]);
@@ -283,7 +283,7 @@ public class NetbeansConfigService {
     }
 
     public NPlatformLocation detectJdk(String path) {
-        return appContext.getSession().env().platforms().resolvePlatform(NPlatformFamily.JAVA, path, null);
+        return NEnvs.of(appContext.getSession()).platforms().resolvePlatform(NPlatformFamily.JAVA, path, null);
     }
 
     public NetbeansGroup[] detectNbGroups(NetbeansWorkspace w) {
@@ -878,7 +878,7 @@ public class NetbeansConfigService {
 
     public NExecCommand run(NetbeansWorkspace w) throws IOException {
         String[] cmd = createRunCommand(w);
-        return appContext.getSession().exec()
+        return NExecCommand.of(appContext.getSession())
                 .setExecutionType(NExecutionType.SYSTEM)
                 .setDirectory(w.getPath())
                 .addCommand(cmd)
@@ -934,14 +934,14 @@ public class NetbeansConfigService {
             loaded = true;
         }
         if (!foundCurrVersionFile) {
-            List<NId> olderVersions = session.search().setInstallStatus(
+            List<NId> olderVersions = NSearchCommand.of(session).setInstallStatus(
                     NInstallStatusFilters.of(session).byInstalled(true)
             ).addId(appContext.getAppId().builder().setVersion("").build()).getResultIds().stream().sorted(
                     (a, b) -> b.getVersion().compareTo(a.getVersion())
             ).filter(x -> x.getVersion().compareTo(appContext.getAppId().getVersion()) < 0).collect(Collectors.toList());
             for (NId olderVersion : olderVersions) {
                 NPath validFile2 =
-                        session.locations().getStoreLocation(olderVersion, NStoreLocation.CONFIG)
+                        NLocations.of(session).getStoreLocation(olderVersion, NStoreLocation.CONFIG)
                                 .resolve("config.json");
                 if (validFile2.isRegularFile()) {
                     try {
@@ -1120,7 +1120,7 @@ public class NetbeansConfigService {
         });
         NetbeansInstallation o = detectNb(folderTo.toString(), NetbeansInstallationStore.DEFAULT);
         if (o != null) {
-            switch (appContext.getSession().env().getOsFamily()) {
+            switch (NEnvs.of(appContext.getSession()).getOsFamily()) {
                 case LINUX:
                 case UNIX:
                 case MACOS: {

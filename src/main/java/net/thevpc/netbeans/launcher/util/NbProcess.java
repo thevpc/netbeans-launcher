@@ -3,7 +3,7 @@ package net.thevpc.netbeans.launcher.util;
 import java.util.Objects;
 
 import net.thevpc.nuts.*;
-import net.thevpc.nuts.cmdline.NArgument;
+import net.thevpc.nuts.cmdline.NArg;
 import net.thevpc.nuts.cmdline.NCommandLine;
 import net.thevpc.nuts.io.NPsInfo;
 
@@ -16,7 +16,7 @@ public class NbProcess implements Comparable<NbProcess> {
 
     public NbProcess(NSession session, NPsInfo jpsResult) {
         NCommandLine cmd = NCommandLine.parseDefault(jpsResult.getCommandLine()).get();
-        NArgument a;
+        NArg a;
         pid = jpsResult.getPid();
         className = jpsResult.getName();
         String _userdir = null;

@@ -10,7 +10,7 @@ import net.thevpc.netbeans.launcher.ui.MainWindowSwing;
 import net.thevpc.netbeans.launcher.util.NbUtils;
 import net.thevpc.nuts.*;
 import net.thevpc.nuts.cmdline.NCommandLine;
-import net.thevpc.nuts.io.NStream;
+import net.thevpc.nuts.io.NOutStream;
 
 import javax.swing.*;
 
@@ -38,14 +38,14 @@ public class NbMain implements NApplication {
 
     @Override
     public void onUninstallApplication(NApplicationContext applicationContext) {
-        applicationContext.getSession().commands().removeCommandIfExists(PREFERRED_ALIAS);
+        NCustomCommandManager.of(applicationContext.getSession()).removeCommandIfExists(PREFERRED_ALIAS);
     }
 
     @Override
     public void run(NApplicationContext appContext) {
         NSession session = appContext.getSession();
-        NStream out = session.out();
-        NStream err = session.err();
+        NOutStream out = session.out();
+        NOutStream err = session.err();
         if (!NbUtils.isPlatformSupported()) {
             err.println("platform not supported");
             if (System.console() == null) {
@@ -102,7 +102,7 @@ public class NbMain implements NApplication {
 
     protected void addDesktopIntegration(NApplicationContext applicationContext) {
         NSession session = applicationContext.getSession();
-        session.env().addLauncher(new NLauncherOptions()
+        NEnvs.of(session).addLauncher(new NLauncherOptions()
                 .setId(applicationContext.getAppId())
                 .setAlias(PREFERRED_ALIAS)
                 .setCreateAlias(true)
