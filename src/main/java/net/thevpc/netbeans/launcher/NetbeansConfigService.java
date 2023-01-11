@@ -656,7 +656,7 @@ public class NetbeansConfigService {
         if (o == null) {
             o = detectNb(path, store);
             if (o == null) {
-                throw new NIllegalArgumentException(appContext.getSession(), NMsg.ofCstyle("invalid Netbeans installation directory %s", path));
+                throw new NIllegalArgumentException(appContext.getSession(), NMsg.ofC("invalid Netbeans installation directory %s", path));
             }
             addNb(o);
         }

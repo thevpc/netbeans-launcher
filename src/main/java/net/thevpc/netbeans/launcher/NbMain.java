@@ -10,7 +10,7 @@ import net.thevpc.netbeans.launcher.ui.MainWindowSwing;
 import net.thevpc.netbeans.launcher.util.NbUtils;
 import net.thevpc.nuts.*;
 import net.thevpc.nuts.cmdline.NCommandLine;
-import net.thevpc.nuts.io.NOutStream;
+import net.thevpc.nuts.io.NPrintStream;
 
 import javax.swing.*;
 
@@ -44,8 +44,8 @@ public class NbMain implements NApplication {
     @Override
     public void run(NApplicationContext appContext) {
         NSession session = appContext.getSession();
-        NOutStream out = session.out();
-        NOutStream err = session.err();
+        NPrintStream out = session.out();
+        NPrintStream err = session.err();
         if (!NbUtils.isPlatformSupported()) {
             err.println("platform not supported");
             if (System.console() == null) {
