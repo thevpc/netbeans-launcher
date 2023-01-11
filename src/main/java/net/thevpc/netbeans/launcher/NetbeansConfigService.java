@@ -283,7 +283,7 @@ public class NetbeansConfigService {
     }
 
     public NPlatformLocation detectJdk(String path) {
-        return NEnvs.of(appContext.getSession()).platforms().resolvePlatform(NPlatformFamily.JAVA, path, null);
+        return NPlatforms.of(appContext.getSession()).resolvePlatform(NPlatformFamily.JAVA, path, null);
     }
 
     public NetbeansGroup[] detectNbGroups(NetbeansWorkspace w) {
