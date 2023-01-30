@@ -22,9 +22,9 @@ public class NbProcess implements Comparable<NbProcess> {
         String _userdir = null;
         String _cachedir = null;
         while (cmd.hasNext()) {
-            if ((a = cmd.nextString("--userdir").orNull()) != null) {
+            if ((a = cmd.nextEntry("--userdir").orNull()) != null) {
                 _userdir = a.getValue().asString().get();
-            } else if ((a = cmd.nextString("--cachedir").orNull()) != null) {
+            } else if ((a = cmd.nextEntry("--cachedir").orNull()) != null) {
                 _cachedir = a.getValue().asString().get();
             } else {
                 cmd.skip();
