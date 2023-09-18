@@ -359,7 +359,7 @@ public class NbListPane extends AppPane {
     }
 
     @Override
-    public void updateAll() {
+    public void updateAll(boolean  cached) {
         updateList();
     }
 

@@ -181,7 +181,7 @@ public class SettingsPane extends AppPane {
                 toolkit.setControlVisible(getComps2().buttonAdd, true);
                 toolkit.setControlVisible(getComps2().buttonRemove, getComps2().nbListView.getSelectedValue() instanceof NetbeansInstallation);
                 toolkit.setControlVisible(getComps2().buttonSearchLocal, true);
-                toolkit.setControlVisible(getComps2().buttonSearchRemote, false);
+                toolkit.setControlVisible(getComps2().buttonSearchRemote, true);
                 toolkit.setControlVisible(getComps2().buttonDownload, true /* ENABLE REINSTALL// getComps2().nbListView.getSelectedValue() instanceof NetbeansBinaryLink*/);
                 break;
             }
@@ -257,7 +257,7 @@ public class SettingsPane extends AppPane {
                             if (loc.length > 0) {
                                 configService.saveFile();
                                 for (AppPane pane : win.getPanes()) {
-                                    pane.updateAll();
+                                    pane.updateAll(true);
                                 }
 //                                updateNbList();
                             } else {
@@ -291,7 +291,7 @@ public class SettingsPane extends AppPane {
                         NetbeansInstallation loc = (NetbeansInstallation) g;
                         if (loc != null) {
                             configService.removeNb(loc.getPath());
-                            updateNbList();
+                            updateNbList(true);
                         }
                     }
                     break;
@@ -309,7 +309,7 @@ public class SettingsPane extends AppPane {
                 () -> {
                     try {
                         configService.configureDefaults();
-                        win.updateList();
+                        win.updateList(true);
                     } catch (Exception ex) {
                         toolkit.showError(toolkit.msg("App.SearchLocal.Error"), ex);
                     }
@@ -321,27 +321,28 @@ public class SettingsPane extends AppPane {
         win.showConfirmOkCancel(
                 toolkit.msg("App.SearchRemote.Confirm.Title"),
                 toolkit.msg("App.SearchRemote.Confirm.Message"),
-                ()
-                -> Workers.richWorker()
-                        .run(() -> configService.configureDefaults())
-                        .onSuccess(() -> win.updateList())
-                        .onError((ex) -> toolkit.showError(toolkit.msg("App.SearchLocal.Error"), ex))
-                        .start()
-        );
+                () -> {
+                    try {
+//                        configService.configureDefaults();
+                        win.updateList(false);
+                    } catch (Exception ex) {
+                        toolkit.showError(toolkit.msg("App.SearchLocal.Error"), ex);
+                    }
+                });
     }
 
     public void updateJdkList() {
         toolkit.updateTable(getComps2().jdkListView, configService.getAllJdk(), (a, b) -> a != null && b != null && ((NPlatformLocation) a).getName().equals(((NPlatformLocation) b).getName()), null);
     }
 
-    public void updateNbList() {
-        getComps2().nbListView.refresh();
+    public void updateNbList(boolean cached) {
+        getComps2().nbListView.refresh(cached);
     }
 
     @Override
-    public void updateAll() {
+    public void updateAll(boolean cached) {
         updateJdkList();
-        updateNbList();
+        updateNbList(cached);
     }
 
     public enum SettingType {

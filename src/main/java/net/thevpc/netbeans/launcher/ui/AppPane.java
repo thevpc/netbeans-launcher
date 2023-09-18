@@ -102,7 +102,7 @@ public abstract class AppPane extends JPanel {
         }
         this.add(c.mainComponent, BorderLayout.CENTER);
         this.add(c.footerComponent, BorderLayout.SOUTH);
-        updateAll();
+        updateAll(true);
         this.invalidate();
         this.revalidate();
     }
@@ -258,7 +258,7 @@ public abstract class AppPane extends JPanel {
     public void onInit() {
     }
 
-    public void updateAll() {
+    public void updateAll(boolean  cached) {
 
     }
 

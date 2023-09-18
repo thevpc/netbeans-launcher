@@ -16,11 +16,5 @@
     "packaging": "zip",
     "url": "https://archive.apache.org/dist/incubator/netbeans/incubating-netbeans-java/incubating-9.0/incubating-netbeans-java-9.0-bin.zip",
     "releaseDate": "2018-07-29T05:25:00Z"
-  },
-  {
-    "version": "8.2",
-    "packaging": "zip",
-    "url": "https://download.netbeans.org/netbeans/8.2/final/zip/netbeans-8.2-201609300101.zip",
-    "releaseDate": "2016-09-30T01:01:00Z"
   }
 ]

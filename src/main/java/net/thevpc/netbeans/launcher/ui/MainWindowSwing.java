@@ -164,9 +164,9 @@ public class MainWindowSwing {
     public void start(JFrame primaryStage) { //int2troadmin
         toolkit = new SwingToolkit(primaryStage);
         configService.getConfig().getSumoMode().addListener(t -> setCompact(!t.getNewValue()));
-        configService.getConfig().getInstallations().addListener(e -> updateList());
-        configService.getConfig().getJdkLocations().addListener(e -> updateList());
-        configService.getConfig().getWorkspaces().addListener(e -> updateList());
+        configService.getConfig().getInstallations().addListener(e -> updateList(true));
+        configService.getConfig().getJdkLocations().addListener(e -> updateList(true));
+        configService.getConfig().getWorkspaces().addListener(e -> updateList(true));
         compact = !configService.getConfig().getSumoMode().get();
         this.frame = primaryStage;
         primaryStage.setTitle("Netbeans Launcher " + appContext.getAppId().getVersion());
@@ -333,7 +333,7 @@ public class MainWindowSwing {
                             NbUtils.setTempRunning(w, false);
                             NbListPane.setStopped(getAppContext(), w);
                             onRefreshHeader();
-                            updateList();
+                            updateList(false);
                         }
                     }
 
@@ -342,14 +342,19 @@ public class MainWindowSwing {
                 toolkit.showError(toolkit.msg("App.RunWorkspace.Error"), ex);
             } finally {
                 onRefreshHeader();
-                updateList();
+                updateList(false);
             }
         }
     }
 
-    public void updateList() {
+    public void updateList(boolean cached) {
         for (AppPane pane : getPanes()) {
-            pane.updateAll();
+            if (pane instanceof SettingsPane) {
+                pane.updateAll(cached);
+            } else {
+                pane.updateAll(true);
+            }
+
         }
     }
 
