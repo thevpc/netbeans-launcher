@@ -9,15 +9,15 @@ import net.thevpc.netbeans.launcher.cli.MainWindowCLI;
 import net.thevpc.netbeans.launcher.ui.MainWindowSwing;
 import net.thevpc.netbeans.launcher.util.NbUtils;
 import net.thevpc.nuts.*;
-import net.thevpc.nuts.cmdline.NutsCommandLine;
-import net.thevpc.nuts.io.NutsPrintStream;
+import net.thevpc.nuts.cmdline.NCommandLine;
+import net.thevpc.nuts.io.NPrintStream;
 
 import javax.swing.*;
 
 /**
  * @author thevpc
  */
-public class NbMain implements NutsApplication {
+public class NbMain implements NApplication {
 
     String PREFERRED_ALIAS = "nbl";
 
@@ -27,25 +27,25 @@ public class NbMain implements NutsApplication {
     }
 
     @Override
-    public void onInstallApplication(NutsApplicationContext applicationContext) {
+    public void onInstallApplication(NApplicationContext applicationContext) {
         addDesktopIntegration(applicationContext);
     }
 
     @Override
-    public void onUpdateApplication(NutsApplicationContext applicationContext) {
+    public void onUpdateApplication(NApplicationContext applicationContext) {
         onInstallApplication(applicationContext);
     }
 
     @Override
-    public void onUninstallApplication(NutsApplicationContext applicationContext) {
-        applicationContext.getSession().commands().removeCommandIfExists(PREFERRED_ALIAS);
+    public void onUninstallApplication(NApplicationContext applicationContext) {
+        NCustomCommandManager.of(applicationContext.getSession()).removeCommandIfExists(PREFERRED_ALIAS);
     }
 
     @Override
-    public void run(NutsApplicationContext appContext) {
-        NutsSession session = appContext.getSession();
-        NutsPrintStream out = session.out();
-        NutsPrintStream err = session.err();
+    public void run(NApplicationContext appContext) {
+        NSession session = appContext.getSession();
+        NPrintStream out = session.out();
+        NPrintStream err = session.err();
         if (!NbUtils.isPlatformSupported()) {
             err.println("platform not supported");
             if (System.console() == null) {
@@ -54,7 +54,7 @@ public class NbMain implements NutsApplication {
             return;
         }
         NbOptions options = new NbOptions();
-        NutsCommandLine cmdLine = appContext.getCommandLine();
+        NCommandLine cmdLine = appContext.getCommandLine();
         while (cmdLine.hasNext()) {
             if (appContext.configureFirst(cmdLine)) {
                 //do nothing
@@ -80,7 +80,7 @@ public class NbMain implements NutsApplication {
             } else if (cmdLine.next("--install") != null) {
                 options.install = true;
             } else {
-                cmdLine.throwUnexpectedArgument(session);
+                cmdLine.throwUnexpectedArgument();
             }
         }
 
@@ -100,14 +100,14 @@ public class NbMain implements NutsApplication {
         }
     }
 
-    protected void addDesktopIntegration(NutsApplicationContext applicationContext) {
-        NutsSession session = applicationContext.getSession();
-        session.env().addLauncher(new NutsLauncherOptions()
+    protected void addDesktopIntegration(NApplicationContext applicationContext) {
+        NSession session = applicationContext.getSession();
+        NEnvs.of(session).addLauncher(new NLauncherOptions()
                 .setId(applicationContext.getAppId())
                 .setAlias(PREFERRED_ALIAS)
                 .setCreateAlias(true)
-                .setCreateMenuLauncher(NutsSupportMode.PREFERRED)
-                .setCreateDesktopLauncher(NutsSupportMode.PREFERRED)
+                .setCreateMenuLauncher(NSupportMode.PREFERRED)
+                .setCreateDesktopLauncher(NSupportMode.PREFERRED)
         );
     }
 }

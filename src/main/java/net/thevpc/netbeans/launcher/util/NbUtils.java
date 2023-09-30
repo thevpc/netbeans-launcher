@@ -12,7 +12,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.beans.PropertyChangeSupport;
 import java.io.*;
-import java.net.URL;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,8 +24,8 @@ import net.thevpc.netbeans.launcher.model.NbOsConfig;
 import net.thevpc.netbeans.launcher.model.NetbeansWorkspace;
 import net.thevpc.netbeans.launcher.ui.utils.CachedValue;
 import net.thevpc.nuts.*;
-import net.thevpc.nuts.io.NutsPs;
-import net.thevpc.nuts.util.NutsStringUtils;
+import net.thevpc.nuts.io.NPs;
+import net.thevpc.nuts.util.NStringUtils;
 
 /**
  * @author thevpc
@@ -119,12 +118,12 @@ public class NbUtils {
         return cmd == null || cmd.trim().isEmpty();
     }
 
-    public static String response(List<String> cmd,NutsSession session) throws IOException {
+    public static String response(List<String> cmd, NSession session) throws IOException {
         return response(cmd.toArray(new String[0]),session);
     }
 
-    public static String response(String[] cmd,NutsSession session) {
-        NutsExecCommand e = session.exec().setExecutionType(NutsExecutionType.SYSTEM)
+    public static String response(String[] cmd, NSession session) {
+        NExecCommand e = NExecCommand.of(session).setExecutionType(NExecutionType.SYSTEM)
                 .addCommand(cmd)
                 .setFailFast(true)
                 .setSleepMillis(500)
@@ -175,8 +174,8 @@ public class NbUtils {
         return sb.toString();
     }
 
-    public static final NbOsConfig getNbOsConfig(NutsApplicationContext appContext) {
-        switch (appContext.getSession().env().getOsFamily()) {
+    public static final NbOsConfig getNbOsConfig(NApplicationContext appContext) {
+        switch (NEnvs.of(appContext.getSession()).getOsFamily()) {
             case UNIX:
             case LINUX:
                 return NbUtils.LINUX_CONFIG;
@@ -227,8 +226,8 @@ public class NbUtils {
     }
 
     public static int compareVersions(String v1, String v2) {
-        v1 = NutsStringUtils.trim(v1);
-        v2 = NutsStringUtils.trim(v2);
+        v1 = NStringUtils.trim(v1);
+        v2 = NStringUtils.trim(v2);
         if (v1.equals(v2)) {
             return 0;
         }
@@ -268,7 +267,7 @@ public class NbUtils {
     }
 
     private static String[] splitVersionParts(String v1) {
-        v1 = NutsStringUtils.trim(v1);
+        v1 = NStringUtils.trim(v1);
         List<String> parts = new ArrayList<>();
         StringBuilder last = new StringBuilder();
         for (char c : v1.toCharArray()) {
@@ -392,9 +391,9 @@ public class NbUtils {
     }
     private static NbProcess[] _last_getRunning = null;
 
-    public static NbProcess[] getRunning(NutsApplicationContext ctx) {
-        NutsSession session = ctx.getSession();
-        NbProcess[] aa = NutsPs.of(session).type("java").getResultList()
+    public static NbProcess[] getRunning(NApplicationContext ctx) {
+        NSession session = ctx.getSession();
+        NbProcess[] aa = NPs.of(session).type("java").getResultList()
                 .stream().filter((p) -> p.getName().equals("org.netbeans.Main"))
                 .map(x -> new NbProcess(session, x)).toArray(NbProcess[]::new);
         Arrays.sort(aa);
@@ -413,7 +412,7 @@ public class NbUtils {
         CACHED_PROCESSES_TEMP.put(nb.copy(), value);
     }
 
-    public static boolean isRunningWithCache(NutsApplicationContext ctx, NetbeansWorkspace nb) {
+    public static boolean isRunningWithCache(NApplicationContext ctx, NetbeansWorkspace nb) {
         if (CACHED_PROCESSES == null) {
             CACHED_PROCESSES = new CachedValue<>(() -> getRunning(ctx), 60);
         }
@@ -437,16 +436,16 @@ public class NbUtils {
         return Arrays.stream(all)
                 .filter(
                         x -> {
-                            String ud = NutsStringUtils.trim(nb.getUserdir());
+                            String ud = NStringUtils.trim(nb.getUserdir());
                             if (ud.isEmpty()) {
                                 return false;
                             }
-                            String cd = NutsStringUtils.trim(nb.getCachedir());
+                            String cd = NStringUtils.trim(nb.getCachedir());
                             if (cd.isEmpty()) {
                                 return false;
                             }
-                            return NutsStringUtils.trim(x.getUserdir()).equals(resolveFile(ud).getPath())
-                            && NutsStringUtils.trim(x.getCachedir()).equals(resolveFile(cd).getPath());
+                            return NStringUtils.trim(x.getUserdir()).equals(resolveFile(ud).getPath())
+                            && NStringUtils.trim(x.getCachedir()).equals(resolveFile(cd).getPath());
                         }
                 ).count() > 0;
     }

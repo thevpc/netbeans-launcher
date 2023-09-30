@@ -5,7 +5,7 @@
  */
 package net.thevpc.netbeans.launcher.model;
 
-import net.thevpc.nuts.util.NutsStringUtils;
+import net.thevpc.nuts.util.NStringUtils;
 
 import java.io.Serializable;
 import java.time.Instant;
@@ -140,17 +140,17 @@ public class NetbeansWorkspace implements Cloneable, Serializable {
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 23 * hash + Objects.hashCode(NutsStringUtils.trim(this.path));
-        hash = 23 * hash + Objects.hashCode(NutsStringUtils.trim(this.userdir));
-        hash = 23 * hash + Objects.hashCode(NutsStringUtils.trim(this.cachedir));
-        hash = 23 * hash + Objects.hashCode(NutsStringUtils.trim(this.name));
-        hash = 23 * hash + Objects.hashCode(NutsStringUtils.trim(this.group));
-        hash = 23 * hash + Objects.hashCode(NutsStringUtils.trim(this.jdkhome));
-        hash = 23 * hash + Objects.hashCode(NutsStringUtils.trim(this.laf));
-        hash = 23 * hash + Objects.hashCode(NutsStringUtils.trim(this.options));
-        hash = 23 * hash + Objects.hashCode(NutsStringUtils.trim(this.cpAppend));
-        hash = 23 * hash + Objects.hashCode(NutsStringUtils.trim(this.cpPrepend));
-        hash = 23 * hash + Objects.hashCode(NutsStringUtils.trim(this.locale));
+        hash = 23 * hash + Objects.hashCode(NStringUtils.trim(this.path));
+        hash = 23 * hash + Objects.hashCode(NStringUtils.trim(this.userdir));
+        hash = 23 * hash + Objects.hashCode(NStringUtils.trim(this.cachedir));
+        hash = 23 * hash + Objects.hashCode(NStringUtils.trim(this.name));
+        hash = 23 * hash + Objects.hashCode(NStringUtils.trim(this.group));
+        hash = 23 * hash + Objects.hashCode(NStringUtils.trim(this.jdkhome));
+        hash = 23 * hash + Objects.hashCode(NStringUtils.trim(this.laf));
+        hash = 23 * hash + Objects.hashCode(NStringUtils.trim(this.options));
+        hash = 23 * hash + Objects.hashCode(NStringUtils.trim(this.cpAppend));
+        hash = 23 * hash + Objects.hashCode(NStringUtils.trim(this.cpPrepend));
+        hash = 23 * hash + Objects.hashCode(NStringUtils.trim(this.locale));
         hash = 23 * hash + this.fontSize;
         return hash;
     }
@@ -170,37 +170,37 @@ public class NetbeansWorkspace implements Cloneable, Serializable {
         if (this.fontSize != other.fontSize) {
             return false;
         }
-        if (!Objects.equals(NutsStringUtils.trim(this.path), NutsStringUtils.trim(other.path))) {
+        if (!Objects.equals(NStringUtils.trim(this.path), NStringUtils.trim(other.path))) {
             return false;
         }
-        if (!Objects.equals(NutsStringUtils.trim(this.userdir), NutsStringUtils.trim(other.userdir))) {
+        if (!Objects.equals(NStringUtils.trim(this.userdir), NStringUtils.trim(other.userdir))) {
             return false;
         }
-        if (!Objects.equals(NutsStringUtils.trim(this.cachedir), NutsStringUtils.trim(other.cachedir))) {
+        if (!Objects.equals(NStringUtils.trim(this.cachedir), NStringUtils.trim(other.cachedir))) {
             return false;
         }
-        if (!Objects.equals(NutsStringUtils.trim(this.name), NutsStringUtils.trim(other.name))) {
+        if (!Objects.equals(NStringUtils.trim(this.name), NStringUtils.trim(other.name))) {
             return false;
         }
-        if (!Objects.equals(NutsStringUtils.trim(this.group), NutsStringUtils.trim(other.group))) {
+        if (!Objects.equals(NStringUtils.trim(this.group), NStringUtils.trim(other.group))) {
             return false;
         }
-        if (!Objects.equals(NutsStringUtils.trim(this.jdkhome), NutsStringUtils.trim(other.jdkhome))) {
+        if (!Objects.equals(NStringUtils.trim(this.jdkhome), NStringUtils.trim(other.jdkhome))) {
             return false;
         }
-        if (!Objects.equals(NutsStringUtils.trim(this.laf), NutsStringUtils.trim(other.laf))) {
+        if (!Objects.equals(NStringUtils.trim(this.laf), NStringUtils.trim(other.laf))) {
             return false;
         }
-        if (!Objects.equals(NutsStringUtils.trim(this.options), NutsStringUtils.trim( other.options))) {
+        if (!Objects.equals(NStringUtils.trim(this.options), NStringUtils.trim( other.options))) {
             return false;
         }
-        if (!Objects.equals(NutsStringUtils.trim(this.cpAppend), NutsStringUtils.trim(other.cpAppend))) {
+        if (!Objects.equals(NStringUtils.trim(this.cpAppend), NStringUtils.trim(other.cpAppend))) {
             return false;
         }
-        if (!Objects.equals(NutsStringUtils.trim(this.cpPrepend), NutsStringUtils.trim(other.cpPrepend))) {
+        if (!Objects.equals(NStringUtils.trim(this.cpPrepend), NStringUtils.trim(other.cpPrepend))) {
             return false;
         }
-        if (!Objects.equals(NutsStringUtils.trim(this.locale), NutsStringUtils.trim(other.locale))) {
+        if (!Objects.equals(NStringUtils.trim(this.locale), NStringUtils.trim(other.locale))) {
             return false;
         }
         return true;

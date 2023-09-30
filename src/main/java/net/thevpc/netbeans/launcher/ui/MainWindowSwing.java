@@ -19,14 +19,12 @@ import java.awt.event.ActionListener;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
 
 import net.thevpc.netbeans.launcher.NbOptions;
-import net.thevpc.nuts.NutsApplicationContext;
+import net.thevpc.nuts.NApplicationContext;
 
 /**
  * @author thevpc
@@ -43,7 +41,7 @@ public class MainWindowSwing {
     private JVMOptions jvmOptions;
     protected JFrame frame;
     private boolean compact = false;
-    private NutsApplicationContext appContext;
+    private NApplicationContext appContext;
     private AppPaneContainer appPaneContainer;
     private JComponent minimizeButton;
     private JComponent enlargeButton;
@@ -53,7 +51,7 @@ public class MainWindowSwing {
     private AppPane currentPane;
     private JComponent winHeader;
 
-    public static void launch(NutsApplicationContext appContext, NbOptions options, boolean wait) {
+    public static void launch(NApplicationContext appContext, NbOptions options, boolean wait) {
         SwingUtils2.prepareLaunch(options);
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -150,11 +148,11 @@ public class MainWindowSwing {
         }
     }
 
-    public NutsApplicationContext getAppContext() {
+    public NApplicationContext getAppContext() {
         return appContext;
     }
 
-    public MainWindowSwing(NutsApplicationContext appContext) {
+    public MainWindowSwing(NApplicationContext appContext) {
         this.appContext = appContext;
         this.configService = new NetbeansConfigService(appContext);
     }

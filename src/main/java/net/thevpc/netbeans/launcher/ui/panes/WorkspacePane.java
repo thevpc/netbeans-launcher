@@ -26,8 +26,8 @@ import net.thevpc.netbeans.launcher.model.NetbeansWorkspace;
 import net.thevpc.netbeans.launcher.ui.*;
 import net.thevpc.netbeans.launcher.ui.utils.*;
 import net.thevpc.netbeans.launcher.util.NbUtils;
-import net.thevpc.nuts.NutsPlatformLocation;
-import net.thevpc.nuts.util.NutsStringUtils;
+import net.thevpc.nuts.NPlatformLocation;
+import net.thevpc.nuts.util.NStringUtils;
 
 /**
  * @author thevpc
@@ -351,16 +351,16 @@ public class WorkspacePane extends AppPane {
     private void onSaveWorkspacePane() {
         try {
             NetbeansWorkspace w = getWorkspace();
-            if(NutsStringUtils.trim(w.getName()).isEmpty()){
+            if(NStringUtils.trim(w.getName()).isEmpty()){
                 throw new IllegalArgumentException("missing name");
             }
-            if(NutsStringUtils.trim(w.getCachedir()).isEmpty()){
+            if(NStringUtils.trim(w.getCachedir()).isEmpty()){
                 throw new IllegalArgumentException("missing cache dir");
             }
-            if(NutsStringUtils.trim(w.getPath()).isEmpty()){
+            if(NStringUtils.trim(w.getPath()).isEmpty()){
                 throw new IllegalArgumentException("missing path");
             }
-            if(NutsStringUtils.trim(w.getUserdir()).isEmpty()){
+            if(NStringUtils.trim(w.getUserdir()).isEmpty()){
                 throw new IllegalArgumentException("missing user dir");
             }
             configService.saveNbWorkspace(w);
@@ -603,7 +603,7 @@ public class WorkspacePane extends AppPane {
     }
 
     public void setEditJdkhome(String p) {
-        NutsPlatformLocation pp2 = configService.getJdk(p);
+        NPlatformLocation pp2 = configService.getJdk(p);
         if (pp2 != null) {
             getComps3().jdkhome.setSelectedItem(pp2);
         } else {
@@ -699,8 +699,8 @@ public class WorkspacePane extends AppPane {
 
     public String getEditJdkHome() {
         Object i = toolkit.getComboSelectedObject(getComps3().jdkhome);
-        if (i instanceof NutsPlatformLocation) {
-            return ((NutsPlatformLocation) i).getPath();
+        if (i instanceof NPlatformLocation) {
+            return ((NPlatformLocation) i).getPath();
         } else {
             return i == null ? null : String.valueOf(i);
         }

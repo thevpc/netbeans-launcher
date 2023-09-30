@@ -1,7 +1,7 @@
 package net.thevpc.netbeans.launcher.ui.utils;
 
 import net.thevpc.netbeans.launcher.util.JlistToStringer;
-import net.thevpc.nuts.NutsPlatformLocation;
+import net.thevpc.nuts.NPlatformLocation;
 
 public class JdkJlistToStringer extends JlistToStringer {
     public JdkJlistToStringer() {
@@ -10,8 +10,8 @@ public class JdkJlistToStringer extends JlistToStringer {
 
     @Override
     public String toString(Object value, int level) {
-        if (value instanceof NutsPlatformLocation) {
-            NutsPlatformLocation i = (NutsPlatformLocation) value;
+        if (value instanceof NPlatformLocation) {
+            NPlatformLocation i = (NPlatformLocation) value;
             switch (level) {
                 case 0: {
                     return i.getName();
