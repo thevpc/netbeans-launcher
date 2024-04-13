@@ -5,6 +5,9 @@ Simple Netbeans Launcher tool that simplifies launching multiple netbeans instan
 ![install-log-example](docs/img/nb-launcher-1.2.2.png)
 
 
+## Current version
+1.3.3
+
 ## Installation
 to run netbeans launcher you should have a valid **nuts** installation (>=0.5.7)  and a valid java 8 or later installation.
 see [nuts wiki](https://github.com/thevpc/nuts/wiki)
