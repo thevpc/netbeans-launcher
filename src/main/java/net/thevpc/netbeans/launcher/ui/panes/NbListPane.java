@@ -13,9 +13,11 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
+import net.thevpc.netbeans.launcher.model.NetbeansInstallation;
 
 import net.thevpc.netbeans.launcher.model.NetbeansLocation;
 import net.thevpc.netbeans.launcher.model.NetbeansWorkspace;
@@ -29,10 +31,10 @@ import net.thevpc.netbeans.launcher.util.NbUtils;
 import net.thevpc.netbeans.launcher.ui.utils.CatalogComponent;
 import net.thevpc.netbeans.launcher.ui.utils.ListComponent;
 import net.thevpc.netbeans.launcher.ui.utils.SwingUtils2;
-import net.thevpc.nuts.NApplicationContext;
 import net.thevpc.netbeans.launcher.ui.utils.Equalizer;
 import net.thevpc.netbeans.launcher.ui.utils.ObjectTableModel;
 import net.thevpc.netbeans.launcher.ui.utils.TableComponent;
+import net.thevpc.nuts.NSession;
 import net.thevpc.nuts.util.NStringUtils;
 
 /**
@@ -42,17 +44,17 @@ public class NbListPane extends AppPane {
 
     protected final static Set<String> running = new HashSet<String>();
 
-    public static boolean isStarted(NApplicationContext ctx, NetbeansWorkspace w) {
+    public static boolean isStarted(NSession session, NetbeansWorkspace w) {
         String name = w.getName();
         synchronized (running) {
             if (running.contains(name)) {
                 return true;
             }
         }
-        return NbUtils.isRunningWithCache(ctx, w);
+        return NbUtils.isRunningWithCache(session, w);
     }
 
-    public static boolean setStopped(NApplicationContext ctx, NetbeansWorkspace w) {
+    public static boolean setStopped(NSession session, NetbeansWorkspace w) {
         String name = w.getName();
         synchronized (running) {
             if (running.remove(name)) {
@@ -62,9 +64,9 @@ public class NbListPane extends AppPane {
         return false;
     }
 
-    public static boolean setStarted(NApplicationContext ctx, NetbeansWorkspace w) {
+    public static boolean setStarted(NSession session, NetbeansWorkspace w) {
         synchronized (running) {
-            if (isStarted(ctx, w)) {
+            if (isStarted(session, w)) {
                 String name = w.getName();
                 running.add(name);
                 return true;
@@ -121,7 +123,7 @@ public class NbListPane extends AppPane {
                     String name = ws == null ? "" : ws.getName()
                             + (" (" + evalInstantRelative(ws.getLastLaunchDate(), ws.getExecutionCount()) + ")");
                     super.getListCellRendererComponent(list, name, index, isSelected, cellHasFocus);
-                    if (ws != null && isStarted(win.getAppContext(), ws)) {
+                    if (ws != null && isStarted(win.getSession(), ws)) {
                         if (!isSelected) {
                             setBackground(index % 2 == 0 ? Color.WHITE : SwingUtils2.color("f9f9f9"));
                         } else {
@@ -147,7 +149,7 @@ public class NbListPane extends AppPane {
         }
         if (c.workspacesListView instanceof TableComponent) {
             TableComponent a = (TableComponent) c.workspacesListView;
-            NbUtils.onRunningNbProcessesChanged(() -> SwingUtilities.invokeLater(this::updateList));
+            NbUtils.onRunningNbProcessesChanged(() -> SwingUtilities.invokeLater(() -> this.updateList(null)));
             a.setColumns(new ObjectTableModel.NamedColumns<NetbeansWorkspace>(new String[]{"Workspace", "Since", "Times"}) {
                 @Override
                 public Object getValueAt(int row, String column, NetbeansWorkspace ws) {
@@ -172,7 +174,7 @@ public class NbListPane extends AppPane {
                 public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
                     super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                     NetbeansWorkspace ws = (NetbeansWorkspace) a.getValue(row);
-                    if (ws != null && isStarted(win.getAppContext(), ws)) {
+                    if (ws != null && isStarted(win.getSession(), ws)) {
 //                        if (!isSelected) {
 //                            setBackground(index % 2 == 0 ? Color.WHITE : SwingUtils2.color("f9f9f9"));
 //                        } else {
@@ -225,8 +227,55 @@ public class NbListPane extends AppPane {
     }
 
     public void setSelectedWorkspace(NetbeansLocation w) {
+        setSelectedWorkspace(w, true);
+    }
+
+    public boolean setSelectedWorkspace(NetbeansLocation w, boolean create) {
+        if (w != null) {
+            if (w instanceof NetbeansInstallation) {
+                NetbeansInstallation ii = (NetbeansInstallation) w;
+                final NetbeansWorkspace[] v = getWorkspaces();
+                for (int i = 0; i < v.length; i++) {
+                    NetbeansWorkspace ws = v[i];
+                    String p = ws.getPath();
+                    final String pp = ii.getPath();
+                    if (Objects.equals(pp, p)) {
+                        int index = getComps1().workspacesListView.indexOf(a
+                                -> Objects.equals(((NetbeansWorkspace) a).getPath(),
+                                        ii.getPath())
+                        );
+                        if (index >= 0) {
+                            getComps1().workspacesListView.setSelectedIndex(index);
+                            return true;
+                        } else {
+                            index = getComps1().workspacesListView.indexOf(a
+                                    -> Objects.equals(((NetbeansWorkspace) a).getName(),
+                                            ii.getName())
+                            );
+                            if (index >= 0) {
+                                getComps1().workspacesListView.setSelectedIndex(index);
+                                return true;
+                            }
+                        }
+                        return false;
+                    }
+                }
+                if (create) {
+                    configService.addNbWorkspace(ii);
+                    updateList(() -> {
+                        setSelectedWorkspace(w, false);
+                    });
+                    return false;
+                }
+            }
+        }
         //TODO
         //getComps1().workspacesListView.setSelectedValue(w);
+        return false;
+    }
+
+    public NetbeansWorkspace[] getWorkspaces() {
+        return getComps1().workspacesListView.getValues().toArray(new NetbeansWorkspace[0]);
     }
 
     public NetbeansWorkspace getSelectedWorkspace() {
@@ -237,7 +286,7 @@ public class NbListPane extends AppPane {
         return null;
     }
 
-    public void updateList() {
+    public void updateList(Runnable onFinish) {
         Equalizer name = (a, b) -> a != null && b != null && NStringUtils.trim(((NetbeansWorkspace) a).getName())
                 .equals(NStringUtils.trim(((NetbeansWorkspace) b).getName()));
         toolkit.updateTable(
@@ -261,7 +310,7 @@ public class NbListPane extends AppPane {
                 }
                 return Instant.MIN;
             }
-        });
+        }, onFinish);
     }
 
     private void onRemoveWorkspace() {
@@ -346,7 +395,7 @@ public class NbListPane extends AppPane {
     protected void onRequiredUpdateButtonStatuses() {
         NetbeansWorkspace w = getSelectedWorkspace();
         Comps1 c = getComps1();
-        toolkit.setControlVisible(c.buttonStart, !(w == null || isStarted(win.getAppContext(), w)));
+        toolkit.setControlVisible(c.buttonStart, !(w == null || isStarted(win.getSession(), w)));
         toolkit.setControlVisible(c.buttonCopy, !(w == null));
         toolkit.setControlVisible(c.buttonEdit, !(w == null));
         toolkit.setControlVisible(c.buttonRemove, !(w == null));
@@ -360,7 +409,7 @@ public class NbListPane extends AppPane {
 
     @Override
     public void updateAll() {
-        updateList();
+        updateList(null);
     }
 
     private int cached_i;

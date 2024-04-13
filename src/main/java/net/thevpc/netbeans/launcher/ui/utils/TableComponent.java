@@ -11,6 +11,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
+import javax.swing.DefaultListModel;
 import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
@@ -161,6 +163,36 @@ public class TableComponent implements CatalogComponent {
         }
         for (int i = 0; i < s; i++) {
             if (e.equals(m.getObject(i), a)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    @Override
+    public int indexOf(Object a, Equalizer e) {
+        ObjectTableModel m = getModel();
+        int s = getModel().getRowCount();
+        if (e == null) {
+            e = getEqualizer();
+        }
+        if (e == null) {
+            e = Objects::equals;
+        }
+        for (int i = 0; i < s; i++) {
+            if (e.equals(m.getObject(i), a)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    @Override
+    public int indexOf(Predicate a) {
+        ObjectTableModel m = getModel();
+        int s = getModel().getRowCount();
+        for (int i = 0; i < s; i++) {
+            if (a.test(m.getObject(i))) {
                 return i;
             }
         }

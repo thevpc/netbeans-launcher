@@ -96,11 +96,11 @@ public class NbUtils {
 //            Logger.getLogger(NbUtils.class.getName()).log(Level.SEVERE, null, ex);
 //        }
 //    }
-    
     public static void onRunningNbProcessesChanged(Runnable r) {
-            NbUtils.PROPERTIES.addPropertyChangeListener("RunningNbProcessesChanged", (e)->r.run());
+        NbUtils.PROPERTIES.addPropertyChangeListener("RunningNbProcessesChanged", (e) -> r.run());
 
     }
+
     public static boolean isPlatformSupported() {
         return true;//isOsWindows() || isOsLinux() || isOsMac();
     }
@@ -119,17 +119,15 @@ public class NbUtils {
     }
 
     public static String response(List<String> cmd, NSession session) throws IOException {
-        return response(cmd.toArray(new String[0]),session);
+        return response(cmd.toArray(new String[0]), session);
     }
 
     public static String response(String[] cmd, NSession session) {
-        NExecCommand e = NExecCommand.of(session).setExecutionType(NExecutionType.SYSTEM)
+        NExecCmd e = NExecCmd.of(session).setExecutionType(NExecutionType.SYSTEM)
                 .addCommand(cmd)
                 .setFailFast(true)
-                .setSleepMillis(500)
-                .grabOutputString()
-                .grabErrorString();
-        return e.getOutputString();
+                .setSleepMillis(500);
+        return e.getGrabbedAllString();
     }
 
     public static boolean equalsStr(String s1, String s2) {
@@ -174,8 +172,8 @@ public class NbUtils {
         return sb.toString();
     }
 
-    public static final NbOsConfig getNbOsConfig(NApplicationContext appContext) {
-        switch (NEnvs.of(appContext.getSession()).getOsFamily()) {
+    public static final NbOsConfig getNbOsConfig(NSession session) {
+        switch (NEnvs.of(session).getOsFamily()) {
             case UNIX:
             case LINUX:
                 return NbUtils.LINUX_CONFIG;
@@ -391,8 +389,7 @@ public class NbUtils {
     }
     private static NbProcess[] _last_getRunning = null;
 
-    public static NbProcess[] getRunning(NApplicationContext ctx) {
-        NSession session = ctx.getSession();
+    public static NbProcess[] getRunning(NSession session) {
         NbProcess[] aa = NPs.of(session).type("java").getResultList()
                 .stream().filter((p) -> p.getName().equals("org.netbeans.Main"))
                 .map(x -> new NbProcess(session, x)).toArray(NbProcess[]::new);
@@ -406,33 +403,31 @@ public class NbUtils {
     }
 
     private static CachedValue<NbProcess[]> CACHED_PROCESSES;
-    private static Map<NetbeansWorkspace,Boolean> CACHED_PROCESSES_TEMP=new HashMap<>();
+    private static Map<NetbeansWorkspace, Boolean> CACHED_PROCESSES_TEMP = new HashMap<>();
 
     public static void setTempRunning(NetbeansWorkspace nb, boolean value) {
         CACHED_PROCESSES_TEMP.put(nb.copy(), value);
     }
 
-    public static boolean isRunningWithCache(NApplicationContext ctx, NetbeansWorkspace nb) {
+    public static boolean isRunningWithCache(NSession session, NetbeansWorkspace nb) {
         if (CACHED_PROCESSES == null) {
-            CACHED_PROCESSES = new CachedValue<>(() -> getRunning(ctx), 60);
+            CACHED_PROCESSES = new CachedValue<>(() -> getRunning(session), 60);
         }
-        if (CACHED_PROCESSES.isValid()) {
-            Boolean t = CACHED_PROCESSES_TEMP.get(nb);
-            if(t!=null){
-                return t;
-            }
-            NbProcess[] lv = CACHED_PROCESSES.getLastValue();
-            return isRunning(nb, lv);
+        if (!CACHED_PROCESSES.isValid()) {
+            CACHED_PROCESSES.updateAsync();
         }
-        CACHED_PROCESSES.updateAsync();
         Boolean t = CACHED_PROCESSES_TEMP.get(nb);
-        if(t!=null){
+        if (t != null) {
             return t;
         }
-        return false;
+        NbProcess[] lv = CACHED_PROCESSES.getLastValue();
+        return isRunning(nb, lv);
     }
 
     public static boolean isRunning(NetbeansWorkspace nb, NbProcess[] all) {
+        if (all == null) {
+            return false;
+        }
         return Arrays.stream(all)
                 .filter(
                         x -> {

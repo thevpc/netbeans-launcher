@@ -13,12 +13,15 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.*;
@@ -196,7 +199,30 @@ public class SwingToolkit {
         return showConfirm(title == null ? null : title.getText(), message == null ? null : message.getText());
     }
 
+    public static void runAndWait(Runnable r) {
+        if (SwingUtilities.isEventDispatchThread()) {
+            r.run();
+        } else {
+            try {
+                SwingUtilities.invokeAndWait(r);
+            } catch (InterruptedException ex) {
+                throw new IllegalArgumentException(ex);
+            } catch (InvocationTargetException ex) {
+                throw new IllegalArgumentException(ex);
+            }
+        }
+    }
+
+    public static void runLater(Runnable r) {
+        if (SwingUtilities.isEventDispatchThread()) {
+            r.run();
+        } else {
+            SwingUtilities.invokeLater(r);
+        }
+    }
+
     private void showError(String title, String message, Exception ex) {
+        System.out.println("AAA 0002");
         if (NbUtils.isEmpty(title)) {
             title = msg("Toolkit.ShowError.Title").getText();
         }
@@ -207,6 +233,18 @@ public class SwingToolkit {
         if (ex != null) {
             message += " : " + ((ex instanceof NExecutionException) ? ex.getMessage() : ex.toString());
         }
+//        JScrollPane scrollPane = new JScrollPane();
+//        String messageOk=message;
+//        runAndWait(() -> {
+//            JTextArea textArea = new JTextArea();
+//            textArea.setText(messageOk);
+//            //textArea.setEditable(false);
+//            textArea.setLineWrap(true);
+//            textArea.setWrapStyleWord(true);
+//            scrollPane.add(textArea);
+//            scrollPane.setPreferredSize(new Dimension(600, 400));
+//        });
+//        JOptionPane.showMessageDialog(parent, scrollPane, title, JOptionPane.ERROR_MESSAGE, null);
         JOptionPane.showMessageDialog(parent, message, title, JOptionPane.ERROR_MESSAGE, null);
     }
 
@@ -259,9 +297,9 @@ public class SwingToolkit {
         return o;
     }
 
-    public void runLater(Runnable r) {
-        SwingUtilities.invokeLater(r);
-    }
+//    public void runLater(Runnable r) {
+//        SwingUtilities.invokeLater(r);
+//    }
 
     public void setControlDisabled(JComponent c, boolean disable) {
         c.setEnabled(!disable);
@@ -334,7 +372,7 @@ public class SwingToolkit {
         }
     }
 
-    public void updateTable(CatalogComponent table, Object[] values, Equalizer e, Comparator comp) {
+    public void updateTable(CatalogComponent table, Object[] values, Equalizer e, Comparator comp,Runnable onFinish) {
         SwingUtilities.invokeLater(() -> {
             Equalizer e2 = new Equalizer() {
                 @Override
@@ -367,6 +405,9 @@ public class SwingToolkit {
             if (okIndex >= 0) {
                 table.setSelectedIndex(okIndex);
             }
+            if(onFinish!=null){
+                onFinish.run();
+            }
         });
     }
 
@@ -381,6 +422,7 @@ public class SwingToolkit {
     public JLabel createLabel(String textKey) {
         JLabel jLabel = new JLabel(msg(textKey).getText());
         jLabel.setFont(jLabel.getFont().deriveFont(Font.BOLD));
+        jLabel.setForeground(Color.GRAY.darker());
 //        jLabel.setFont(new Font(Font.MONOSPACED,Font.BOLD,12));
         return jLabel;
     }
@@ -449,6 +491,5 @@ public class SwingToolkit {
         }
         showError(msg("Toolkit.OpenFolder.Error.Invalid"));
     }
-
 
 }

@@ -7,6 +7,7 @@ package net.thevpc.netbeans.launcher.ui.utils;
 
 import java.awt.event.MouseEvent;
 import java.util.List;
+import java.util.function.Predicate;
 import javax.swing.JComponent;
 
 /**
@@ -38,6 +39,10 @@ public interface CatalogComponent {
     void addValue(Object a);
 
     int indexOf(Object a);
+
+    int indexOf(Object a, Equalizer e);
+
+    int indexOf(Predicate a);
 
     void setValues(List<Object> a);
 

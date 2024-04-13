@@ -9,10 +9,11 @@ import net.thevpc.netbeans.launcher.cli.MainWindowCLI;
 import net.thevpc.netbeans.launcher.ui.MainWindowSwing;
 import net.thevpc.netbeans.launcher.util.NbUtils;
 import net.thevpc.nuts.*;
-import net.thevpc.nuts.cmdline.NCommandLine;
+import net.thevpc.nuts.cmdline.NCmdLine;
 import net.thevpc.nuts.io.NPrintStream;
 
 import javax.swing.*;
+import net.thevpc.nuts.util.NSupportMode;
 
 /**
  * @author thevpc
@@ -27,23 +28,22 @@ public class NbMain implements NApplication {
     }
 
     @Override
-    public void onInstallApplication(NApplicationContext applicationContext) {
-        addDesktopIntegration(applicationContext);
+    public void onInstallApplication(NSession session) {
+        addDesktopIntegration(session);
     }
 
     @Override
-    public void onUpdateApplication(NApplicationContext applicationContext) {
-        onInstallApplication(applicationContext);
+    public void onUpdateApplication(NSession session) {
+        onInstallApplication(session);
     }
 
     @Override
-    public void onUninstallApplication(NApplicationContext applicationContext) {
-        NCustomCommandManager.of(applicationContext.getSession()).removeCommandIfExists(PREFERRED_ALIAS);
+    public void onUninstallApplication(NSession session) {
+        NCommands.of(session).removeCommandIfExists(PREFERRED_ALIAS);
     }
 
     @Override
-    public void run(NApplicationContext appContext) {
-        NSession session = appContext.getSession();
+    public void run(NSession session) {
         NPrintStream out = session.out();
         NPrintStream err = session.err();
         if (!NbUtils.isPlatformSupported()) {
@@ -54,9 +54,9 @@ public class NbMain implements NApplication {
             return;
         }
         NbOptions options = new NbOptions();
-        NCommandLine cmdLine = appContext.getCommandLine();
+        NCmdLine cmdLine = session.getAppCmdLine();
         while (cmdLine.hasNext()) {
-            if (appContext.configureFirst(cmdLine)) {
+            if (session.configureFirst(cmdLine)) {
                 //do nothing
             } else if (cmdLine.next("--swing") != null) {
                 options.plaf = "nimbus";
@@ -85,25 +85,24 @@ public class NbMain implements NApplication {
         }
 
         if (options.install) {
-            addDesktopIntegration(appContext);
+            addDesktopIntegration(session);
         }
 
         if (options.version) {
-            out.println(appContext.getAppId().getVersion());
+            out.println(session.getAppId().getVersion());
         } else if (options.cli && !options.swing_arg) {
-            MainWindowCLI.launch(appContext, options);
+            MainWindowCLI.launch(session, options);
         } else if (options.swing_arg) {
-            MainWindowSwing.launch(appContext, options, true);
+            MainWindowSwing.launch(session, options, true);
         } else {
             //will default to swing!!
-            MainWindowSwing.launch(appContext, options, true);
+            MainWindowSwing.launch(session, options, true);
         }
     }
 
-    protected void addDesktopIntegration(NApplicationContext applicationContext) {
-        NSession session = applicationContext.getSession();
+    protected void addDesktopIntegration(NSession session) {
         NEnvs.of(session).addLauncher(new NLauncherOptions()
-                .setId(applicationContext.getAppId())
+                .setId(session.getAppId())
                 .setAlias(PREFERRED_ALIAS)
                 .setCreateAlias(true)
                 .setCreateMenuLauncher(NSupportMode.PREFERRED)

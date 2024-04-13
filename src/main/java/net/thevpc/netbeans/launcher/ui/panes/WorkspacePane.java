@@ -72,7 +72,7 @@ public class WorkspacePane extends AppPane {
     };
 
     public WorkspacePane(MainWindowSwing win) {
-        super(AppPaneType.EDIT_WS,new AppPanePos(1,0), win);
+        super(AppPaneType.EDIT_WS, new AppPanePos(1, 0), win);
         build();
     }
 
@@ -81,14 +81,33 @@ public class WorkspacePane extends AppPane {
         return getComps3().main;
     }
 
+    private JComponent createRowToolbarR(JComponent... components) {
+        Box b = Box.createHorizontalBox();
+        b.add(Box.createHorizontalGlue());
+        for (JComponent component : components) {
+            b.add(component);
+        }
+        return b;
+    }
+
+    private JComponent createRowToolbarL(JComponent... components) {
+        Box b = Box.createHorizontalBox();
+        for (JComponent component : components) {
+            b.add(component);
+        }
+        b.add(Box.createHorizontalGlue());
+        return b;
+    }
+
     public void createMainCompact(final Comp3 c) {
-        GridPane g = SwingUtils2.gridPane().insets(1, 1).expandHorizontallyColumn(1);
+        GridPane g = SwingUtils2.gridPane().insets(1, 1).expandHorizontallyColumn(0);
         //            g.setPadding(new Insets(5, 5, 5, 5));
         int row = 0;
         g.insets(1, 10).add(toolkit.createLabel("App.Workspace.InstallFolder"), 0, row);
-        Box b1 = Box.createHorizontalBox();
-        b1.add(toolkit.createIconButton("folder", "App.Action.OpenSelectedFolder", () -> onOpenNbdir()));
-        g.insets(1, 1).add(b1, 1, row);
+        //Box b1 = Box.createHorizontalBox();
+        g.insets(1, 1).add(createRowToolbarR(
+                toolkit.createIconButton("folder", "App.Action.OpenSelectedFolder", () -> onOpenNbdir())
+        ), 1, row);
         row++;
         g.insets(1, 1).add(c.path, 0, row, 2, 1);
         row++;
@@ -97,29 +116,29 @@ public class WorkspacePane extends AppPane {
         g.insets(1, 1).add(c.name, 0, row, 2, 1);
         row++;
         g.insets(1, 10).add(toolkit.createLabel("App.Workspace.ConfigFolder"), 0, row);
-        Box b = Box.createHorizontalBox();
-        b.add(toolkit.createIconButton("search", "App.Action.SelectFolder", () -> onSelectUserdir()));
-        b.add(toolkit.createIconButton("folder", "App.Action.OpenSelectedFolder", () -> onOpenUserdir()));
-        b.add(toolkit.createIconButton("trash", "App.Action.DeleteSelectedFolder", () -> onClearUserdir()));
-        g.insets(1, 1).add(b, 1, row);
+        g.insets(1, 1).add(createRowToolbarR(
+                toolkit.createIconButton("search", "App.Action.SelectFolder", () -> onSelectUserdir()),
+                toolkit.createIconButton("folder", "App.Action.OpenSelectedFolder", () -> onOpenUserdir()),
+                toolkit.createIconButton("trash", "App.Action.DeleteSelectedFolder", () -> onClearUserdir())
+        ), 1, row);
         row++;
         g.insets(1, 1).add(c.userdir, 0, row, 2, 1);
         row++;
         g.insets(1, 10).add(toolkit.createLabel("App.Workspace.CacheFolder"), 0, row);
-        b = Box.createHorizontalBox();
-        b.add(toolkit.createIconButton("search", "App.Action.SelectFolder", () -> onSelectCachedir()));
-        b.add(toolkit.createIconButton("folder", "App.Action.OpenSelectedFolder", () -> onOpenCachedir()));
-        b.add(toolkit.createIconButton("trash", "App.Action.DeleteSelectedFolder", () -> onClearCachedir()));
-        g.insets(1, 1).add(b, 1, row);
+        g.insets(1, 1).add(createRowToolbarR(
+                toolkit.createIconButton("search", "App.Action.SelectFolder", () -> onSelectCachedir()),
+                toolkit.createIconButton("folder", "App.Action.OpenSelectedFolder", () -> onOpenCachedir()),
+                toolkit.createIconButton("trash", "App.Action.DeleteSelectedFolder", () -> onClearCachedir())
+        ), 1, row);
         row++;
         g.insets(1, 1).add(c.cachedir, 0, row, 2, 1);
         row++;
         g.insets(1, 10).add(toolkit.createLabel("App.Workspace.Group"), 0, row);
-        b = Box.createHorizontalBox();
-        b.add(toolkit.createIconButton("search", "App.Action.LoadGroups", () -> onLoadGroup()));
-//        b.add(MainWindowSwingHelper.createIconButton("folder.png", "Open Selected folder",()->{}));
-//        b.add(MainWindowSwingHelper.createIconButton("trash.png", "Delete Selected folder",()->onClearCachedir()));
-        g.insets(1, 1).add(b, 1, row);
+        g.insets(1, 1).add(createRowToolbarR(
+                toolkit.createIconButton("search", "App.Action.LoadGroups", () -> onLoadGroup())
+        //        MainWindowSwingHelper.createIconButton("folder.png", "Open Selected folder",()->{})
+        //        MainWindowSwingHelper.createIconButton("trash.png", "Delete Selected folder",()->onClearCachedir())
+        ), 1, row);
         row++;
         g.insets(1, 1).add(c.group, 0, row, 2, 1);
 //        g.insets(1, 1).add(buttonUpdateGroup, 3, row);
@@ -146,25 +165,23 @@ public class WorkspacePane extends AppPane {
 
         row++;
         g.insets(1, 10).add(toolkit.createLabel("App.Workspace.JVMOptions"), 0, row, 3, 1);
-        b = Box.createHorizontalBox();
-        b.add(toolkit.createIconButton("search", "App.Action.AddOption", () -> {
-            onAddOption(c.options);
-        }));
-        b.add(toolkit.createIconButton("trash", "App.Action.Clear", () -> onClearOptions()));
-        g.insets(1, 1).add(b, 1, row);
+        g.insets(1, 1).add(createRowToolbarR(
+                toolkit.createIconButton("search", "App.Action.AddOption", () -> onAddOption(c.options)),
+                toolkit.createIconButton("trash", "App.Action.Clear", () -> onClearOptions())),
+                1, row);
         row++;
-        g.insets(1, 10).add(prepareTextField(c.options, 3), 0, row, 2, 1);
+        g.insets(1, 1).add(prepareTextField(c.options, 3), 0, row, 2, 1);
 
         row++;
         g.insets(1, 10).add(toolkit.createLabel("App.Workspace.ClassPathPrepend"), 0, row, 3, 1);
         row++;
-        g.insets(1, 10).add(prepareTextField(c.cpPrepend, 1), 0, row, 2, 1);
+        g.insets(1, 1).add(prepareTextField(c.cpPrepend, 1), 0, row, 2, 1);
         row++;
 
         row++;
         g.insets(1, 10).add(toolkit.createLabel("App.Workspace.ClassPathAppend"), 0, row, 3, 1);
         row++;
-        g.insets(1, 10).add(prepareTextField(c.cpAppend, 1), 0, row, 2, 1);
+        g.insets(1, 1).add(prepareTextField(c.cpAppend, 1), 0, row, 2, 1);
         row++;
 
         final JComponent c2 = g.toComponent();
@@ -173,82 +190,89 @@ public class WorkspacePane extends AppPane {
     }
 
     public void createMainNonCompact(final Comp3 c) {
-        GridPane g = SwingUtils2.gridPane().insets(1, 1).expandHorizontallyColumn(1);
+        final String MAIN_SHORT = "mainShort";
+        final String MAIN_LONG = "mainLong";
+        final String MAIN_LONGEST = "mainLongest";
+        final String LABEL = "label";
+        final String BUTTONS = "buttons";
+
+        GridPane g = SwingUtils2.gridPane().insets(1, 1)
+                .template(MAIN_SHORT).insets(1, 1).expandH().build()
+                .template(MAIN_LONG).insets(1, 1).span(3, 1).expandH().build()
+                .template(MAIN_LONGEST).insets(1, 1).span(5, 1).expandH().build()
+                .template(LABEL).insets(1, 10).span(2, 1).build()
+                .template(BUTTONS).insets(1, 4, 1, 1).span(2, 1).build();
         //            g.setPadding(new Insets(5, 5, 5, 5));
-        int row = 0;
-        g.insets(1, 10).add(toolkit.createLabel("App.Workspace.InstallFolder"), 0, row);
-        g.insets(1, 1).add(c.path, 1, row, 2, 1);
-        Box b1 = Box.createHorizontalBox();
-        b1.add(toolkit.createIconButton("folder", "App.Action.OpenSelectedFolder", () -> onOpenNbdir()));
-        g.insets(1, 1).add(b1, 3, row);
+        g.b(LABEL).add(toolkit.createLabel("App.Workspace.InstallFolder"));
+        g.b(MAIN_SHORT).add(c.path);
+        g.b(BUTTONS).add(createRowToolbarL(
+                toolkit.createIconButton("folder", "App.Action.OpenSelectedFolder", () -> onOpenNbdir())
+        ));
+        g.newRow();
 
-        row++;
-        g.insets(1, 10).add(toolkit.createLabel("App.Workspace.Name"), 0, row);
-        g.insets(1, 1).add(c.name, 1, row, 3, 1);
-        row++;
-        g.insets(1, 10).add(toolkit.createLabel("App.Workspace.ConfigFolder"), 0, row);
-        g.insets(1, 1).add(c.userdir, 1, row, 2, 1);
-        Box b = Box.createHorizontalBox();
-        b.add(toolkit.createIconButton("search", "App.Action.SelectFolder", () -> onSelectUserdir()));
-        b.add(toolkit.createIconButton("folder", "App.Action.OpenSelectedFolder", () -> onOpenUserdir()));
-        b.add(toolkit.createIconButton("trash", "App.Action.DeleteSelectedFolder", () -> onClearUserdir()));
-        g.insets(1, 1).add(b, 3, row);
-        row++;
-        g.insets(1, 10).add(toolkit.createLabel("App.Workspace.CacheFolder"), 0, row);
-        g.insets(1, 1).add(c.cachedir, 1, row, 2, 1);
-        b = Box.createHorizontalBox();
-        b.add(toolkit.createIconButton("search", "App.Action.SelectFolder", () -> onSelectCachedir()));
-        b.add(toolkit.createIconButton("folder", "App.Action.OpenSelectedFolder", () -> onOpenCachedir()));
-        b.add(toolkit.createIconButton("trash", "App.Action.DeleteSelectedFolder", () -> onClearCachedir()));
-        g.insets(1, 1).add(b, 3, row);
-        row++;
-        g.insets(1, 10).add(toolkit.createLabel("App.Workspace.Group"), 0, row);
-        g.insets(1, 1).add(c.group, 1, row, 2, 1);
-        b = Box.createHorizontalBox();
-        b.add(toolkit.createIconButton("search", "App.Action.LoadGroups", () -> onLoadGroup()));
-//        b.add(MainWindowSwingHelper.createIconButton("folder.png", "Open Selected folder",()->{}));
-//        b.add(MainWindowSwingHelper.createIconButton("trash.png", "Delete Selected folder",()->onClearCachedir()));
-        g.insets(1, 1).add(b, 3, row);
-//        g.insets(1, 1).add(buttonUpdateGroup, 3, row);
-        row++;
-        g.insets(1, 10).add(toolkit.createLabel("App.Workspace.JDK"), 0, row);
-        g.insets(1, 1).add(c.jdkhome, 1, row, 3, 1);
-        //            GridPane.setHgrow(buttonUpdateGroup, Priority.NEVER);
-        //            GridPane.setHgrow(group, Priority.ALWAYS);
-        row++;
-        g.insets(1, 10).add(toolkit.createLabel("App.Workspace.LAF"), 0, row);
-        g.insets(1, 1).add(c.laf, 1, row, 3, 1);
+        g.b(LABEL).add(toolkit.createLabel("App.Workspace.Name"));
+        g.b(MAIN_LONG).add(c.name);
+        g.newRow();
 
-        row++;
-        g.insets(1, 10).add(toolkit.createLabel("App.Workspace.FontSize"), 0, row);
-        g.insets(1, 1).add(c.fontSize, 1, row, 3, 1);
+        g.b(LABEL).add(toolkit.createLabel("App.Workspace.ConfigFolder"));
+        g.b(MAIN_SHORT).add(c.userdir);
+        g.b(BUTTONS).add(createRowToolbarL(
+                toolkit.createIconButton("search", "App.Action.SelectFolder", () -> onSelectUserdir()),
+                toolkit.createIconButton("folder", "App.Action.OpenSelectedFolder", () -> onOpenUserdir()),
+                toolkit.createIconButton("trash", "App.Action.DeleteSelectedFolder", () -> onClearUserdir())
+        ));
+        g.newRow();
 
-        row++;
-        g.insets(1, 10).add(toolkit.createLabel("App.Workspace.Locale"), 0, row);
-        g.insets(1, 1).add(prepareTextField(c.locale, 3), 1, row, 3, 1);
+        g.b(LABEL).add(toolkit.createLabel("App.Workspace.CacheFolder"));
+        g.b(MAIN_SHORT).add(c.cachedir);
+        g.b(BUTTONS).add(createRowToolbarL(
+                toolkit.createIconButton("search", "App.Action.SelectFolder", () -> onSelectCachedir()),
+                toolkit.createIconButton("folder", "App.Action.OpenSelectedFolder", () -> onOpenCachedir()),
+                toolkit.createIconButton("trash", "App.Action.DeleteSelectedFolder", () -> onClearCachedir())
+        ));
+        g.newRow();
 
-        row++;
-        g.insets(1, 10).add(toolkit.createLabel("App.Workspace.JVMOptions"), 0, row, 3, 1);
-        row++;
-        g.insets(1, 10).add(prepareTextField(c.options, 3), 0, row, 3, 1);
-        b = Box.createHorizontalBox();
-        b.add(toolkit.createIconButton("search", "App.Action.AddOption", () -> {
-            onAddOption(c.options);
-        }));
-        b.add(toolkit.createIconButton("trash", "App.Action.Clear", () -> onClearOptions()));
-        g.insets(1, 1).add(b, 3, row);
+        g.b(LABEL).add(toolkit.createLabel("App.Workspace.Group"));
+        g.b(MAIN_SHORT).add(c.group);
+        g.b(BUTTONS).add(createRowToolbarL(
+                toolkit.createIconButton("search", "App.Action.LoadGroups", () -> onLoadGroup())
+        ));
+        g.newRow();
 
-        row++;
-        g.insets(1, 10).add(toolkit.createLabel("App.Workspace.ClassPathPrepend"), 0, row, 3, 1);
-        row++;
-        g.insets(1, 10).add(prepareTextField(c.cpPrepend, 5), 0, row, 5, 2);
-        row++;
+        g.b(LABEL).add(toolkit.createLabel("App.Workspace.JDK"));
+        g.b(MAIN_LONG).add(c.jdkhome);
+        g.newRow();
 
-        row++;
-        g.insets(1, 10).add(toolkit.createLabel("App.Workspace.ClassPathAppend"), 0, row, 3, 1);
-        row++;
-        g.insets(1, 10).add(prepareTextField(c.cpAppend, 5), 0, row, 5, 2);
-        row++;
+        g.b(LABEL).add(toolkit.createLabel("App.Workspace.LAF"));
+        g.b(MAIN_LONG).add(c.laf);
+        g.newRow();
+
+        g.b(LABEL).add(toolkit.createLabel("App.Workspace.FontSize"));
+        g.b(MAIN_LONG).add(c.fontSize);
+        g.newRow();
+
+        g.b(LABEL).add(toolkit.createLabel("App.Workspace.Locale"));
+        g.b(MAIN_LONG).add(c.locale);
+        g.newRow();
+
+        g.b(LABEL).add(toolkit.createLabel("App.Workspace.JVMOptions"));
+        g.newRow();
+        g.b(MAIN_LONG).add(prepareTextField(c.options, 3, false));
+        g.b(BUTTONS).add(createRowToolbarL(
+                toolkit.createIconButton("search", "App.Action.AddOption", () -> onAddOption(c.options)),
+                toolkit.createIconButton("trash", "App.Action.Clear", () -> onClearOptions())
+        ));
+        g.newRow();
+
+        g.b(LABEL).add(toolkit.createLabel("App.Workspace.ClassPathPrepend"));
+        g.newRow();
+        g.b(MAIN_LONGEST).add(prepareTextField(c.cpPrepend, 5, false));
+        g.newRow();
+
+        g.b(LABEL).add(toolkit.createLabel("App.Workspace.ClassPathAppend"));
+        g.newRow();
+        g.b(MAIN_LONGEST).add(prepareTextField(c.cpAppend, 5, false));
+        g.newRow();
 
         final JComponent cc = g.toComponent();
         final JScrollPane s = new JScrollPane(cc);
@@ -270,9 +294,9 @@ public class WorkspacePane extends AppPane {
         String editName = getEditName();
         win.showConfirmOkCancel(
                 toolkit.msg("App.DeleteFolder.Confirm.Title"),
-                toolkit.msg("App.DeleteFolder.Confirm.Message")
-                , () -> {
-                    if (NbListPane.isStarted(win.getAppContext(),getWorkspace())) {
+                toolkit.msg("App.DeleteFolder.Confirm.Message"),
+                () -> {
+                    if (NbListPane.isStarted(win.getSession(), getWorkspace())) {
                         toolkit.showError(toolkit.msg("App.DeleteWorkspaceFolder.Error"));
                     } else {
                         try {
@@ -351,16 +375,16 @@ public class WorkspacePane extends AppPane {
     private void onSaveWorkspacePane() {
         try {
             NetbeansWorkspace w = getWorkspace();
-            if(NStringUtils.trim(w.getName()).isEmpty()){
+            if (NStringUtils.trim(w.getName()).isEmpty()) {
                 throw new IllegalArgumentException("missing name");
             }
-            if(NStringUtils.trim(w.getCachedir()).isEmpty()){
+            if (NStringUtils.trim(w.getCachedir()).isEmpty()) {
                 throw new IllegalArgumentException("missing cache dir");
             }
-            if(NStringUtils.trim(w.getPath()).isEmpty()){
+            if (NStringUtils.trim(w.getPath()).isEmpty()) {
                 throw new IllegalArgumentException("missing path");
             }
-            if(NStringUtils.trim(w.getUserdir()).isEmpty()){
+            if (NStringUtils.trim(w.getUserdir()).isEmpty()) {
                 throw new IllegalArgumentException("missing user dir");
             }
             configService.saveNbWorkspace(w);
@@ -372,26 +396,25 @@ public class WorkspacePane extends AppPane {
     }
 
     private void onCloseWorkspacePane() {
-            if (isModified()) {
-                win.showConfirmOkCancel(
-                        toolkit.msg("App.DiscardConfigChanges.Confirm.Title"),
-                        toolkit.msg("App.DiscardConfigChanges.Confirm.Message")
-                        ,
-                        () -> {
-                            try {
-                                win.setSelectedPane(AppPaneType.LIST_WS);
-                            } catch (Exception ex) {
-                                toolkit.showError(toolkit.msg("App.CloseWorkspace.Error"), ex);
-                            }
+        if (isModified()) {
+            win.showConfirmOkCancel(
+                    toolkit.msg("App.DiscardConfigChanges.Confirm.Title"),
+                    toolkit.msg("App.DiscardConfigChanges.Confirm.Message"),
+                    () -> {
+                        try {
+                            win.setSelectedPane(AppPaneType.LIST_WS);
+                        } catch (Exception ex) {
+                            toolkit.showError(toolkit.msg("App.CloseWorkspace.Error"), ex);
                         }
-                );
-            }else{
-                try{
-                    win.setSelectedPane(AppPaneType.LIST_WS);
-                } catch (Exception ex) {
-                    toolkit.showError(toolkit.msg("App.CloseWorkspace.Error"), ex);
-                }
+                    }
+            );
+        } else {
+            try {
+                win.setSelectedPane(AppPaneType.LIST_WS);
+            } catch (Exception ex) {
+                toolkit.showError(toolkit.msg("App.CloseWorkspace.Error"), ex);
             }
+        }
     }
 
     @Override
@@ -414,13 +437,13 @@ public class WorkspacePane extends AppPane {
         getComps3().userdir.setEditable(true);
         toolkit.setComboxValues(getComps3().userdir, configService.getUserdirProposals(w), oldValue);
 //        if(NbUtils.isEmpty(oldValue)){
-            getComps3().userdir.setSelectedItem(configService.getUserdirProposal(w));
+        getComps3().userdir.setSelectedItem(configService.getUserdirProposal(w));
 //        }
         oldValue = getEditCachedir();
         getComps3().cachedir.setEditable(true);
         toolkit.setComboxValues(getComps3().cachedir, configService.getCachedirProposals(w), oldValue);
 //        if(NbUtils.isEmpty(oldValue)){
-            getComps3().cachedir.setSelectedItem(configService.getCachedirProposal(w));
+        getComps3().cachedir.setSelectedItem(configService.getCachedirProposal(w));
 //        }
     }
 
@@ -433,12 +456,12 @@ public class WorkspacePane extends AppPane {
         regenerateNamesByInstallations(true);
     }
 
-    private void regenerateNamesByInstallations(boolean reset){
+    private void regenerateNamesByInstallations(boolean reset) {
         Object i = getComps3().path.getSelectedItem();
-        if(i==null) {
+        if (i == null) {
             i = getComps3().path.getEditor().getItem();
         }
-        String si=i==null?"":i.toString();
+        String si = i == null ? "" : i.toString();
         toolkit.setComboxValues(getComps3().name, configService.getNewNameProposals(si), si);
     }
 
@@ -760,12 +783,32 @@ public class WorkspacePane extends AppPane {
 
     private JComponent prepareTextField(JTextField options, int i) {
         options.setColumns(10);
-        final Box b = Box.createHorizontalBox();
-        b.add(options);
-        options.setMaximumSize(new Dimension(550, 100));
-//        b.setMaximumSize(new Dimension(600, 100));
-//        b.setBorder(BorderFactory.createDashedBorder(Color.RED));
-        return b;
+        return options;
+//        final Box b = Box.createHorizontalBox();
+//        b.add(options);
+////        options.setMaximumSize(new Dimension(550, 100));
+////        b.setMaximumSize(new Dimension(600, 100));
+////        b.setBorder(BorderFactory.createDashedBorder(Color.RED));
+//        return b;
+    }
+
+    private JComponent prepareTextField(JTextField options, int i, boolean compact) {
+        options.setColumns(10);
+        if (compact) {
+            options.setMaximumSize(new Dimension(550, 100));
+        } else {
+            if (i == 5) {
+                options.setMaximumSize(new Dimension(750, 100));
+            } else if (i == 3) {
+                options.setMaximumSize(new Dimension(550, 100));
+            }
+        }
+        return options;
+//       final Box b = Box.createHorizontalBox();
+//        b.add(options);
+////        b.setMaximumSize(new Dimension(600, 100));
+////        b.setBorder(BorderFactory.createDashedBorder(Color.RED));
+//        return b;
     }
 
     private NetbeansWorkspace cached_lw;
@@ -819,25 +862,25 @@ public class WorkspacePane extends AppPane {
         });
         c.jdkhome.setEditor(new SimpleBasicComboBoxEditor(
                 new StringMapper() {
-                    @Override
-                    public String toString(Object o) {
-                        return jdkJlistToStringer.toString(o,1);
-                    }
+            @Override
+            public String toString(Object o) {
+                return jdkJlistToStringer.toString(o, 1);
+            }
 
-                    @Override
-                    public Object fromString(String str) {
-                        ComboBoxModel model = c.jdkhome.getModel();
-                        int size = model.getSize();
-                        for (int i = 0; i < size; i++) {
-                            Object p = model.getElementAt(i);
-                            String s = toString(p);
-                            if(s.equals(str)){
-                                return p;
-                            }
-                        }
-                        return null;
+            @Override
+            public Object fromString(String str) {
+                ComboBoxModel model = c.jdkhome.getModel();
+                int size = model.getSize();
+                for (int i = 0; i < size; i++) {
+                    Object p = model.getElementAt(i);
+                    String s = toString(p);
+                    if (s.equals(str)) {
+                        return p;
                     }
                 }
+                return null;
+            }
+        }
         ));
         c.fontSize = new JSpinner();
         c.fontSize.setModel(new SpinnerNumberModel(0, 0, 72, 1));
@@ -864,11 +907,11 @@ public class WorkspacePane extends AppPane {
     }
 
     private void onAddOption(JTextField options) {
-        JVMOptions p = (JVMOptions)win.getPane(AppPaneType.JVM_OPTIONS);
+        JVMOptions p = (JVMOptions) win.getPane(AppPaneType.JVM_OPTIONS);
         win.setSelectedPane(AppPaneType.JVM_OPTIONS);
         p.setArguments(options.getText());
-        p.init(getPaneType(), ok->{
-            if(ok){
+        p.init(getPaneType(), ok -> {
+            if (ok) {
                 options.setText(p.getArguments());
             }
         });

@@ -24,7 +24,7 @@ import java.util.logging.Logger;
 import javax.swing.*;
 
 import net.thevpc.netbeans.launcher.NbOptions;
-import net.thevpc.nuts.NApplicationContext;
+import net.thevpc.nuts.NSession;
 
 /**
  * @author thevpc
@@ -41,7 +41,7 @@ public class MainWindowSwing {
     private JVMOptions jvmOptions;
     protected JFrame frame;
     private boolean compact = false;
-    private NApplicationContext appContext;
+    private NSession session;
     private AppPaneContainer appPaneContainer;
     private JComponent minimizeButton;
     private JComponent enlargeButton;
@@ -51,11 +51,11 @@ public class MainWindowSwing {
     private AppPane currentPane;
     private JComponent winHeader;
 
-    public static void launch(NApplicationContext appContext, NbOptions options, boolean wait) {
+    public static void launch(NSession session, NbOptions options, boolean wait) {
         SwingUtils2.prepareLaunch(options);
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        MainWindowSwing w = new MainWindowSwing(appContext);
+        MainWindowSwing w = new MainWindowSwing(session);
         w.start(frame);
 
         if (SystemTray.isSupported()) {
@@ -148,12 +148,12 @@ public class MainWindowSwing {
         }
     }
 
-    public NApplicationContext getAppContext() {
-        return appContext;
+    public NSession getSession() {
+        return session;
     }
 
-    public MainWindowSwing(NApplicationContext appContext) {
-        this.appContext = appContext;
+    public MainWindowSwing(NSession appContext) {
+        this.session = appContext;
         this.configService = new NetbeansConfigService(appContext);
     }
 
@@ -169,7 +169,7 @@ public class MainWindowSwing {
         configService.getConfig().getWorkspaces().addListener(e -> updateList());
         compact = !configService.getConfig().getSumoMode().get();
         this.frame = primaryStage;
-        primaryStage.setTitle("Netbeans Launcher " + appContext.getAppId().getVersion());
+        primaryStage.setTitle("Netbeans Launcher " + session.getAppId().getVersion());
         primaryStage.setIconImage(new ImageIcon(MainWindowSwing.class.getResource("nb.png")).getImage());
         primaryStage.setResizable(false);
         JPanel basePanel = new JPanel(new BorderLayout());
@@ -206,7 +206,15 @@ public class MainWindowSwing {
             SettingsPane s = (SettingsPane) getPane(AppPaneType.SETTINGS);
             s.setSettingType(SettingsPane.SettingType.NB_INSTALLATION);
         }
-        configService.loadAsync();
+        configService.loadAsync(() -> {
+            if (configService.getAllNbWorkspaces().length == 0) {
+                setSelectedPane(AppPaneType.SETTINGS);
+                SettingsPane s = (SettingsPane) getPane(AppPaneType.SETTINGS);
+                s.setSettingType(SettingsPane.SettingType.NB_INSTALLATION);
+            }else{
+                setSelectedPane(AppPaneType.LIST_WS);
+            }
+        });
     }
 
     private JComponent createHeader() {
@@ -311,10 +319,10 @@ public class MainWindowSwing {
 
     public void startWorkspace(NetbeansWorkspace w) {
         if (w != null) {
-            if (NbListPane.isStarted(getAppContext(), w)) {
+            if (NbListPane.isStarted(getSession(), w)) {
                 return;
             }
-            NbListPane.setStarted(getAppContext(), w);
+            NbListPane.setStarted(getSession(), w);
             try {
                 w.setLastLaunchDate(Instant.now());
                 w.setExecutionCount(w.getExecutionCount() + 1);
@@ -331,7 +339,7 @@ public class MainWindowSwing {
                             toolkit.showError(toolkit.msg("App.RunWorkspace.Error"), ex);
                         } finally {
                             NbUtils.setTempRunning(w, false);
-                            NbListPane.setStopped(getAppContext(), w);
+                            NbListPane.setStopped(getSession(), w);
                             onRefreshHeader();
                             updateList();
                         }
@@ -388,7 +396,7 @@ public class MainWindowSwing {
         for (AppPane pane : getPanes()) {
             pane.onChangeCompatStatus(compact);
         }
-        Dimension dimension = compact ? new Dimension(380, 300) : new Dimension(700, 500);
+        Dimension dimension = compact ? new Dimension(410, 300) : new Dimension(800, 600);
         frame.setPreferredSize(dimension);
         frame.setSize(dimension);
     }

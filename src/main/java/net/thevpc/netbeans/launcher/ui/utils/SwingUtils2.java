@@ -2,7 +2,6 @@ package net.thevpc.netbeans.launcher.ui.utils;
 
 import net.thevpc.netbeans.launcher.NbOptions;
 import net.thevpc.netbeans.launcher.ui.MainWindowSwing;
-import net.thevpc.nuts.NBlankable;
 import net.thevpc.swing.plaf.UIPlafManager;
 
 import javax.swing.*;
@@ -15,6 +14,7 @@ import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import net.thevpc.nuts.util.NBlankable;
 
 /**
  * thank you

@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.JComponent;
@@ -175,6 +176,36 @@ public class ListComponent implements CatalogComponent {
         }
         for (int i = 0; i < s; i++) {
             if (e.equals(m.get(i), a)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    @Override
+    public int indexOf(Object a, Equalizer e) {
+        if (e == null) {
+            e = getEqualizer();
+        }
+        DefaultListModel m = getModel();
+        int s = getModel().size();
+        if (e == null) {
+            e = Objects::equals;
+        }
+        for (int i = 0; i < s; i++) {
+            if (e.equals(m.get(i), a)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    @Override
+    public int indexOf(Predicate a) {
+        DefaultListModel m = getModel();
+        int s = getModel().size();
+        for (int i = 0; i < s; i++) {
+            if (a.test(m.get(i))) {
                 return i;
             }
         }

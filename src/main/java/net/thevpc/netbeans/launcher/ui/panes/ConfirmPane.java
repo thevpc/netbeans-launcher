@@ -23,6 +23,7 @@ import java.util.function.Consumer;
  * @author thevpc
  */
 public class ConfirmPane extends AppPane {
+
     private AppPaneType lastPane;
     private SwingToolkit.Message title;
     private SwingToolkit.Message desc;
@@ -30,6 +31,7 @@ public class ConfirmPane extends AppPane {
     private boolean yesNoCancel = false;
 
     private static class Comps1 {
+
         JComponent buttonOk;
         JComponent buttonYes;
         JComponent buttonNo;
@@ -68,14 +70,13 @@ public class ConfirmPane extends AppPane {
         PaintablePanel p = new PaintablePanel(new BorderLayout());
         p.add(c.title, BorderLayout.NORTH);
         p.add(c.desc, BorderLayout.CENTER);
-        p.setBackgroundPaint(SwingUtils2.componentGradientPaint("c4c7cc","d9dce1", Direction.BOTTOM));
+        p.setBackgroundPaint(SwingUtils2.componentGradientPaint("c4c7cc", "d9dce1", Direction.BOTTOM));
         p.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
         p.setOpaque(true);
         c.main = new JScrollPane(p);
         c.main.setBackground(Color.WHITE);
         return c;
     }
-
 
     public void initOkCancel(AppPaneType lastType, SwingToolkit.Message title, SwingToolkit.Message desc, Consumer<ConfirmResult> supp) {
         this.lastPane = lastType;
@@ -163,6 +164,15 @@ public class ConfirmPane extends AppPane {
     public void updateAll() {
         onRequiredUpdateButtonStatuses();
         getComps1().title.setText(title == null ? "Attention" : title.getText());
-        getComps1().desc.setText(desc == null ? "" : desc.getText());
+        String t = desc == null ? "" : desc.getText();
+        if (t.indexOf("\n") >= 0) {
+            if (t.toLowerCase().indexOf("<html>") < 0) {
+                t = t.replaceAll("<", "&lt;");
+                t = t.replaceAll(">", "&gt;");
+                t = t.replaceAll("\n", "<br>");
+                t = "<html>" + t + "</html>";
+            }
+        }
+        getComps1().desc.setText(t);
     }
 }

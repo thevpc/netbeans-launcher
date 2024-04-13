@@ -154,8 +154,8 @@ public abstract class NbListComponent {
 
     public void refresh(boolean cached) {
         new Thread(() -> {
-            win.getToolkit().updateTable(table, load(false, cached), new NetbeansInstallOrBinaryEqualizer(), null);
-            win.getToolkit().updateTable(table, load(true, cached), new NetbeansInstallOrBinaryEqualizer(), null);
+            win.getToolkit().updateTable(table, load(false, cached), new NetbeansInstallOrBinaryEqualizer(), null,null);
+            win.getToolkit().updateTable(table, load(true, cached), new NetbeansInstallOrBinaryEqualizer(), null,null);
         }).start();
         table.setElementHeight(win.isCompact() ? 30 : 50);
     }

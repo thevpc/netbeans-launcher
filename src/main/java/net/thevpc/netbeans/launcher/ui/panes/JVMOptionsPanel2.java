@@ -19,7 +19,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
 import net.thevpc.nuts.NSession;
-import net.thevpc.nuts.cmdline.NCommandLine;
+import net.thevpc.nuts.cmdline.NCmdLine;
 
 /**
  *
@@ -155,7 +155,7 @@ public class JVMOptionsPanel2 extends JPanel {
     public void setArguments(String args) {
         DefaultListModel<String> m = getListModel();
         m.clear();
-        for (String a : NCommandLine.parseDefault(args).get().toStringArray()) {
+        for (String a : NCmdLine.parseDefault(args).get().toStringArray()) {
             m.addElement(a);
         }
     }
@@ -166,7 +166,7 @@ public class JVMOptionsPanel2 extends JPanel {
         for (Object object : m.toArray()) {
             a.add(String.valueOf(object));
         }
-        return NCommandLine.of(a).toString();
+        return NCmdLine.of(a).toString();
     }
 
     private DefaultListModel<String> getListModel() {

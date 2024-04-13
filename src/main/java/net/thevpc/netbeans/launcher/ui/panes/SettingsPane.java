@@ -331,7 +331,7 @@ public class SettingsPane extends AppPane {
     }
 
     public void updateJdkList() {
-        toolkit.updateTable(getComps2().jdkListView, configService.getAllJdk(), (a, b) -> a != null && b != null && ((NPlatformLocation) a).getName().equals(((NPlatformLocation) b).getName()), null);
+        toolkit.updateTable(getComps2().jdkListView, configService.getAllJdk(), (a, b) -> a != null && b != null && ((NPlatformLocation) a).getName().equals(((NPlatformLocation) b).getName()), null,null);
     }
 
     public void updateNbList() {

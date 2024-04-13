@@ -10,8 +10,11 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
             </goals>
             <properties>
-                <exec.args>-Dnuts.args='-ZSy' -classpath %classpath net.thevpc.netbeans.launcher.NbMain</exec.args>
+                <exec.args>${exec.vmArgs} -classpath %classpath ${exec.mainClass} ${exec.appArgs}</exec.args>
                 <exec.executable>java</exec.executable>
+                <exec.vmArgs>-Dnuts.args=</exec.vmArgs>
+                <exec.appArgs></exec.appArgs>
+                <exec.mainClass>net.thevpc.netbeans.launcher.NbMain</exec.mainClass>
             </properties>
         </action>
         <action>
@@ -24,9 +27,12 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
             </goals>
             <properties>
-                <exec.args>-agentlib:jdwp=transport=dt_socket,server=n,address=${jpda.address} -Dnuts.args='-ZSy' -classpath %classpath net.thevpc.netbeans.launcher.NbMain</exec.args>
+                <exec.args>${exec.vmArgs} -classpath %classpath ${exec.mainClass} ${exec.appArgs}</exec.args>
                 <exec.executable>java</exec.executable>
                 <jpda.listen>true</jpda.listen>
+                <exec.vmArgs>-Dnuts.args= -agentlib:jdwp=transport=dt_socket,server=n,address=${jpda.address}</exec.vmArgs>
+                <exec.appArgs></exec.appArgs>
+                <exec.mainClass>net.thevpc.netbeans.launcher.NbMain</exec.mainClass>
             </properties>
         </action>
         <action>
@@ -39,8 +45,11 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
             </goals>
             <properties>
-                <exec.args>-Dnuts.args='-ZSy' -classpath %classpath net.thevpc.netbeans.launcher.NbMain</exec.args>
+                <exec.args>${exec.vmArgs} -classpath %classpath ${exec.mainClass} ${exec.appArgs}</exec.args>
                 <exec.executable>java</exec.executable>
+                <exec.vmArgs>-Dnuts.args=</exec.vmArgs>
+                <exec.appArgs></exec.appArgs>
+                <exec.mainClass>net.thevpc.netbeans.launcher.NbMain</exec.mainClass>
             </properties>
         </action>
     </actions>

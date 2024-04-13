@@ -24,7 +24,7 @@ nuts netbeans-launcher
 ## Creating an alias to netbeans-launcher
 You may use nuts alias mechanism to simplify netbeans launching
 ```
-nadmin add alias nb=netbeans-launcher
+nuts settings add alias nb netbeans-launcher
 ```
 
 then you may start
