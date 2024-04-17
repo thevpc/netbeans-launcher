@@ -131,17 +131,23 @@ public class ObservableList<T> implements ObservableObject, Iterable<T> {
         return data.toArray(a);
     }
 
-    public interface ObservableListItemListener<T> {
-        public void onChange(ObservableListEvent<T> event) ;
+    public boolean isEmpty() {
+        return data.isEmpty();
     }
-    
-    public class ObservableListAdapter<T> implements ObservableListListener<T>{
+
+    public interface ObservableListItemListener<T> {
+
+        public void onChange(ObservableListEvent<T> event);
+    }
+
+    public class ObservableListAdapter<T> implements ObservableListListener<T> {
+
         private ObservableListItemListener<T> li;
 
         public ObservableListAdapter(ObservableListItemListener<T> li) {
             this.li = li;
         }
-        
+
         @Override
         public void onAdd(ObservableListEvent<T> event) {
             li.onChange(event);
@@ -157,7 +163,7 @@ public class ObservableList<T> implements ObservableObject, Iterable<T> {
             li.onChange(event);
         }
     }
-    
+
     public interface ObservableListListener<T> {
 
         void onAdd(ObservableListEvent<T> event);

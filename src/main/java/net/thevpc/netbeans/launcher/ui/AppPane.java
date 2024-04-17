@@ -15,7 +15,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
 
-import net.thevpc.netbeans.launcher.NetbeansConfigService;
+import net.thevpc.netbeans.launcher.service.NetbeansLauncherModule;
 import net.thevpc.netbeans.launcher.model.LongOperation;
 import net.thevpc.netbeans.launcher.model.LongOperationListener;
 import net.thevpc.netbeans.launcher.ui.utils.BoxH;
@@ -42,7 +42,7 @@ public abstract class AppPane extends JPanel {
     protected Comps nonCompactComp;
     protected MainWindowSwing win;
     protected SwingToolkit toolkit;
-    protected NetbeansConfigService configService;
+    protected NetbeansLauncherModule configService;
     protected AppPaneType paneType;
     protected AppPanePos pos;
 
@@ -131,7 +131,7 @@ public abstract class AppPane extends JPanel {
         hgap = 1;//compact ? 1 : 3;
         c.footer = SwingUtils2.boxH().setVgap(vgap).setHgap(hgap).setName(getPaneType()+"-footer");
         c.jpb = new JProgressBar();
-        configService.addOperationListener(new LongOperationListener() {
+        configService.rt().addOperationListener(new LongOperationListener() {
             @Override
             public void onLongOperationProgress(LongOperation operation) {
                 updateProgressbar();
@@ -204,7 +204,7 @@ public abstract class AppPane extends JPanel {
     }
     private LongOperationTracker tracker=new LongOperationTracker();
     private void updateProgressbar(JProgressBar jpb) {
-        LongOperation[] operations = configService.getOperations();
+        LongOperation[] operations = configService.rt().getOperations();
         DecimalFormat df=new DecimalFormat("00.0");
         if (operations.length > 0) {
             if (operations.length == 1) {

@@ -18,11 +18,8 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashSet;
 import javax.swing.*;
 
-import net.thevpc.netbeans.launcher.NetbeansConfigService;
-import net.thevpc.netbeans.launcher.model.NetbeansGroup;
-import net.thevpc.netbeans.launcher.model.NetbeansInstallation;
-import net.thevpc.netbeans.launcher.model.NetbeansInstallationStore;
-import net.thevpc.netbeans.launcher.model.NetbeansWorkspace;
+import net.thevpc.netbeans.launcher.model.*;
+import net.thevpc.netbeans.launcher.service.NetbeansWorkspaceService;
 import net.thevpc.netbeans.launcher.ui.*;
 import net.thevpc.netbeans.launcher.ui.utils.*;
 import net.thevpc.netbeans.launcher.util.NbUtils;
@@ -296,7 +293,7 @@ public class WorkspacePane extends AppPane {
                 toolkit.msg("App.DeleteFolder.Confirm.Title"),
                 toolkit.msg("App.DeleteFolder.Confirm.Message"),
                 () -> {
-                    if (NbListPane.isStarted(win.getSession(), getWorkspace())) {
+                    if (NetbeansWorkspaceListPane.isStarted(win.getSession(), getWorkspace())) {
                         toolkit.showError(toolkit.msg("App.DeleteWorkspaceFolder.Error"));
                     } else {
                         try {
@@ -333,9 +330,9 @@ public class WorkspacePane extends AppPane {
     private void onClearUserdir() {
         String d = getEditUserdir();
         if (NbUtils.isEmpty(d)) {
-            NetbeansInstallation ni = configService.findNb(getEditPath());
+            NetbeansInstallation ni = configService.ins().findNetbeansInstallation(getEditPath());
             if (ni == null) {
-                ni = configService.detectNb(getEditPath(), NetbeansInstallationStore.USER);
+                ni = configService.ins().detectNetbeansInstallations(getEditPath(), NetbeansInstallationStore.USER);
             }
             if (ni != null) {
                 d = ni.getUserdir();
@@ -347,9 +344,9 @@ public class WorkspacePane extends AppPane {
     private void onClearCachedir() {
         String d = getEditCachedir();
         if (NbUtils.isEmpty(d)) {
-            NetbeansInstallation ni = configService.findNb(getEditPath());
+            NetbeansInstallation ni = configService.ins().findNetbeansInstallation(getEditPath());
             if (ni == null) {
-                ni = configService.detectNb(getEditPath(), NetbeansInstallationStore.USER);
+                ni = configService.ins().detectNetbeansInstallations(getEditPath(), NetbeansInstallationStore.USER);
             }
             if (ni != null) {
                 d = ni.getCachedir();
@@ -387,7 +384,7 @@ public class WorkspacePane extends AppPane {
             if (NStringUtils.trim(w.getUserdir()).isEmpty()) {
                 throw new IllegalArgumentException("missing user dir");
             }
-            configService.saveNbWorkspace(w);
+            configService.ws().saveNetbeansWorkspace(w);
             win.updateList();
             win.setSelectedPane(AppPaneType.LIST_WS);
         } catch (Exception ex) {
@@ -435,23 +432,23 @@ public class WorkspacePane extends AppPane {
         w.setName(getEditName());
         String oldValue = getEditUserdir();
         getComps3().userdir.setEditable(true);
-        toolkit.setComboxValues(getComps3().userdir, configService.getUserdirProposals(w), oldValue);
+        toolkit.setComboxValues(getComps3().userdir, configService.ws().getUserdirProposals(w), oldValue);
 //        if(NbUtils.isEmpty(oldValue)){
-        getComps3().userdir.setSelectedItem(configService.getUserdirProposal(w));
+        getComps3().userdir.setSelectedItem(configService.ws().getUserdirProposal(w));
 //        }
         oldValue = getEditCachedir();
         getComps3().cachedir.setEditable(true);
-        toolkit.setComboxValues(getComps3().cachedir, configService.getCachedirProposals(w), oldValue);
+        toolkit.setComboxValues(getComps3().cachedir, configService.ws().getCachedirProposals(w), oldValue);
 //        if(NbUtils.isEmpty(oldValue)){
-        getComps3().cachedir.setSelectedItem(configService.getCachedirProposal(w));
+        getComps3().cachedir.setSelectedItem(configService.ws().getCachedirProposal(w));
 //        }
     }
 
     public void resetValues() {
         getComps3().path.setEditable(true);
-        toolkit.setComboxValues(getComps3().path, configService.getAllNb(), null);
+        toolkit.setComboxValues(getComps3().path, configService.ins().findNetbeansInstallations(SortType.LATEST_FIRST), null);
         getComps3().jdkhome.setEditable(true);
-        toolkit.setComboxValues(getComps3().jdkhome, configService.getAllJdk(), null);
+        toolkit.setComboxValues(getComps3().jdkhome, configService.jdk().findAllJdks(), null);
         getComps3().name.setEditable(true);
         regenerateNamesByInstallations(true);
     }
@@ -462,7 +459,7 @@ public class WorkspacePane extends AppPane {
             i = getComps3().path.getEditor().getItem();
         }
         String si = i == null ? "" : i.toString();
-        toolkit.setComboxValues(getComps3().name, configService.getNewNameProposals(si), si);
+        toolkit.setComboxValues(getComps3().name, configService.ws().getNewNameProposals(si), si);
     }
 
     public EditType getEditMode() {
@@ -483,10 +480,10 @@ public class WorkspacePane extends AppPane {
 
     protected void onLoadGroup() {
         NetbeansWorkspace w = getWorkspace();
-        NetbeansGroup[] o = configService.detectNbGroups(w);
+        NetbeansGroup[] o = configService.ws().detectNetbeansGroups(w);
         NetbeansGroup gsel = null;
         if (o == null) {
-            o = new NetbeansGroup[]{NetbeansConfigService.NETBEANS_NO_GROUP, NetbeansConfigService.NETBEANS_CLOSE_GROUP};
+            o = new NetbeansGroup[]{NetbeansWorkspaceService.NETBEANS_NO_GROUP, NetbeansWorkspaceService.NETBEANS_CLOSE_GROUP};
         }
         for (NetbeansGroup gg : o) {
             if (NbUtils.equalsStr(gg.getName(), w.getGroup())) {
@@ -495,7 +492,7 @@ public class WorkspacePane extends AppPane {
             }
         }
         if (gsel == null) {
-            gsel = NetbeansConfigService.NETBEANS_NO_GROUP;
+            gsel = NetbeansWorkspaceService.NETBEANS_NO_GROUP;
         }
         getComps3().group.setEditable(true);
         toolkit.setComboxValues(getComps3().group, o, gsel);
@@ -504,10 +501,10 @@ public class WorkspacePane extends AppPane {
     protected void onNbPathChanged() {
         NetbeansWorkspace w = getWorkspace();
         String p = w.getPath();
-        NetbeansInstallation nb = configService.findNb(p);
+        NetbeansInstallation nb = configService.ins().findNetbeansInstallation(p);
         NetbeansInstallation[] existing = {};
         if (getEditMode() == EditType.ADD) {
-            existing = configService.getAllNb();
+            existing = configService.ins().findNetbeansInstallations(SortType.LATEST_FIRST);
         }
         if (nb != null) {
 //            if (NbUtils.isEmpty(w.getJdkhome())) {
@@ -546,7 +543,8 @@ public class WorkspacePane extends AppPane {
 
     protected void onRequiredUpdateGroupFast() {
         NetbeansWorkspace w = getWorkspace();
-        NetbeansGroup[] o = (NbUtils.isEmpty(w.getGroup())) ? new NetbeansGroup[]{NetbeansConfigService.NETBEANS_NO_GROUP, NetbeansConfigService.NETBEANS_CLOSE_GROUP} : new NetbeansGroup[]{NetbeansConfigService.NETBEANS_NO_GROUP, NetbeansConfigService.NETBEANS_CLOSE_GROUP, new NetbeansGroup(w.getGroup(), w.getGroup())};
+        NetbeansGroup[] o = (NbUtils.isEmpty(w.getGroup())) ? new NetbeansGroup[]{NetbeansWorkspaceService.NETBEANS_NO_GROUP, NetbeansWorkspaceService.NETBEANS_CLOSE_GROUP}
+                : new NetbeansGroup[]{NetbeansWorkspaceService.NETBEANS_NO_GROUP, NetbeansWorkspaceService.NETBEANS_CLOSE_GROUP, new NetbeansGroup(w.getGroup(), w.getGroup())};
         NetbeansGroup gsel = null;
         for (NetbeansGroup gg : o) {
             if (NbUtils.equalsStr(gg.getName(), w.getGroup())) {
@@ -555,7 +553,7 @@ public class WorkspacePane extends AppPane {
             }
         }
         if (gsel == null) {
-            gsel = NetbeansConfigService.NETBEANS_NO_GROUP;
+            gsel = NetbeansWorkspaceService.NETBEANS_NO_GROUP;
         }
         getComps3().group.setEditable(true);
         toolkit.setComboxValues(getComps3().group, o, gsel);
@@ -613,11 +611,11 @@ public class WorkspacePane extends AppPane {
     }
 
     public void setEditPath(String p) {
-        NetbeansInstallation ni = configService.findNb(p);
+        NetbeansInstallation ni = configService.ins().findNetbeansInstallation(p);
         if (ni == null) {
-            ni = configService.detectNb(p, NetbeansInstallationStore.USER);
+            ni = configService.ins().detectNetbeansInstallations(p, NetbeansInstallationStore.USER);
         }
-        NetbeansInstallation pp = configService.getNb(p, ni == null ? NetbeansInstallationStore.USER : ni.getStore());
+        NetbeansInstallation pp = configService.ins().findOrAddNetbeansInstallation(p, ni == null ? NetbeansInstallationStore.USER : ni.getStore());
         if (pp != null) {
             getComps3().path.setSelectedItem(pp);
         } else {
@@ -626,7 +624,7 @@ public class WorkspacePane extends AppPane {
     }
 
     public void setEditJdkhome(String p) {
-        NPlatformLocation pp2 = configService.getJdk(p);
+        NPlatformLocation pp2 = configService.jdk().findOrAddJdk(p);
         if (pp2 != null) {
             getComps3().jdkhome.setSelectedItem(pp2);
         } else {
@@ -747,13 +745,13 @@ public class WorkspacePane extends AppPane {
 
     private void onSelectCachedir() {
         JFileChooser c = new JFileChooser();
-        c.setCurrentDirectory(configService.getCurrentDirectory());
+        c.setCurrentDirectory(configService.rt().getCurrentDirectory());
         c.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         c.setAcceptAllFileFilterUsed(false);
         if (JFileChooser.APPROVE_OPTION == c.showDialog(this, toolkit.msg("App.Workspace.SelectCacheDir").getText())) {
             File f = c.getSelectedFile();
             if (f != null) {
-                configService.setCurrentDirectory(f);
+                configService.rt().setCurrentDirectory(f);
                 setEditCachedir(c.getSelectedFile().getPath());
             }
         }
@@ -769,13 +767,13 @@ public class WorkspacePane extends AppPane {
 
     private void onSelectUserdir() {
         JFileChooser c = new JFileChooser();
-        c.setCurrentDirectory(configService.getCurrentDirectory());
+        c.setCurrentDirectory(configService.rt().getCurrentDirectory());
         c.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         c.setAcceptAllFileFilterUsed(false);
         if (JFileChooser.APPROVE_OPTION == c.showDialog(this, toolkit.msg("App.Workspace.SelectUserDir").getText())) {
             File f = c.getSelectedFile();
             if (f != null) {
-                configService.setCurrentDirectory(f);
+                configService.rt().setCurrentDirectory(f);
                 setEditUserdir(c.getSelectedFile().getPath());
             }
         }

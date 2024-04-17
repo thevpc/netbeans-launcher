@@ -8,7 +8,7 @@ import net.thevpc.netbeans.launcher.ui.utils.ListComponent;
 import net.thevpc.netbeans.launcher.util.JlistToStringer;
 import net.thevpc.netbeans.launcher.ui.MainWindowSwing;
 
-public class NbListComponentAsList extends NbListComponent {
+public class NbListComponentAsList extends NetbeansInstallationListComponent {
 
     private ListComponent table;
     protected JlistToStringer nbLinkStringer = new JlistToStringer(2) {
@@ -23,7 +23,7 @@ public class NbListComponentAsList extends NbListComponent {
                 NetbeansInstallation i = (NetbeansInstallation) value;
                 boolean _downloading = false;
                 if (i.getStore() == NetbeansInstallationStore.DEFAULT) {
-                    _downloading = NbListComponent.isDownloadingVersion(i.getVersion());
+                    _downloading = NetbeansInstallationListComponent.isDownloadingVersion(i.getVersion());
                 }
                 if (win.isCompact()) {
                     switch (level) {

@@ -40,7 +40,7 @@ import net.thevpc.nuts.util.NStringUtils;
 /**
  * @author thevpc
  */
-public class NbListPane extends AppPane {
+public class NetbeansWorkspaceListPane extends AppPane {
 
     protected final static Set<String> running = new HashSet<String>();
 
@@ -93,7 +93,7 @@ public class NbListPane extends AppPane {
     Comps1 compact;
     Comps1 nonCompact;
 
-    public NbListPane(MainWindowSwing win) {
+    public NetbeansWorkspaceListPane(MainWindowSwing win) {
         super(AppPaneType.LIST_WS, new AppPanePos(0, 0), win);
         build();
     }
@@ -111,7 +111,7 @@ public class NbListPane extends AppPane {
 
         c.workspacesListView = new TableComponent();
         c.workspacesListView.setElementHeight(win.isCompact() ? 30 : 50);
-        for (NetbeansWorkspace workspace : configService.getAllNbWorkspaces()) {
+        for (NetbeansWorkspace workspace : configService.ws().findNetbeansWorkspaces()) {
             c.workspacesListView.addValue(workspace);
         }
         c.workspacesListView.addEnterSelection((e) -> win.startWorkspace(getSelectedWorkspace()));
@@ -261,7 +261,7 @@ public class NbListPane extends AppPane {
                     }
                 }
                 if (create) {
-                    configService.addNbWorkspace(ii);
+                    configService.ws().addNetbeansWorkspace(ii);
                     updateList(() -> {
                         setSelectedWorkspace(w, false);
                     });
@@ -290,7 +290,7 @@ public class NbListPane extends AppPane {
         Equalizer name = (a, b) -> a != null && b != null && NStringUtils.trim(((NetbeansWorkspace) a).getName())
                 .equals(NStringUtils.trim(((NetbeansWorkspace) b).getName()));
         toolkit.updateTable(
-                getComps1().workspacesListView, configService.getAllNbWorkspaces(),
+                getComps1().workspacesListView, configService.ws().findNetbeansWorkspaces(),
                 name,
                 new Comparator<NetbeansWorkspace>() {
             @Override
@@ -320,7 +320,7 @@ public class NbListPane extends AppPane {
                 toolkit.msg("App.RemoveConfiguration.Confirm.Message"),
                 () -> {
                     try {
-                        configService.removeNbWorkspace(w);
+                        configService.ws().removeNetbeansWorkspace(w);
                         getComps1().workspacesListView.removeValue(w);
                     } catch (Exception ex) {
                         toolkit.showError(toolkit.msg("App.RemoveWorkspace.Error"), ex);

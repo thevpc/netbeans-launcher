@@ -9,26 +9,19 @@ import java.awt.*;
 import java.io.File;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
-import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTable;
 import javax.swing.event.ChangeEvent;
-import javax.swing.table.DefaultTableCellRenderer;
 
 import net.thevpc.netbeans.launcher.model.NetbeansInstallation;
 import net.thevpc.netbeans.launcher.model.NetbeansInstallationStore;
 import net.thevpc.netbeans.launcher.model.NetbeansLocation;
-import net.thevpc.netbeans.launcher.model.NetbeansWorkspace;
 import net.thevpc.netbeans.launcher.ui.AppPane;
 import net.thevpc.netbeans.launcher.ui.AppPanePos;
 import net.thevpc.netbeans.launcher.ui.AppPaneType;
 import net.thevpc.netbeans.launcher.ui.MainWindowSwing;
 import net.thevpc.netbeans.launcher.ui.utils.CatalogComponent;
 import net.thevpc.netbeans.launcher.ui.utils.JdkJlistToStringer;
-import net.thevpc.netbeans.launcher.ui.utils.ListComponent;
-import net.thevpc.netbeans.launcher.ui.utils.ObjectTableModel;
-import net.thevpc.netbeans.launcher.ui.utils.TableComponent;
 import net.thevpc.netbeans.launcher.util.*;
 import net.thevpc.nuts.NPlatformLocation;
 
@@ -39,8 +32,8 @@ public class SettingsPane extends AppPane {
 
     private static class Comp2 {
 
-        private CatalogComponent jdkListView;
-        private NbListComponent nbListView;
+        private JdkListComponent jdkListView;
+        private NetbeansInstallationListComponent nbListView;
         private JTabbedPane tabbedPane;
         private JComponent buttonAdd;
         private JComponent buttonRemove;
@@ -59,58 +52,8 @@ public class SettingsPane extends AppPane {
     public SettingsPane(MainWindowSwing win) {
         super(AppPaneType.SETTINGS, new AppPanePos(2, 0), win);
         build();
-        win.getConfigService().getConfig()
-                .getJdkLocations().addListener(new ObservableList.ObservableListListener<NPlatformLocation>() {
-            @Override
-            public void onAdd(ObservableListEvent<NPlatformLocation> event) {
-                updateJdkList();
-            }
-
-            @Override
-            public void onRemove(ObservableListEvent<NPlatformLocation> event) {
-                updateJdkList();
-            }
-
-            @Override
-            public void onUpdate(ObservableListEvent<NPlatformLocation> event) {
-                updateJdkList();
-            }
-        });
-        win.getConfigService().getConfig()
-                .getInstallations().addListener(new ObservableList.ObservableListListener<NetbeansInstallation>() {
-            @Override
-            public void onAdd(ObservableListEvent<NetbeansInstallation> event) {
-                updateJdkList();
-            }
-
-            @Override
-            public void onRemove(ObservableListEvent<NetbeansInstallation> event) {
-                updateJdkList();
-            }
-
-            @Override
-            public void onUpdate(ObservableListEvent<NetbeansInstallation> event) {
-                updateJdkList();
-            }
-        });
-        win.getConfigService().getConfig()
-                .getWorkspaces().addListener(new ObservableList.ObservableListListener<NetbeansWorkspace>() {
-            @Override
-            public void onAdd(ObservableListEvent<NetbeansWorkspace> event) {
-                updateJdkList();
-            }
-
-            @Override
-            public void onRemove(ObservableListEvent<NetbeansWorkspace> event) {
-                updateJdkList();
-            }
-
-            @Override
-            public void onUpdate(ObservableListEvent<NetbeansWorkspace> event) {
-                updateJdkList();
-            }
-        });
-        win.getConfigService().getConfig().getSumoMode().addListener(new ObservableValue.ObservableValueListener<Boolean>() {
+        
+        win.getConfigService().conf().getSumoMode().addListener(new ObservableValue.ObservableValueListener<Boolean>() {
             @Override
             public void onChange(ObservableValueEvent<Boolean> t) {
                 //
@@ -123,43 +66,12 @@ public class SettingsPane extends AppPane {
         return getComps2().main;
     }
 
-    public CatalogComponent createJdkList() {
-        CatalogComponent jdkListView = new TableComponent();
-        jdkListView.setElementHeight(win.isCompact() ? 30 : 50);
-        if (jdkListView instanceof ListComponent) {
-            ((ListComponent) jdkListView).setStringer(jdkStringer);
-        } else if (jdkListView instanceof TableComponent) {
-            ((TableComponent) jdkListView).setColumns(new ObjectTableModel.NamedColumns<NPlatformLocation>(new String[]{"Name", "Location"}) {
-                @Override
-                public Object getValueAt(int row, String column, NPlatformLocation t) {
-                    switch (column) {
-                        case "Name":
-                            return t==null?"<null>":t.getName();
-                        case "Type":
-                            return t==null?"<null>":t.getPackaging();
-                        case "Location":
-                            return t==null?"<null>":t.getPath();
-                    }
-                    return "";
-                }
-            }.setColumnSizes(new float[]{3, 5}));
-            ((TableComponent) jdkListView).getTable().getColumnModel().getColumn(0).setCellRenderer(new DefaultTableCellRenderer() {
-                @Override
-                public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-                    JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                    setIcon(win.getToolkit().createIcon("java", win.isCompact()));
-                    return label;
-                }
-            });
-        }
-        jdkListView.addListSelectionListener((e) -> {
-            onRequiredUpdateButtonStatuses();
-        });
-        return jdkListView;
+    public JdkListComponent createJdkList() {
+        return new JdkListComponent(win,this);
     }
 
-    public NbListComponent createRemoteNbList() {
-        return new NbListComponentAsTable(win, () -> onRequiredUpdateButtonStatuses());
+    public NetbeansInstallationListComponent createRemoteNbList() {
+        return new NetbeansInstallationListComponentAsTable(win, () -> onRequiredUpdateButtonStatuses());
     }
 
     protected SettingType getSettingType() {
@@ -221,17 +133,17 @@ public class SettingsPane extends AppPane {
             switch (getSettingType()) {
                 case JDK_INSTALLATION: {
                     JFileChooser c = new JFileChooser();
-                    c.setCurrentDirectory(configService.getCurrentDirectory());
+                    c.setCurrentDirectory(configService.rt().getCurrentDirectory());
                     c.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
                     c.setAcceptAllFileFilterUsed(false);
                     if (JFileChooser.APPROVE_OPTION == c.showDialog(this, toolkit.msg("App.Workspace.SelectJDK").getText())) {
                         final File f = c.getSelectedFile();
                         if (f != null) {
-                            configService.setCurrentDirectory(f);
-                            NPlatformLocation loc = configService.detectJdk(f.getPath());
+                            configService.rt().setCurrentDirectory(f);
+                            NPlatformLocation loc = configService.jdk().detectJdk(f.getPath());
                             if (loc != null) {
-                                configService.addJdk(loc);
-                                updateJdkList();
+                                configService.jdk().addJdk(loc);
+                                getComps2().jdkListView.updateJdkList();
                             } else {
                                 toolkit.showError(toolkit.msg("App.JdkInstallation.Error"));
                             }
@@ -242,20 +154,20 @@ public class SettingsPane extends AppPane {
 
                 case NB_INSTALLATION: {
                     JFileChooser c = new JFileChooser();
-                    c.setCurrentDirectory(configService.getCurrentDirectory());
+                    c.setCurrentDirectory(configService.rt().getCurrentDirectory());
                     c.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
                     c.setAcceptAllFileFilterUsed(false);
                     if (JFileChooser.APPROVE_OPTION == c.showDialog(this, toolkit.msg("App.Workspace.SelectNetbeans").getText())) {
                         final File f = c.getSelectedFile();
                         if (f != null) {
-                            configService.setCurrentDirectory(f);
-                            NetbeansInstallation ni = configService.findNb(f.getPath());
+                            configService.rt().setCurrentDirectory(f);
+                            NetbeansInstallation ni = configService.ins().findNetbeansInstallation(f.getPath());
                             if (ni == null) {
-                                ni = configService.detectNb(f.getPath(), NetbeansInstallationStore.USER);
+                                ni = configService.ins().detectNetbeansInstallations(f.getPath(), NetbeansInstallationStore.USER);
                             }
-                            NetbeansInstallation[] loc = configService.detectNbs(f.getPath(), true, ni == null ? NetbeansInstallationStore.USER : ni.getStore());
+                            NetbeansInstallation[] loc = configService.ins().detectNetbeansInstallations(f.getPath(), true, ni == null ? NetbeansInstallationStore.USER : ni.getStore());
                             if (loc.length > 0) {
-                                configService.saveFile();
+                                configService.conf().saveConfig();
                                 for (AppPane pane : win.getPanes()) {
                                     pane.updateAll();
                                 }
@@ -280,8 +192,8 @@ public class SettingsPane extends AppPane {
                 case JDK_INSTALLATION: {
                     NPlatformLocation loc = getSelectedJdkLocation();
                     if (loc != null) {
-                        configService.removeJdk(loc.getPath());
-                        updateJdkList();
+                        configService.jdk().removeJdk(loc.getPath());
+                        getComps2().jdkListView.updateJdkList();
                     }
                     break;
                 }
@@ -290,7 +202,7 @@ public class SettingsPane extends AppPane {
                     if (g instanceof NetbeansInstallation) {
                         NetbeansInstallation loc = (NetbeansInstallation) g;
                         if (loc != null) {
-                            configService.removeNb(loc.getPath());
+                            configService.ins().removeNetbeansInstallation(loc.getPath());
                             updateNbList();
                         }
                     }
@@ -330,17 +242,14 @@ public class SettingsPane extends AppPane {
         );
     }
 
-    public void updateJdkList() {
-        toolkit.updateTable(getComps2().jdkListView, configService.getAllJdk(), (a, b) -> a != null && b != null && ((NPlatformLocation) a).getName().equals(((NPlatformLocation) b).getName()), null,null);
-    }
-
+    
     public void updateNbList() {
         getComps2().nbListView.refresh();
     }
 
     @Override
     public void updateAll() {
-        updateJdkList();
+        getComps2().jdkListView.updateJdkList();
         updateNbList();
     }
 
@@ -407,7 +316,7 @@ public class SettingsPane extends AppPane {
                 super.paint(g);
                 Dimension s = getSize();
                 g.setFont(font2);
-                Graphics2D g2=(Graphics2D) g;
+                Graphics2D g2 = (Graphics2D) g;
                 RenderingHints rh = new RenderingHints(
                         RenderingHints.KEY_TEXT_ANTIALIASING,
                         RenderingHints.VALUE_TEXT_ANTIALIAS_ON);

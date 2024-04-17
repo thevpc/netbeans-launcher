@@ -19,6 +19,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.TableCellRenderer;
 
 /**
  *
@@ -54,6 +55,13 @@ public class TableComponent implements CatalogComponent {
 
             }
         });
+    }
+
+    public void setColumnRenderer(String name, TableCellRenderer cellRenderer) {
+        final int index = getColumns().indexOf(name);
+        if (index >= 0) {
+            getTable().getColumnModel().getColumn(index).setCellRenderer(cellRenderer);
+        }
     }
 
     @Override
@@ -126,6 +134,18 @@ public class TableComponent implements CatalogComponent {
             }
 
         });
+    }
+
+    public int getColumnsCount() {
+        return getModel().getColumnIdentifiers().size();
+    }
+
+    public int getColumnsIndex(String name) {
+        return getModel().getColumnIdentifiers().indexOf(name);
+    }
+
+    public ObjectTableModel.Columns getColumns() {
+        return getModel().getColumnIdentifiers();
     }
 
     public TableComponent setColumns(ObjectTableModel.Columns d) {

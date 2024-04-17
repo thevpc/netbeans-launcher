@@ -6,13 +6,17 @@
 package net.thevpc.netbeans.launcher;
 
 import net.thevpc.netbeans.launcher.cli.MainWindowCLI;
+import net.thevpc.netbeans.launcher.model.NbOptions;
 import net.thevpc.netbeans.launcher.ui.MainWindowSwing;
 import net.thevpc.netbeans.launcher.util.NbUtils;
 import net.thevpc.nuts.*;
 import net.thevpc.nuts.cmdline.NCmdLine;
+import net.thevpc.nuts.env.NPlatformFamily;
 import net.thevpc.nuts.io.NPrintStream;
 
 import javax.swing.*;
+
+import net.thevpc.nuts.util.NOptional;
 import net.thevpc.nuts.util.NSupportMode;
 
 /**

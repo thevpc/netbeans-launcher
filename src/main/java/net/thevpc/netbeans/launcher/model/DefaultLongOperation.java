@@ -1,7 +1,6 @@
-package net.thevpc.netbeans.launcher;
+package net.thevpc.netbeans.launcher.model;
 
-import net.thevpc.netbeans.launcher.model.LongOperationStatus;
-import net.thevpc.netbeans.launcher.model.WritableLongOperation;
+import net.thevpc.netbeans.launcher.service.NetbeansLauncherModule;
 
 public class DefaultLongOperation implements WritableLongOperation {
     private String name;
@@ -9,10 +8,10 @@ public class DefaultLongOperation implements WritableLongOperation {
     private float percent;
     private boolean indeterminate;
     private LongOperationStatus status;
-    private NetbeansConfigService service;
+    private NetbeansLauncherModule module;
 
-    public DefaultLongOperation(NetbeansConfigService service) {
-        this.service = service;
+    public DefaultLongOperation(NetbeansLauncherModule module) {
+        this.module = module;
     }
 
     @Override
@@ -65,7 +64,7 @@ public class DefaultLongOperation implements WritableLongOperation {
         this.setIndeterminate(indeterminate);
         this.setStatus(LongOperationStatus.STARTED);
         this.setPercent(0);
-        service.fire(this);
+        module.rt().fire(this);
     }
 
     @Override
@@ -83,7 +82,7 @@ public class DefaultLongOperation implements WritableLongOperation {
         } else {
             this.percent = 0;
         }
-        service.fire(this);
+        module.rt().fire(this);
     }
 
     @Override
@@ -96,7 +95,7 @@ public class DefaultLongOperation implements WritableLongOperation {
     @Override
     public void end() {
         this.status = LongOperationStatus.ENDED;
-        service.fire(this);
+        module.rt().fire(this);
     }
 
 }

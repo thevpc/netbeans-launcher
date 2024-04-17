@@ -36,16 +36,19 @@ public class NbUtils {
 
     public static final NbOsConfig LINUX_CONFIG = new NbOsConfig(
             new String[]{
-                "/usr/local",
-                "~/bin",
-                "~/programs",
-                "~/Programs",
-                "~/apps",
-                "~/Apps",},
+                    "/usr/local",
+                    "~/bin",
+                    "~/programs",
+                    "~/Programs",
+                    "~/apps",
+                    "~/Apps",
+            },
             new String[]{
-                "/usr/java",
-                "/usr/lib64/jvm",
-                "/usr/lib/jvm"
+                    "/usr/java",
+                    "/usr/lib64/jvm",
+                    "/usr/lib/jvm",
+                    "~/.jdks",
+                    "~/.jdk",
             },
             "~/.netbeans",
             "~/.cache/netbeans",
@@ -54,15 +57,18 @@ public class NbUtils {
     );
     public static final NbOsConfig WINDOWS_CONFIG = new NbOsConfig(
             new String[]{
-                NbUtils.coalesce(System.getenv("ProgramFiles"), "C:\\Program Files"),
-                NbUtils.coalesce(System.getenv("ProgramFiles(x86)"), "C:\\Program Files (x86)"),
-                "~/programs",
-                "~/Programs",
-                "~/apps",
-                "~/Apps",},
+                    NbUtils.coalesce(System.getenv("ProgramFiles"), "C:\\Program Files"),
+                    NbUtils.coalesce(System.getenv("ProgramFiles(x86)"), "C:\\Program Files (x86)"),
+                    "~/programs",
+                    "~/Programs",
+                    "~/apps",
+                    "~/Apps",},
             new String[]{
-                NbUtils.coalesce(System.getenv("ProgramFiles"), "C:\\Program Files") + "\\Java",
-                NbUtils.coalesce(System.getenv("ProgramFiles(x86)"), "C:\\Program Files (x86)") + "\\Java",},
+                    NbUtils.coalesce(System.getenv("ProgramFiles"), "C:\\Program Files") + "\\Java",
+                    NbUtils.coalesce(System.getenv("ProgramFiles(x86)"), "C:\\Program Files (x86)") + "\\Java",
+                    "~/.jdks",
+                    "~/.jdk",
+            },
             "~\\AppData\\Roaming/Netbeans",
             "~\\AppData\\Local\\Netbeans\\Cache",
             "netbeans.exe",
@@ -70,14 +76,16 @@ public class NbUtils {
     );
     public static final NbOsConfig MAC_CONFIG = new NbOsConfig(
             new String[]{
-                "/Library/",
-                "~/programs",
-                "~/Programs",
-                "~/apps",
-                "~/Apps",},
+                    "/Library/",
+                    "~/programs",
+                    "~/Programs",
+                    "~/apps",
+                    "~/Apps",},
             new String[]{
-                "/Library/Java/JavaVirtualMachines",
-                "/System/Library/Frameworks/JavaVM.framework"
+                    "/Library/Java/JavaVirtualMachines",
+                    "/System/Library/Frameworks/JavaVM.framework",
+                    "~/.jdks",
+                    "~/.jdk",
             },
             "~/Library/Application Support/",
             "~/Library/Caches/NetBeans",
@@ -387,6 +395,7 @@ public class NbUtils {
             unzip(zis, outputFolder, options);
         }
     }
+
     private static NbProcess[] _last_getRunning = null;
 
     public static NbProcess[] getRunning(NSession session) {
@@ -440,7 +449,7 @@ public class NbUtils {
                                 return false;
                             }
                             return NStringUtils.trim(x.getUserdir()).equals(resolveFile(ud).getPath())
-                            && NStringUtils.trim(x.getCachedir()).equals(resolveFile(cd).getPath());
+                                    && NStringUtils.trim(x.getCachedir()).equals(resolveFile(cd).getPath());
                         }
                 ).count() > 0;
     }
@@ -448,7 +457,7 @@ public class NbUtils {
     /**
      * Unzip it
      *
-     * @param in input zip file
+     * @param in           input zip file
      * @param outputFolder zip file output folder
      */
     public static void unzip(InputStream in, String outputFolder, UnzipOptions options) throws IOException {

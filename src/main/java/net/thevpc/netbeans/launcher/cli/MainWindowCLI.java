@@ -5,15 +5,15 @@
  */
 package net.thevpc.netbeans.launcher.cli;
 
-import net.thevpc.netbeans.launcher.NetbeansConfigService;
-import net.thevpc.netbeans.launcher.NbOptions;
+import net.thevpc.netbeans.launcher.service.NetbeansLauncherModule;
+import net.thevpc.netbeans.launcher.model.NbOptions;
 import net.thevpc.nuts.NSession;
 
 /**
  * @author thevpc
  */
 public class MainWindowCLI {
-    private final NetbeansConfigService configService;
+    private final NetbeansLauncherModule configService;
     private final NSession session;
     private final NbOptions options;
 
@@ -27,7 +27,7 @@ public class MainWindowCLI {
     }
 
     public MainWindowCLI(NSession session, NbOptions options) {
-        this.configService = new NetbeansConfigService(session);
+        this.configService = new NetbeansLauncherModule(session);
         this.session = session;
         this.options = options;
     }

@@ -7,7 +7,7 @@ package net.thevpc.netbeans.launcher.ui;
 
 import java.awt.*;
 
-import net.thevpc.netbeans.launcher.NetbeansConfigService;
+import net.thevpc.netbeans.launcher.service.NetbeansLauncherModule;
 import net.thevpc.netbeans.launcher.model.ConfirmResult;
 import net.thevpc.netbeans.launcher.model.NetbeansWorkspace;
 import net.thevpc.netbeans.launcher.ui.panes.*;
@@ -23,7 +23,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
 
-import net.thevpc.netbeans.launcher.NbOptions;
+import net.thevpc.netbeans.launcher.model.NbOptions;
 import net.thevpc.nuts.NSession;
 
 /**
@@ -32,10 +32,10 @@ import net.thevpc.nuts.NSession;
 public class MainWindowSwing {
 
     private static final Logger LOG = Logger.getLogger(MainWindowSwing.class.getName());
-    protected NetbeansConfigService configService;
+    protected NetbeansLauncherModule configService;
     protected SwingToolkit toolkit;
     private WorkspacePane workspacePane;
-    private NbListPane workspaceListPane;
+    private NetbeansWorkspaceListPane workspaceListPane;
     private SettingsPane settingsPane;
     private ConfirmPane confirmPane;
     private JVMOptions jvmOptions;
@@ -154,7 +154,7 @@ public class MainWindowSwing {
 
     public MainWindowSwing(NSession appContext) {
         this.session = appContext;
-        this.configService = new NetbeansConfigService(appContext);
+        this.configService = new NetbeansLauncherModule(appContext);
     }
 
     public SwingToolkit getToolkit() {
@@ -163,11 +163,11 @@ public class MainWindowSwing {
 
     public void start(JFrame primaryStage) { //int2troadmin
         toolkit = new SwingToolkit(primaryStage);
-        configService.getConfig().getSumoMode().addListener(t -> setCompact(!t.getNewValue()));
-        configService.getConfig().getInstallations().addListener(e -> updateList());
-        configService.getConfig().getJdkLocations().addListener(e -> updateList());
-        configService.getConfig().getWorkspaces().addListener(e -> updateList());
-        compact = !configService.getConfig().getSumoMode().get();
+        configService.conf().getSumoMode().addListener(t -> setCompact(!t.getNewValue()));
+        configService.conf().getInstallations().addListener(e -> updateList());
+        configService.conf().getJdkLocations().addListener(e -> updateList());
+        configService.conf().getWorkspaces().addListener(e -> updateList());
+        compact = !configService.conf().getSumoMode().get();
         this.frame = primaryStage;
         primaryStage.setTitle("Netbeans Launcher " + session.getAppId().getVersion());
         primaryStage.setIconImage(new ImageIcon(MainWindowSwing.class.getResource("nb.png")).getImage());
@@ -180,7 +180,7 @@ public class MainWindowSwing {
         appPaneContainer = new SlideAppPaneContainer(container);
 
         workspacePane = new WorkspacePane(this);
-        workspaceListPane = new NbListPane(this);
+        workspaceListPane = new NetbeansWorkspaceListPane(this);
         settingsPane = new SettingsPane(this);
         confirmPane = new ConfirmPane(this);
         jvmOptions = new JVMOptions(this);
@@ -201,17 +201,17 @@ public class MainWindowSwing {
         frame.setUndecorated(true);
         primaryStage.setLocationRelativeTo(null);
         primaryStage.setVisible(true);
-        if (configService.getAllNbWorkspaces().length == 0) {
+        if (configService.ws().findNetbeansWorkspaces().length == 0) {
             setSelectedPane(AppPaneType.SETTINGS);
             SettingsPane s = (SettingsPane) getPane(AppPaneType.SETTINGS);
             s.setSettingType(SettingsPane.SettingType.NB_INSTALLATION);
         }
-        configService.loadAsync(() -> {
-            if (configService.getAllNbWorkspaces().length == 0) {
+        configService.conf().loadAsync(() -> {
+            if (configService.ws().findNetbeansWorkspaces().length == 0) {
                 setSelectedPane(AppPaneType.SETTINGS);
                 SettingsPane s = (SettingsPane) getPane(AppPaneType.SETTINGS);
                 s.setSettingType(SettingsPane.SettingType.NB_INSTALLATION);
-            }else{
+            } else {
                 setSelectedPane(AppPaneType.LIST_WS);
             }
         });
@@ -319,14 +319,14 @@ public class MainWindowSwing {
 
     public void startWorkspace(NetbeansWorkspace w) {
         if (w != null) {
-            if (NbListPane.isStarted(getSession(), w)) {
+            if (NetbeansWorkspaceListPane.isStarted(getSession(), w)) {
                 return;
             }
-            NbListPane.setStarted(getSession(), w);
+            NetbeansWorkspaceListPane.setStarted(getSession(), w);
             try {
                 w.setLastLaunchDate(Instant.now());
                 w.setExecutionCount(w.getExecutionCount() + 1);
-                configService.saveNbWorkspace(w);
+                configService.ws().saveNetbeansWorkspace(w);
                 frame.invalidate();
                 frame.revalidate();
                 new Thread() {
@@ -334,12 +334,12 @@ public class MainWindowSwing {
                     public void run() {
                         try {
                             NbUtils.setTempRunning(w, true);
-                            configService.run(w);
+                            configService.ps().launchNetbeans(w);
                         } catch (Exception ex) {
                             toolkit.showError(toolkit.msg("App.RunWorkspace.Error"), ex);
                         } finally {
                             NbUtils.setTempRunning(w, false);
-                            NbListPane.setStopped(getSession(), w);
+                            NetbeansWorkspaceListPane.setStopped(getSession(), w);
                             onRefreshHeader();
                             updateList();
                         }
@@ -370,7 +370,7 @@ public class MainWindowSwing {
             onPreChangeCompatStatus(compact);
             this.compact = compact;
             onChangeCompatStatus(compact);
-            configService.setSumoMode(!compact);
+            configService.conf().setSumoMode(!compact);
             frame.invalidate();
             frame.revalidate();
             frame.repaint();
@@ -550,7 +550,7 @@ public class MainWindowSwing {
         }
     }
 
-    public NetbeansConfigService getConfigService() {
+    public NetbeansLauncherModule getConfigService() {
         return configService;
     }
 }

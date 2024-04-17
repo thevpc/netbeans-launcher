@@ -19,7 +19,7 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-public class NbListComponentAsTable extends NbListComponent {
+public class NetbeansInstallationListComponentAsTable extends NetbeansInstallationListComponent {
 
     protected JlistToStringer nbLinkStringer = new JlistToStringer(2) {
         @Override
@@ -37,7 +37,7 @@ public class NbListComponentAsTable extends NbListComponent {
 
     };
 
-    public NbListComponentAsTable(MainWindowSwing win, Runnable _onRequiredUpdateButtonStatuses) {
+    public NetbeansInstallationListComponentAsTable(MainWindowSwing win, Runnable _onRequiredUpdateButtonStatuses) {
         super(win, _onRequiredUpdateButtonStatuses);
     }
 
@@ -82,7 +82,7 @@ public class NbListComponentAsTable extends NbListComponent {
                         if (value instanceof NetbeansInstallation) {
                             NetbeansInstallation i = (NetbeansInstallation) value;
                             if (i.getStore() == NetbeansInstallationStore.DEFAULT) {
-                                _downloading = NbListComponent.isDownloadingVersion(i.getVersion());
+                                _downloading = NetbeansInstallationListComponent.isDownloadingVersion(i.getVersion());
                             }
                         }
                         if (_downloading) {
@@ -122,7 +122,7 @@ public class NbListComponentAsTable extends NbListComponent {
                 JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 Object oo = null;
                 try {
-                    oo = NbListComponentAsTable.this.table.getValues().get(row);
+                    oo = NetbeansInstallationListComponentAsTable.this.table.getValues().get(row);
                 }catch (Exception e){
                     //
                 }

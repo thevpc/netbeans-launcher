@@ -5,6 +5,7 @@ import javax.swing.table.AbstractTableModel;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class ObjectTableModel<T> extends AbstractTableModel implements Serializable {
 
@@ -106,9 +107,20 @@ public class ObjectTableModel<T> extends AbstractTableModel implements Serializa
         default void setValueAt(int row, int column, T t, Object columnValue) {
 
         }
-        
+
         default float[] getColumnSizes() {
             return null;
+        }
+
+        default int indexOf(String name) {
+            final int size = size();
+            for (int i = 0; i < size; i++) {
+                String n = getColumnName(i);
+                if (Objects.equals(n, name)) {
+                    return i;
+                }
+            }
+            return -1;
         }
     }
 
@@ -230,7 +242,6 @@ public class ObjectTableModel<T> extends AbstractTableModel implements Serializa
     public Columns<T> getColumnIdentifiers() {
         return columnIdentifiers;
     }
-    
 
     @Override
     public final int getRowCount() {
@@ -284,7 +295,7 @@ public class ObjectTableModel<T> extends AbstractTableModel implements Serializa
     }
 
     public T getObject(int row) {
-        return row<dataVector.size()? dataVector.get(row):null;
+        return row < dataVector.size() ? dataVector.get(row) : null;
     }
 
     public void setValueAt(Object aValue, int row, int column) {
