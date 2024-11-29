@@ -131,7 +131,7 @@ public class NbUtils {
     }
 
     public static String response(String[] cmd, NSession session) {
-        NExecCmd e = NExecCmd.of(session).setExecutionType(NExecutionType.SYSTEM)
+        NExecCmd e = NExecCmd.of().setExecutionType(NExecutionType.SYSTEM)
                 .addCommand(cmd)
                 .setFailFast(true)
                 .setSleepMillis(500);
@@ -181,7 +181,7 @@ public class NbUtils {
     }
 
     public static final NbOsConfig getNbOsConfig(NSession session) {
-        switch (NEnvs.of(session).getOsFamily()) {
+        switch (NEnvs.of().getOsFamily()) {
             case UNIX:
             case LINUX:
                 return NbUtils.LINUX_CONFIG;
@@ -399,7 +399,7 @@ public class NbUtils {
     private static NbProcess[] _last_getRunning = null;
 
     public static NbProcess[] getRunning(NSession session) {
-        NbProcess[] aa = NPs.of(session).type("java").getResultList()
+        NbProcess[] aa = NPs.of().type("java").getResultList()
                 .stream().filter((p) -> p.getName().equals("org.netbeans.Main"))
                 .map(x -> new NbProcess(session, x)).toArray(NbProcess[]::new);
         Arrays.sort(aa);

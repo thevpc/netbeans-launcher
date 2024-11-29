@@ -30,22 +30,22 @@ public class NbMain implements NApplication {
     }
 
     @Override
-    public void onInstallApplication(NSession session) {
-        addDesktopIntegration(session);
+    public void onInstallApplication() {
+        addDesktopIntegration();
     }
 
     @Override
-    public void onUpdateApplication(NSession session) {
-        onInstallApplication(session);
+    public void onUpdateApplication() {
+        onInstallApplication();
     }
 
     @Override
-    public void onUninstallApplication(NSession session) {
-        NCommands.of(session).removeCommandIfExists(PREFERRED_ALIAS);
+    public void onUninstallApplication() {
+        NCommands.of().removeCommandIfExists(PREFERRED_ALIAS);
     }
 
     @Override
-    public void run(NSession session) {
+    public void run() {
         NPrintStream out = session.out();
         NPrintStream err = session.err();
         if (!NbUtils.isPlatformSupported()) {
@@ -98,13 +98,13 @@ public class NbMain implements NApplication {
             MainWindowSwing.launch(session, options, true);
         } else {
             //will default to swing!!
-            MainWindowSwing.launch(session, options, true);
+            MainWindowSwing.launch(NSession.get(), options, true);
         }
     }
 
-    protected void addDesktopIntegration(NSession session) {
-        NEnvs.of(session).addLauncher(new NLauncherOptions()
-                .setId(session.getAppId())
+    protected void addDesktopIntegration() {
+        NEnvs.of().addLauncher(new NLauncherOptions()
+                .setId(NApp.of().getId())
                 .setAlias(PREFERRED_ALIAS)
                 .setCreateAlias(true)
                 .setCreateMenuLauncher(NSupportMode.PREFERRED)

@@ -34,6 +34,7 @@ import net.thevpc.nuts.NEnvs;
 import net.thevpc.nuts.NIllegalArgumentException;
 import net.thevpc.nuts.NStoreType;
 import net.thevpc.nuts.NVersion;
+import net.thevpc.nuts.NApp;
 import net.thevpc.nuts.concurrent.NLocks;
 import net.thevpc.nuts.elem.NElements;
 import net.thevpc.nuts.io.NCp;
@@ -77,7 +78,7 @@ public class NetbeansInstallationService {
         if (o == null) {
             o = detectNetbeansInstallations(path, store);
             if (o == null) {
-                throw new NIllegalArgumentException(module.session(), NMsg.ofC("invalid Netbeans installation directory %s", path));
+                throw new NIllegalArgumentException(NMsg.ofC("invalid Netbeans installation directory %s", path));
             }
             NetbeansInstallationService.this.addNetbeansInstallation(o);
         }
@@ -96,31 +97,31 @@ public class NetbeansInstallationService {
     }
 
     public NetbeansInstallation addNetbeansInstallationByLink(NetbeansBinaryLink i) {
-        NPath zipTo = module.session().getAppSharedFolder(NStoreType.BIN)
+        NPath zipTo = NApp.of().getSharedFolder(NStoreType.BIN)
                 .resolve("org")
                 .resolve("netbeans")
                 .resolve("netbeans-" + i.getVersion() + ".zip");
-        NPath folderTo = module.session().getAppSharedFolder(NStoreType.BIN)
+        NPath folderTo = NApp.of().getSharedFolder(NStoreType.BIN)
                 .resolve("org")
                 .resolve("netbeans")
                 .resolve("netbeans-" + i.getVersion());
         //if (!Files.exists(zipTo)) {
-        NCp.of(module.session()).from(NPath.of(i.getUrl(), module.session())).to(zipTo).addOptions(NPathOption.LOG, NPathOption.TRACE)
+        NCp.of().from(NPath.of(i.getUrl())).to(zipTo).addOptions(NPathOption.LOG, NPathOption.TRACE)
                 .setProgressMonitor(new OpNInputStreamProgressMonitor(module.rt().addOperation("Downloading " + i)))
                 .run();
         //}
-        NLocks.of(module.session()).setSource(zipTo).run(() -> {
+        NLocks.of().setSource(zipTo).run(() -> {
             if (folderTo.resolve("bin").resolve("netbeans").exists()) {
                 //already unzipped!!
             } else {
-                NUncompress.of(module.session()).from(zipTo).to(folderTo).setSkipRoot(true)
+                NUncompress.of().from(zipTo).to(folderTo).setSkipRoot(true)
                         .progressMonitor(new OpNInputStreamProgressMonitor(module.rt().addOperation("Unzipping " + i)))
                         .run();
             }
         });
         NetbeansInstallation o = detectNetbeansInstallations(folderTo.toString(), NetbeansInstallationStore.DEFAULT);
         if (o != null) {
-            switch (NEnvs.of(module.session()).getOsFamily()) {
+            switch (NEnvs.of().getOsFamily()) {
                 case LINUX:
                 case UNIX:
                 case MACOS: {
@@ -547,15 +548,15 @@ public class NetbeansInstallationService {
 
     public NetbeansBinaryLink[] searchRemoteInstallableNbBinaries() {
         List<NetbeansBinaryLink> all = new ArrayList<>(
-                Arrays.asList(NElements.of(module.session()).json().parse(getClass().getResource("/net/thevpc/netbeans/launcher/binaries.json"), NetbeansBinaryLink[].class))
+                Arrays.asList(NElements.of().json().parse(getClass().getResource("/net/thevpc/netbeans/launcher/binaries.json"), NetbeansBinaryLink[].class))
         );
 
         //nuts supports out of the box navigating apache website using htmlfs
-        for (NPath p : NPath.of("htmlfs:https://archive.apache.org/dist/netbeans/netbeans/", module.session()).stream()) {
+        for (NPath p : NPath.of("htmlfs:https://archive.apache.org/dist/netbeans/netbeans/").stream()) {
             if (p.isDirectory()) {
                 ///12.0/netbeans-12.0-bin.zip
                 String version = p.getName();
-                NPath b = NPath.of("https://archive.apache.org/dist/netbeans/netbeans/" + version + "/netbeans-" + version + "-bin.zip", module.session());
+                NPath b = NPath.of("https://archive.apache.org/dist/netbeans/netbeans/" + version + "/netbeans-" + version + "-bin.zip");
                 if (b.exists()) {
                     all.add(new NetbeansBinaryLink()
                             .setPackaging("zip")

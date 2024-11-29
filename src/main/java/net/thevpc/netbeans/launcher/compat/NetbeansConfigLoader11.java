@@ -43,7 +43,7 @@ public class NetbeansConfigLoader11 {
     }
 
     public static NetbeansConfig load(Path file, NSession ws) {
-        NElements json = NElements.of(ws).json();
+        NElements json = NElements.of().json();
         Map o = json.parse(file, Map.class);
         visit(o);
         StringWriter sw = new StringWriter();

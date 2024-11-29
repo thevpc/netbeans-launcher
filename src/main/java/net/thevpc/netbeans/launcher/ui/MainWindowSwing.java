@@ -25,6 +25,7 @@ import javax.swing.*;
 
 import net.thevpc.netbeans.launcher.model.NbOptions;
 import net.thevpc.nuts.NSession;
+import net.thevpc.nuts.NApp;
 
 /**
  * @author thevpc
@@ -52,16 +53,20 @@ public class MainWindowSwing {
     private JComponent winHeader;
 
     public static void launch(NSession session, NbOptions options, boolean wait) {
-        SwingUtils2.prepareLaunch(options);
-        JFrame frame = new JFrame();
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        MainWindowSwing w = new MainWindowSwing(session);
-        w.start(frame);
+        SwingUtilities.invokeLater(()->{
+            session.getWorkspace().setSharedInstance();
+        });
+        session.runWith(()->{
+            SwingUtils2.prepareLaunch(options);
+            JFrame frame = new JFrame();
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            MainWindowSwing w = new MainWindowSwing(session);
+            w.start(frame);
 
-        if (SystemTray.isSupported()) {
+            if (SystemTray.isSupported()) {
 
-            SystemTray tray = SystemTray.getSystemTray();
-            Image image = SwingUtils2.loadIcon("nb.png", 32).getImage();
+                SystemTray tray = SystemTray.getSystemTray();
+                Image image = SwingUtils2.loadIcon("nb.png", 32).getImage();
 
 //            MouseListener mouseListener = new MouseListener() {
 //
@@ -95,57 +100,58 @@ public class MainWindowSwing {
 //            MenuItem defaultItem = new MenuItem("Exit");
 //            defaultItem.addActionListener(exitListener);
 //            popup.add(defaultItem);
-            TrayIcon trayIcon = new TrayIcon(image, "Netbeans Launcher", null);
+                TrayIcon trayIcon = new TrayIcon(image, "Netbeans Launcher", null);
 //            trayIcon.setPopupMenu(new JPopupMenu());
-            ActionListener actionListener = new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    switch (frame.getState()) {
-                        case Frame.NORMAL: {
-                            if (frame.isActive()) {
-                                frame.setState(Frame.ICONIFIED);
-                            } else {
-                                frame.setVisible(false);
+                ActionListener actionListener = new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        switch (frame.getState()) {
+                            case Frame.NORMAL: {
+                                if (frame.isActive()) {
+                                    frame.setState(Frame.ICONIFIED);
+                                } else {
+                                    frame.setVisible(false);
+                                    frame.setState(Frame.NORMAL);
+                                    frame.setVisible(true);
+                                    frame.toFront();
+                                    frame.repaint();
+                                }
+                                break;
+                            }
+                            case Frame.ICONIFIED: {
                                 frame.setState(Frame.NORMAL);
-                                frame.setVisible(true);
                                 frame.toFront();
                                 frame.repaint();
+                                break;
                             }
-                            break;
-                        }
-                        case Frame.ICONIFIED: {
-                            frame.setState(Frame.NORMAL);
-                            frame.toFront();
-                            frame.repaint();
-                            break;
                         }
                     }
-                }
-            };
+                };
 
-            trayIcon.setImageAutoSize(true);
-            trayIcon.addActionListener(actionListener);
+                trayIcon.setImageAutoSize(true);
+                trayIcon.addActionListener(actionListener);
 //            trayIcon.addMouseListener(mouseListener);
 
-            try {
-                tray.add(trayIcon);
-            } catch (AWTException e) {
-                System.err.println("TrayIcon could not be added.");
-            }
-
-        } else {
-
-            //  System Tray is not supported
-        }
-        if (wait) {
-            final Object lock = new Object();
-            synchronized (lock) {
                 try {
-                    lock.wait();
-                } catch (InterruptedException e) {
-                    LOG.log(Level.SEVERE, e.getMessage(), e);
+                    tray.add(trayIcon);
+                } catch (AWTException e) {
+                    System.err.println("TrayIcon could not be added.");
+                }
+
+            } else {
+
+                //  System Tray is not supported
+            }
+            if (wait) {
+                final Object lock = new Object();
+                synchronized (lock) {
+                    try {
+                        lock.wait();
+                    } catch (InterruptedException e) {
+                        LOG.log(Level.SEVERE, e.getMessage(), e);
+                    }
                 }
             }
-        }
+        });
     }
 
     public NSession getSession() {
@@ -169,7 +175,7 @@ public class MainWindowSwing {
         configService.conf().getWorkspaces().addListener(e -> updateList());
         compact = !configService.conf().getSumoMode().get();
         this.frame = primaryStage;
-        primaryStage.setTitle("Netbeans Launcher " + session.getAppId().getVersion());
+        primaryStage.setTitle("Netbeans Launcher " + NApp.of().getId().get().getVersion());
         primaryStage.setIconImage(new ImageIcon(MainWindowSwing.class.getResource("nb.png")).getImage());
         primaryStage.setResizable(false);
         JPanel basePanel = new JPanel(new BorderLayout());

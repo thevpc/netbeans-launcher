@@ -93,11 +93,11 @@ public class NetbeansProcessService {
 
     public NExecCmd launchNetbeans(NetbeansWorkspace w) throws IOException {
         String[] cmd = createNetbeansRunCommand(w);
-        return NExecCmd.of(module.session())
+        return NExecCmd.of()
                 .setExecutionType(NExecutionType.SYSTEM)
                 .setDirectory(
                         NBlankable.isBlank(w.getPath()) ? null
-                        : NPath.of(w.getPath(), module.session())
+                        : NPath.of(w.getPath())
                 )
                 .addCommand(cmd)
                 .redirectErr()
