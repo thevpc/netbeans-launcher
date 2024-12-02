@@ -34,7 +34,6 @@ import net.thevpc.netbeans.launcher.ui.utils.SwingUtils2;
 import net.thevpc.netbeans.launcher.ui.utils.Equalizer;
 import net.thevpc.netbeans.launcher.ui.utils.ObjectTableModel;
 import net.thevpc.netbeans.launcher.ui.utils.TableComponent;
-import net.thevpc.nuts.NSession;
 import net.thevpc.nuts.util.NStringUtils;
 
 /**
@@ -44,17 +43,17 @@ public class NetbeansWorkspaceListPane extends AppPane {
 
     protected final static Set<String> running = new HashSet<String>();
 
-    public static boolean isStarted(NSession session, NetbeansWorkspace w) {
+    public static boolean isStarted(NetbeansWorkspace w) {
         String name = w.getName();
         synchronized (running) {
             if (running.contains(name)) {
                 return true;
             }
         }
-        return NbUtils.isRunningWithCache(session, w);
+        return NbUtils.isRunningWithCache(w);
     }
 
-    public static boolean setStopped(NSession session, NetbeansWorkspace w) {
+    public static boolean setStopped(NetbeansWorkspace w) {
         String name = w.getName();
         synchronized (running) {
             if (running.remove(name)) {
@@ -64,9 +63,9 @@ public class NetbeansWorkspaceListPane extends AppPane {
         return false;
     }
 
-    public static boolean setStarted(NSession session, NetbeansWorkspace w) {
+    public static boolean setStarted(NetbeansWorkspace w) {
         synchronized (running) {
-            if (isStarted(session, w)) {
+            if (isStarted(w)) {
                 String name = w.getName();
                 running.add(name);
                 return true;
@@ -123,7 +122,7 @@ public class NetbeansWorkspaceListPane extends AppPane {
                     String name = ws == null ? "" : ws.getName()
                             + (" (" + evalInstantRelative(ws.getLastLaunchDate(), ws.getExecutionCount()) + ")");
                     super.getListCellRendererComponent(list, name, index, isSelected, cellHasFocus);
-                    if (ws != null && isStarted(win.getSession(), ws)) {
+                    if (ws != null && isStarted(ws)) {
                         if (!isSelected) {
                             setBackground(index % 2 == 0 ? Color.WHITE : SwingUtils2.color("f9f9f9"));
                         } else {
@@ -174,7 +173,7 @@ public class NetbeansWorkspaceListPane extends AppPane {
                 public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
                     super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                     NetbeansWorkspace ws = (NetbeansWorkspace) a.getValue(row);
-                    if (ws != null && isStarted(win.getSession(), ws)) {
+                    if (ws != null && isStarted(ws)) {
 //                        if (!isSelected) {
 //                            setBackground(index % 2 == 0 ? Color.WHITE : SwingUtils2.color("f9f9f9"));
 //                        } else {
@@ -395,7 +394,7 @@ public class NetbeansWorkspaceListPane extends AppPane {
     protected void onRequiredUpdateButtonStatuses() {
         NetbeansWorkspace w = getSelectedWorkspace();
         Comps1 c = getComps1();
-        toolkit.setControlVisible(c.buttonStart, !(w == null || isStarted(win.getSession(), w)));
+        toolkit.setControlVisible(c.buttonStart, !(w == null || isStarted(w)));
         toolkit.setControlVisible(c.buttonCopy, !(w == null));
         toolkit.setControlVisible(c.buttonEdit, !(w == null));
         toolkit.setControlVisible(c.buttonRemove, !(w == null));

@@ -5,19 +5,15 @@
 package net.thevpc.netbeans.launcher.service;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
 import java.util.*;
-import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import net.thevpc.netbeans.launcher.util.NbUtils;
+import net.thevpc.nuts.NPlatformFamily;
 import net.thevpc.nuts.NPlatformLocation;
-import net.thevpc.nuts.NPlatforms;
-import net.thevpc.nuts.cmdline.NCmdLineConfigurable;
-import net.thevpc.nuts.env.NPlatformFamily;
+import net.thevpc.nuts.NWorkspace;
 import net.thevpc.nuts.io.NPath;
 import net.thevpc.nuts.util.NBlankable;
 
@@ -37,12 +33,12 @@ public class JdkService {
             return null;
         }
         if (path.equals("~")) {
-            return NPath.ofUserHome(module.session());
+            return NPath.ofUserHome();
         }
         if (path.startsWith("~/") || path.startsWith("~\\")) {
-            return NPath.ofUserHome(module.session()).resolve(path.substring(2));
+            return NPath.ofUserHome().resolve(path.substring(2));
         }
-        return NPath.of(path, module.session());
+        return NPath.of(path);
     }
 
     public NPlatformLocation detectJdk(String path) {
@@ -50,7 +46,7 @@ public class JdkService {
     }
 
     public NPlatformLocation detectJdk(NPath path) {
-        return NPlatforms.of(module.session()).resolvePlatform(NPlatformFamily.JAVA, path, null)
+        return NWorkspace.of().resolvePlatform(NPlatformFamily.JAVA, path, null)
                 .filter(x -> "jdk".equalsIgnoreCase(x.getPackaging()))
                 .orNull();
     }
@@ -138,7 +134,7 @@ public class JdkService {
     public void addDefaultJdks() {
         List<NPlatformLocation> all =
                 configureJdks(
-                        Arrays.stream(NbUtils.getNbOsConfig(module.session()).getJdkFolders()).map(x -> toPath(x)).toArray(NPath[]::new)
+                        Arrays.stream(NbUtils.getNbOsConfig().getJdkFolders()).map(x -> toPath(x)).toArray(NPath[]::new)
                         , false);
         Map<String, List<NPlatformLocation>> mapped = all.stream().collect(
                 Collectors.groupingBy(x -> {

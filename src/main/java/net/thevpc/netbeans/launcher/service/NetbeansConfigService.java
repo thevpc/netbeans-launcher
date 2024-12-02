@@ -17,12 +17,7 @@ import net.thevpc.netbeans.launcher.model.NetbeansWorkspace;
 import net.thevpc.netbeans.launcher.model.ObservableNetbeansConfig;
 import net.thevpc.netbeans.launcher.util.ObservableList;
 import net.thevpc.netbeans.launcher.util.ObservableValue;
-import net.thevpc.nuts.NId;
-import net.thevpc.nuts.NInstallStatusFilters;
-import net.thevpc.nuts.NLocations;
-import net.thevpc.nuts.NPlatformLocation;
-import net.thevpc.nuts.NSearchCmd;
-import net.thevpc.nuts.NStoreType;
+import net.thevpc.nuts.*;
 import net.thevpc.nuts.concurrent.NScheduler;
 import net.thevpc.nuts.elem.NElements;
 import net.thevpc.nuts.io.NPath;
@@ -77,19 +72,19 @@ public class NetbeansConfigService {
 
     public synchronized void saveConfig() {
         NetbeansConfig c = config.getNetbeansConfig();
-        NElements.of(module.session()).json()
+        NElements.of().json()
                 .setValue(c).setNtf(false)
-                .print(module.session().getAppConfFolder().resolve("config.json"));
+                .print(NApp.of().getConfFolder().resolve("config.json"));
     }
 
     public <T> void loadFile(ConfigListener onFinish) {
         NetbeansConfig config = null;
         boolean loaded = false;
-        NPath validFile = module.session().getAppConfFolder().resolve("config.json");
+        NPath validFile = NApp.of().getConfFolder().resolve("config.json");
         boolean foundCurrVersionFile = false;
         if (validFile.isRegularFile()) {
             try {
-                config = (NetbeansConfig) NElements.of(module.session()).json().parse(validFile, NetbeansConfig.class);
+                config = (NetbeansConfig) NElements.of().json().parse(validFile, NetbeansConfig.class);
                 foundCurrVersionFile = config != null;
             } catch (Exception e) {
                 System.err.println("Unable to load config from " + validFile.toString());
@@ -120,18 +115,18 @@ public class NetbeansConfigService {
             loaded = true;
         }
         if (!foundCurrVersionFile) {
-            List<NId> olderVersions = NSearchCmd.of(module.session()).setInstallStatus(
-                    NInstallStatusFilters.of(module.session()).byInstalled(true)
-            ).addId(module.session().getAppId().builder().setVersion("").build()).getResultIds().stream().sorted(
+            List<NId> olderVersions = NSearchCmd.of().setInstallStatus(
+                    NInstallStatusFilters.of().byInstalled(true)
+            ).addId(NApp.of().getId().get().builder().setVersion("").build()).getResultIds().stream().sorted(
                     (a, b) -> b.getVersion().compareTo(a.getVersion())
-            ).filter(x -> x.getVersion().compareTo(module.session().getAppId().getVersion()) < 0).collect(Collectors.toList());
+            ).filter(x -> x.getVersion().compareTo(NApp.of().getVersion().get()) < 0).collect(Collectors.toList());
             for (NId olderVersion : olderVersions) {
                 NPath validFile2
-                        = NLocations.of(module.session()).getStoreLocation(olderVersion, NStoreType.CONF)
+                        = NLocations.of().getStoreLocation(olderVersion, NStoreType.CONF)
                                 .resolve("config.json");
                 if (validFile2.isRegularFile()) {
                     try {
-                        config = (NetbeansConfig) NElements.of(module.session()).json().parse(validFile2, NetbeansConfig.class);
+                        config = (NetbeansConfig) NElements.of().json().parse(validFile2, NetbeansConfig.class);
                     } catch (Exception e) {
                         System.err.println("Unable to load config from " + validFile2.toString());
                         break;
@@ -181,7 +176,7 @@ public class NetbeansConfigService {
     }
 
     public void loadAsync(ConfigListener onFinish) {
-        NScheduler.of(module.session())
+        NScheduler.of()
                 .executorService().submit(() -> this.load(onFinish));
     }
 

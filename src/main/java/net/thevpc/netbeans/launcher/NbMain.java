@@ -30,24 +30,26 @@ public class NbMain implements NApplication {
     }
 
     @Override
-    public void onInstallApplication(NSession session) {
-        addDesktopIntegration(session);
+    public void onInstallApplication() {
+        addDesktopIntegration();
     }
 
     @Override
-    public void onUpdateApplication(NSession session) {
-        onInstallApplication(session);
+    public void onUpdateApplication() {
+        onInstallApplication();
     }
 
     @Override
-    public void onUninstallApplication(NSession session) {
-        NCommands.of(session).removeCommandIfExists(PREFERRED_ALIAS);
+    public void onUninstallApplication() {
+        NWorkspace.of().removeCommandIfExists(PREFERRED_ALIAS);
     }
 
     @Override
-    public void run(NSession session) {
-        NPrintStream out = session.out();
-        NPrintStream err = session.err();
+    public void run() {
+        NWorkspace workspace = NWorkspace.of();
+        SwingUtilities.invokeLater(workspace::setSharedInstance);
+        NPrintStream out = NSession.of().out();
+        NPrintStream err = NSession.of().err();
         if (!NbUtils.isPlatformSupported()) {
             err.println("platform not supported");
             if (System.console() == null) {
@@ -56,9 +58,9 @@ public class NbMain implements NApplication {
             return;
         }
         NbOptions options = new NbOptions();
-        NCmdLine cmdLine = session.getAppCmdLine();
+        NCmdLine cmdLine = NApp.of().getCmdLine();
         while (cmdLine.hasNext()) {
-            if (session.configureFirst(cmdLine)) {
+            if (NSession.of().configureFirst(cmdLine)) {
                 //do nothing
             } else if (cmdLine.next("--swing") != null) {
                 options.plaf = "nimbus";
@@ -87,24 +89,24 @@ public class NbMain implements NApplication {
         }
 
         if (options.install) {
-            addDesktopIntegration(session);
+            addDesktopIntegration();
         }
 
         if (options.version) {
-            out.println(session.getAppId().getVersion());
+            out.println(NApp.of().getId().get().getVersion());
         } else if (options.cli && !options.swing_arg) {
-            MainWindowCLI.launch(session, options);
+            MainWindowCLI.launch(options);
         } else if (options.swing_arg) {
-            MainWindowSwing.launch(session, options, true);
+            MainWindowSwing.launch(options, true);
         } else {
             //will default to swing!!
-            MainWindowSwing.launch(session, options, true);
+            MainWindowSwing.launch(options, true);
         }
     }
 
-    protected void addDesktopIntegration(NSession session) {
-        NEnvs.of(session).addLauncher(new NLauncherOptions()
-                .setId(session.getAppId())
+    protected void addDesktopIntegration() {
+        NWorkspace.of().addLauncher(new NLauncherOptions()
+                .setId(NApp.of().getId().get())
                 .setAlias(PREFERRED_ALIAS)
                 .setCreateAlias(true)
                 .setCreateMenuLauncher(NSupportMode.PREFERRED)

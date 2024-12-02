@@ -126,12 +126,12 @@ public class NbUtils {
         return cmd == null || cmd.trim().isEmpty();
     }
 
-    public static String response(List<String> cmd, NSession session) throws IOException {
-        return response(cmd.toArray(new String[0]), session);
+    public static String response(List<String> cmd) throws IOException {
+        return response(cmd.toArray(new String[0]));
     }
 
-    public static String response(String[] cmd, NSession session) {
-        NExecCmd e = NExecCmd.of(session).setExecutionType(NExecutionType.SYSTEM)
+    public static String response(String[] cmd) {
+        NExecCmd e = NExecCmd.of().setExecutionType(NExecutionType.SYSTEM)
                 .addCommand(cmd)
                 .setFailFast(true)
                 .setSleepMillis(500);
@@ -180,8 +180,8 @@ public class NbUtils {
         return sb.toString();
     }
 
-    public static final NbOsConfig getNbOsConfig(NSession session) {
-        switch (NEnvs.of(session).getOsFamily()) {
+    public static final NbOsConfig getNbOsConfig() {
+        switch (NWorkspace.of().getOsFamily()) {
             case UNIX:
             case LINUX:
                 return NbUtils.LINUX_CONFIG;
@@ -398,10 +398,10 @@ public class NbUtils {
 
     private static NbProcess[] _last_getRunning = null;
 
-    public static NbProcess[] getRunning(NSession session) {
-        NbProcess[] aa = NPs.of(session).type("java").getResultList()
+    public static NbProcess[] getRunning() {
+        NbProcess[] aa = NPs.of().type("java").getResultList()
                 .stream().filter((p) -> p.getName().equals("org.netbeans.Main"))
-                .map(x -> new NbProcess(session, x)).toArray(NbProcess[]::new);
+                .map(x -> new NbProcess(x)).toArray(NbProcess[]::new);
         Arrays.sort(aa);
         if (_last_getRunning == null || !Arrays.equals(aa, _last_getRunning)) {
             _last_getRunning = aa;
@@ -418,9 +418,9 @@ public class NbUtils {
         CACHED_PROCESSES_TEMP.put(nb.copy(), value);
     }
 
-    public static boolean isRunningWithCache(NSession session, NetbeansWorkspace nb) {
+    public static boolean isRunningWithCache(NetbeansWorkspace nb) {
         if (CACHED_PROCESSES == null) {
-            CACHED_PROCESSES = new CachedValue<>(() -> getRunning(session), 60);
+            CACHED_PROCESSES = new CachedValue<>(() -> getRunning(), 60);
         }
         if (!CACHED_PROCESSES.isValid()) {
             CACHED_PROCESSES.updateAsync();

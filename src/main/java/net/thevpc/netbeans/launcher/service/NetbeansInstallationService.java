@@ -30,10 +30,7 @@ import net.thevpc.netbeans.launcher.util.NbStringUtils;
 import static net.thevpc.netbeans.launcher.util.NbStringUtils.match;
 
 import net.thevpc.netbeans.launcher.util.NbUtils;
-import net.thevpc.nuts.NEnvs;
-import net.thevpc.nuts.NIllegalArgumentException;
-import net.thevpc.nuts.NStoreType;
-import net.thevpc.nuts.NVersion;
+import net.thevpc.nuts.*;
 import net.thevpc.nuts.concurrent.NLocks;
 import net.thevpc.nuts.elem.NElements;
 import net.thevpc.nuts.io.NCp;
@@ -77,7 +74,7 @@ public class NetbeansInstallationService {
         if (o == null) {
             o = detectNetbeansInstallations(path, store);
             if (o == null) {
-                throw new NIllegalArgumentException(module.session(), NMsg.ofC("invalid Netbeans installation directory %s", path));
+                throw new NIllegalArgumentException(NMsg.ofC("invalid Netbeans installation directory %s", path));
             }
             NetbeansInstallationService.this.addNetbeansInstallation(o);
         }
@@ -96,31 +93,31 @@ public class NetbeansInstallationService {
     }
 
     public NetbeansInstallation addNetbeansInstallationByLink(NetbeansBinaryLink i) {
-        NPath zipTo = module.session().getAppSharedFolder(NStoreType.BIN)
+        NPath zipTo = NApp.of().getSharedFolder(NStoreType.BIN)
                 .resolve("org")
                 .resolve("netbeans")
                 .resolve("netbeans-" + i.getVersion() + ".zip");
-        NPath folderTo = module.session().getAppSharedFolder(NStoreType.BIN)
+        NPath folderTo = NApp.of().getSharedFolder(NStoreType.BIN)
                 .resolve("org")
                 .resolve("netbeans")
                 .resolve("netbeans-" + i.getVersion());
         //if (!Files.exists(zipTo)) {
-        NCp.of(module.session()).from(NPath.of(i.getUrl(), module.session())).to(zipTo).addOptions(NPathOption.LOG, NPathOption.TRACE)
+        NCp.of().from(NPath.of(i.getUrl())).to(zipTo).addOptions(NPathOption.LOG, NPathOption.TRACE)
                 .setProgressMonitor(new OpNInputStreamProgressMonitor(module.rt().addOperation("Downloading " + i)))
                 .run();
         //}
-        NLocks.of(module.session()).setSource(zipTo).run(() -> {
+        NLocks.of().setSource(zipTo).run(() -> {
             if (folderTo.resolve("bin").resolve("netbeans").exists()) {
                 //already unzipped!!
             } else {
-                NUncompress.of(module.session()).from(zipTo).to(folderTo).setSkipRoot(true)
+                NUncompress.of().from(zipTo).to(folderTo).setSkipRoot(true)
                         .progressMonitor(new OpNInputStreamProgressMonitor(module.rt().addOperation("Unzipping " + i)))
                         .run();
             }
         });
         NetbeansInstallation o = detectNetbeansInstallations(folderTo.toString(), NetbeansInstallationStore.DEFAULT);
         if (o != null) {
-            switch (NEnvs.of(module.session()).getOsFamily()) {
+            switch (NWorkspace.of().getOsFamily()) {
                 case LINUX:
                 case UNIX:
                 case MACOS: {
@@ -349,7 +346,7 @@ public class NetbeansInstallationService {
         switch (sortType) {
             case LATEST_FIRST:
                 return (o1, o2) -> {
-                    int i = -NVersion.of(o1.getVersion()).get().compareTo(o2.getVersion());
+                    int i = -NVersion.of(o1.getVersion()).compareTo(o2.getVersion());
                     if (i != 0) {
                         return i;
                     }
@@ -369,7 +366,7 @@ public class NetbeansInstallationService {
                 };
             case OLDEST_FIRST: {
                 return (o1, o2) -> {
-                    int i = NVersion.of(o1.getVersion()).get().compareTo(o2.getVersion());
+                    int i = NVersion.of(o1.getVersion()).compareTo(o2.getVersion());
                     if (i != 0) {
                         return i;
                     }
@@ -421,7 +418,7 @@ public class NetbeansInstallationService {
             return null;
         }
         File f = NbUtils.resolveFile(path);
-        if (!new File(f, NbUtils.toOsPath("bin/" + NbUtils.getNbOsConfig(module.session()).getNetbeansExe())).exists()) {
+        if (!new File(f, NbUtils.toOsPath("bin/" + NbUtils.getNbOsConfig().getNetbeansExe())).exists()) {
             return null;
         }
         VersionAndDate versionAndDate = detectNbVersionFrom_build_info_file(path);
@@ -445,15 +442,15 @@ public class NetbeansInstallationService {
         }
         String netbeans_default_userdir = nbconf.getProperty("netbeans_default_userdir");
         if (netbeans_default_userdir != null) {
-            netbeans_default_userdir = netbeans_default_userdir.replace("${DEFAULT_USERDIR_ROOT}", NbUtils.getNbOsConfig(module.session()).getConfigRoot());
+            netbeans_default_userdir = netbeans_default_userdir.replace("${DEFAULT_USERDIR_ROOT}", NbUtils.getNbOsConfig().getConfigRoot());
         }
         String netbeans_default_cachedir = nbconf.getProperty("netbeans_default_cachedir");
         if (netbeans_default_cachedir != null) {
-            netbeans_default_cachedir = netbeans_default_cachedir.replace("${DEFAULT_CACHEDIR_ROOT}", NbUtils.getNbOsConfig(module.session()).getCacheRoot());
+            netbeans_default_cachedir = netbeans_default_cachedir.replace("${DEFAULT_CACHEDIR_ROOT}", NbUtils.getNbOsConfig().getCacheRoot());
         }
         String netbeans_default_options = nbconf.getProperty("netbeans_default_options");
         if (netbeans_default_options != null) {
-            netbeans_default_options = netbeans_default_options.replace("${DEFAULT_CACHEDIR_ROOT}", NbUtils.getNbOsConfig(module.session()).getCacheRoot());
+            netbeans_default_options = netbeans_default_options.replace("${DEFAULT_CACHEDIR_ROOT}", NbUtils.getNbOsConfig().getCacheRoot());
         }
 //                String netbeans_default_options=nbconf.getProperty("netbeans_default_options");
         String netbeans_jdkhome = nbconf.getProperty("netbeans_jdkhome");
@@ -547,15 +544,15 @@ public class NetbeansInstallationService {
 
     public NetbeansBinaryLink[] searchRemoteInstallableNbBinaries() {
         List<NetbeansBinaryLink> all = new ArrayList<>(
-                Arrays.asList(NElements.of(module.session()).json().parse(getClass().getResource("/net/thevpc/netbeans/launcher/binaries.json"), NetbeansBinaryLink[].class))
+                Arrays.asList(NElements.of().json().parse(getClass().getResource("/net/thevpc/netbeans/launcher/binaries.json"), NetbeansBinaryLink[].class))
         );
 
         //nuts supports out of the box navigating apache website using htmlfs
-        for (NPath p : NPath.of("htmlfs:https://archive.apache.org/dist/netbeans/netbeans/", module.session()).stream()) {
+        for (NPath p : NPath.of("htmlfs:https://archive.apache.org/dist/netbeans/netbeans/").stream()) {
             if (p.isDirectory()) {
                 ///12.0/netbeans-12.0-bin.zip
                 String version = p.getName();
-                NPath b = NPath.of("https://archive.apache.org/dist/netbeans/netbeans/" + version + "/netbeans-" + version + "-bin.zip", module.session());
+                NPath b = NPath.of("https://archive.apache.org/dist/netbeans/netbeans/" + version + "/netbeans-" + version + "-bin.zip");
                 if (b.exists()) {
                     all.add(new NetbeansBinaryLink()
                             .setPackaging("zip")
@@ -575,7 +572,7 @@ public class NetbeansInstallationService {
 
     public ConfigResult configureDefaultInstallations() {
         ConfigResult r0 = new ConfigResult();
-        for (String programFolder : NbUtils.getNbOsConfig(module.session()).getProgramFolders()) {
+        for (String programFolder : NbUtils.getNbOsConfig().getProgramFolders()) {
             File level1Folder = NbUtils.resolveFile(programFolder);
             ConfigResult r = configureDefaultNetbeansInstallations(level1Folder, NetbeansInstallationStore.SYSTEM);
             r0.add(r);

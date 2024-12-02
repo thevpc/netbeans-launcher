@@ -2,7 +2,6 @@ package net.thevpc.netbeans.launcher.util;
 
 import java.util.Objects;
 
-import net.thevpc.nuts.*;
 import net.thevpc.nuts.cmdline.NArg;
 import net.thevpc.nuts.cmdline.NCmdLine;
 import net.thevpc.nuts.io.NPsInfo;
@@ -14,7 +13,7 @@ public class NbProcess implements Comparable<NbProcess> {
     private final String userdir;
     private final String cachedir;
 
-    public NbProcess(NSession session, NPsInfo jpsResult) {
+    public NbProcess(NPsInfo jpsResult) {
         NCmdLine cmd = NCmdLine.of(jpsResult.getCmdLineArgs());
         NArg a;
         pid = jpsResult.getPid();

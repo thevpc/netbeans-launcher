@@ -335,7 +335,7 @@ public class NetbeansWorkspaceService {
         if (NbUtils.isEmpty(n)) {
             n = "noname";
         }
-        String configRoot = NbUtils.getNbOsConfig(module.session()).getConfigRoot();
+        String configRoot = NbUtils.getNbOsConfig().getConfigRoot();
         return NbUtils.toOsPath(configRoot + File.separatorChar + n);
     }
 
@@ -344,7 +344,7 @@ public class NetbeansWorkspaceService {
         if (NbUtils.isEmpty(n)) {
             n = "noname";
         }
-        String configRoot = NbUtils.getNbOsConfig(module.session()).getConfigRoot();
+        String configRoot = NbUtils.getNbOsConfig().getConfigRoot();
         List<String> all = new ArrayList<>();
         for (String extra : new String[]{"", " 1", " 2", " 3", " 4", " 5"}) {
             all.add(NbUtils.toOsPath(configRoot + File.separatorChar + n + extra));
@@ -357,7 +357,7 @@ public class NetbeansWorkspaceService {
         if (NbUtils.isEmpty(n)) {
             n = "noname";
         }
-        String cacheRoot = NbUtils.getNbOsConfig(module.session()).getCacheRoot();
+        String cacheRoot = NbUtils.getNbOsConfig().getCacheRoot();
         List<String> all = new ArrayList<>();
         for (String extra : new String[]{"", " 1", " 2", " 3", " 4", " 5"}) {
             all.add(NbUtils.toOsPath(cacheRoot + File.separatorChar + n + extra));
@@ -370,7 +370,7 @@ public class NetbeansWorkspaceService {
         if (NbUtils.isEmpty(n)) {
             n = "noname";
         }
-        String cacheRoot = NbUtils.getNbOsConfig(module.session()).getCacheRoot();
+        String cacheRoot = NbUtils.getNbOsConfig().getCacheRoot();
         return NbUtils.toOsPath(cacheRoot + File.separatorChar + n);
     }
 
@@ -405,7 +405,7 @@ public class NetbeansWorkspaceService {
                 return null;
             }
             List<String> cmd = new ArrayList<>();
-            cmd.add(NbUtils.toOsPath(w.getPath() + "/bin/" + NbUtils.getNbOsConfig(module.session()).getNetbeansExe()));//linux
+            cmd.add(NbUtils.toOsPath(w.getPath() + "/bin/" + NbUtils.getNbOsConfig().getNetbeansExe()));//linux
             if (w.getUserdir() != null) {
                 cmd.add("--userdir");
                 cmd.add(NbUtils.resolveFile(w.getUserdir()).getPath());
@@ -425,7 +425,7 @@ public class NetbeansWorkspaceService {
             cmd.add("--nosplash");
             cmd.add("--list-groups");
 
-            String s = NbUtils.response(cmd, module.session());
+            String s = NbUtils.response(cmd);
             List<NetbeansGroup> all = new ArrayList<>();
             if (s != null) {
                 all.add(NETBEANS_NO_GROUP);

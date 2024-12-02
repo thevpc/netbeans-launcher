@@ -14,21 +14,19 @@ import net.thevpc.nuts.NSession;
  */
 public class MainWindowCLI {
     private final NetbeansLauncherModule configService;
-    private final NSession session;
     private final NbOptions options;
 
-    public static void launch(NSession appContext, NbOptions options) {
-        MainWindowCLI cli = new MainWindowCLI(appContext, options);
+    public static void launch(NbOptions options) {
+        MainWindowCLI cli = new MainWindowCLI(options);
         cli.run();
     }
 
     private void run() {
-        session.out().println("CLI mode is not yet supported. Ignoring command");
+        NSession.of().out().println("CLI mode is not yet supported. Ignoring command");
     }
 
-    public MainWindowCLI(NSession session, NbOptions options) {
-        this.configService = new NetbeansLauncherModule(session);
-        this.session = session;
+    public MainWindowCLI(NbOptions options) {
+        this.configService = new NetbeansLauncherModule();
         this.options = options;
     }
 

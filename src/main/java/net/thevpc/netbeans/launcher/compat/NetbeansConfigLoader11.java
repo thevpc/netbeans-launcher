@@ -6,7 +6,6 @@
 package net.thevpc.netbeans.launcher.compat;
 
 import net.thevpc.netbeans.launcher.model.NetbeansConfig;
-import net.thevpc.nuts.NSession;
 import net.thevpc.nuts.elem.NElements;
 
 import java.io.StringReader;
@@ -42,8 +41,8 @@ public class NetbeansConfigLoader11 {
         }
     }
 
-    public static NetbeansConfig load(Path file, NSession ws) {
-        NElements json = NElements.of(ws).json();
+    public static NetbeansConfig load(Path file) {
+        NElements json = NElements.of().json();
         Map o = json.parse(file, Map.class);
         visit(o);
         StringWriter sw = new StringWriter();

@@ -293,7 +293,7 @@ public class WorkspacePane extends AppPane {
                 toolkit.msg("App.DeleteFolder.Confirm.Title"),
                 toolkit.msg("App.DeleteFolder.Confirm.Message"),
                 () -> {
-                    if (NetbeansWorkspaceListPane.isStarted(win.getSession(), getWorkspace())) {
+                    if (NetbeansWorkspaceListPane.isStarted(getWorkspace())) {
                         toolkit.showError(toolkit.msg("App.DeleteWorkspaceFolder.Error"));
                     } else {
                         try {

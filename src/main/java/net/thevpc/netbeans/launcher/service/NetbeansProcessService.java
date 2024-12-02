@@ -29,7 +29,7 @@ public class NetbeansProcessService {
 
     public String[] createNetbeansRunCommand(NetbeansWorkspace w) {
         List<String> cmd = new ArrayList<>();
-        cmd.add(NbUtils.toOsPath(w.getPath() + "/bin/" + NbUtils.getNbOsConfig(module.session()).getNetbeansExe()));//linux
+        cmd.add(NbUtils.toOsPath(w.getPath() + "/bin/" + NbUtils.getNbOsConfig().getNetbeansExe()));//linux
         if (w.getUserdir() != null) {
             cmd.add("--userdir");
             cmd.add(NbUtils.resolveFile(w.getUserdir()).getPath());
@@ -93,11 +93,11 @@ public class NetbeansProcessService {
 
     public NExecCmd launchNetbeans(NetbeansWorkspace w) throws IOException {
         String[] cmd = createNetbeansRunCommand(w);
-        return NExecCmd.of(module.session())
+        return NExecCmd.of()
                 .setExecutionType(NExecutionType.SYSTEM)
                 .setDirectory(
                         NBlankable.isBlank(w.getPath()) ? null
-                        : NPath.of(w.getPath(), module.session())
+                        : NPath.of(w.getPath())
                 )
                 .addCommand(cmd)
                 .redirectErr()
