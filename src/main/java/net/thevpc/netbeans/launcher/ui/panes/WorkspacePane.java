@@ -15,7 +15,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import javax.swing.*;
 
 import net.thevpc.netbeans.launcher.model.*;
@@ -52,8 +54,7 @@ public class WorkspacePane extends AppPane {
 
     }
 
-    private Comp3 compact;
-    private Comp3 nonCompact;
+    protected Map<FrameInfo,Comp3> cachedComs3=new HashMap<>();
     private EditType editMode = EditType.EDIT;
 //    private NetbeansWorkspace currWorkspace = new NetbeansWorkspace();
     private NetbeansWorkspace lastWorkspace = new NetbeansWorkspace();
@@ -74,7 +75,7 @@ public class WorkspacePane extends AppPane {
     }
 
     @Override
-    public JComponent createMain(boolean compact) {
+    public JComponent createMain(FrameInfo compact) {
         return getComps3().main;
     }
 
@@ -356,7 +357,7 @@ public class WorkspacePane extends AppPane {
     }
 
     @Override
-    public JComponent[] createButtons(boolean compact) {
+    public JComponent[] createButtons(FrameInfo compact) {
         return getComps3().buttons;
     }
 
@@ -813,32 +814,23 @@ public class WorkspacePane extends AppPane {
     private NetbeansWorkspace cached_w;
 
     @Override
-    public void onPreChangeCompatStatus(boolean compact) {
+    public void onPreChangeCompatStatus(FrameInfo compact) {
         cached_lw = lastWorkspace;
         cached_w = getWorkspace();
     }
 
     @Override
-    public void onChangeCompatStatus(boolean compact) {
+    public void onChangeCompatStatus(FrameInfo compact) {
         super.onChangeCompatStatus(compact);
         setWorkspace(cached_w);
         lastWorkspace = cached_lw;
     }
 
     private Comp3 getComps3() {
-        if (win.isCompact()) {
-            if (compact == null) {
-                compact = createComp3(true);
-            }
-            return compact;
-        }
-        if (nonCompact == null) {
-            nonCompact = createComp3(false);
-        }
-        return nonCompact;
+        return this.cachedComs3.computeIfAbsent(toolkit.getFrameInfo(), k -> createComp3(k));
     }
 
-    private Comp3 createComp3(boolean b) {
+    private Comp3 createComp3(FrameInfo b) {
         Comp3 c = new Comp3();
         c.path = toolkit.createCombo();
         c.options = toolkit.createText();
@@ -890,13 +882,13 @@ public class WorkspacePane extends AppPane {
                 onRequireUpdateDirProposals();
             }
         });
-        JComponent buttonStart = toolkit.createIconButton("start", "App.Action.Start", () -> onStartWorkspace(), b);
-        JComponent buttonSave = toolkit.createIconButton("save", "App.Action.Save", () -> onSaveWorkspacePane(), b);
-        JComponent buttonClose = toolkit.createIconButton("close", "App.Action.Close", () -> onCloseWorkspacePane(), b);
+        JComponent buttonStart = toolkit.createIconButton("start", "App.Action.Start", () -> onStartWorkspace());
+        JComponent buttonSave = toolkit.createIconButton("save", "App.Action.Save", () -> onSaveWorkspacePane());
+        JComponent buttonClose = toolkit.createIconButton("close", "App.Action.Close", () -> onCloseWorkspacePane());
         c.buttons = new JComponent[]{buttonStart, buttonSave, buttonClose};
 
         c.laf.setEditable(true);
-        if (b) {
+        if (b.isCompact()) {
             createMainCompact(c);
         } else {
             createMainNonCompact(c);

@@ -57,7 +57,7 @@ public class JdkListComponent extends TableComponent {
                 @Override
                 public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
                     JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                    setIcon(win.getToolkit().createIcon("java", win.isCompact()));
+                    setIcon(win.getToolkit().createIcon("java"));
                     label.setHorizontalAlignment(JLabel.LEFT);
                     return label;
                 }

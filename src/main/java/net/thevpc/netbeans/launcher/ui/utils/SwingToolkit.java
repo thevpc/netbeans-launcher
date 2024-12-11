@@ -20,13 +20,13 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.*;
 
+import net.thevpc.netbeans.launcher.ui.FrameInfo;
 import net.thevpc.netbeans.launcher.util.NbUtils;
+import net.thevpc.netbeans.launcher.util.RefreshContext;
 import net.thevpc.nuts.NExecutionException;
 import net.thevpc.nuts.util.NStringUtils;
 
@@ -37,24 +37,29 @@ public class SwingToolkit {
 
     private Component parent;
     private ResourceBundle lang;
-    private boolean compact;
+    private FrameInfo frameInfo = new FrameInfo();
 
     public SwingToolkit(Component parent) {
         this.parent = parent;
         lang = ResourceBundle.getBundle("net.thevpc.netbeans.launcher.Messages");
     }
 
-    public boolean isCompact() {
-        return compact;
+
+    public FrameInfo getFrameInfo() {
+        return frameInfo;
     }
 
-    public void setCompact(boolean compact) {
-        this.compact = compact;
+    public void setFrameInfo(FrameInfo frameInfo) {
+        this.frameInfo = frameInfo;
     }
 
     private final static Pattern keyPattern = Pattern.compile("\\$\\{(?<name>[a-z]+)}");
 
-    private static class ButtonLabelMouseAdapter extends MouseAdapter {
+    public Font deriveFont(Font initialFont) {
+        return initialFont.deriveFont(fontSize(initialFont.getSize()));
+    }
+
+    private class ButtonLabelMouseAdapter extends MouseAdapter {
 
         private final ButtonAction action;
         JLabel label;
@@ -62,13 +67,20 @@ public class SwingToolkit {
         ImageIcon selectedIcon;
         ImageIcon disabledIcon;
         boolean hover;
+        String icon;
 
         public ButtonLabelMouseAdapter(String icon, ButtonAction action) {
+            this.icon = icon;
             this.action = action;
-            normalIcon = SwingUtils2.loadIcon(icon + ".png", 24);
+            update();
+        }
+
+        public void update() {
+            normalIcon = SwingUtils2.loadIcon(icon + ".png", iconSize());
             selectedIcon = new ImageIcon(SwingUtils2.newBrightness(normalIcon.getImage(), 0.8f));
 //            selectedIcon = new ImageIcon(SwingUtils2.grayScaleImage2(normalIcon.getImage()));
             disabledIcon = new ImageIcon(SwingUtils2.grayScaleImage2(normalIcon.getImage()));
+            revalidateIcon();
         }
 
         @Override
@@ -84,6 +96,9 @@ public class SwingToolkit {
         }
 
         private void revalidateIcon() {
+            if (label == null) {
+                return;
+            }
             if (label.isEnabled()) {
                 if (hover) {
                     label.setIcon(selectedIcon);
@@ -372,7 +387,7 @@ public class SwingToolkit {
         }
     }
 
-    public void updateTable(CatalogComponent table, Object[] values, Equalizer e, Comparator comp,Runnable onFinish) {
+    public void updateTable(CatalogComponent table, Object[] values, Equalizer e, Comparator comp, Runnable onFinish) {
         SwingUtilities.invokeLater(() -> {
             Equalizer e2 = new Equalizer() {
                 @Override
@@ -405,48 +420,144 @@ public class SwingToolkit {
             if (okIndex >= 0) {
                 table.setSelectedIndex(okIndex);
             }
-            if(onFinish!=null){
+            if (onFinish != null) {
                 onFinish.run();
             }
         });
     }
 
-    public JComponent createIconButton0(String icon, String tooltip, ButtonAction action, boolean compact) {
+    public JComponent createIconButton0(String icon, String tooltip, ButtonAction action) {
         JLabel label = new JLabel();
         label.setToolTipText(msg(tooltip).getText());
         ButtonLabelMouseAdapter ad = new ButtonLabelMouseAdapter(icon, action);
         ad.install(label);
+        prepareComponent(label, new DefaultJComponentRefresher() {
+            @Override
+            public void onRefresh(RefreshContext context) {
+                super.onRefresh(context);
+                ad.update();
+            }
+        });
         return label;
+    }
+
+    public float fontSize(float size) {
+        int zoom = frameInfo.getZoom();
+        size = size + zoom;
+        if (size < 1) {
+            size = 1;
+        }
+        if (size > 100) {
+            size = size;
+        }
+        return size;
     }
 
     public JLabel createLabel(String textKey) {
         JLabel jLabel = new JLabel(msg(textKey).getText());
-        jLabel.setFont(jLabel.getFont().deriveFont(Font.BOLD));
+        Font oldFont = jLabel.getFont();
+        jLabel.setFont(oldFont.deriveFont(Font.BOLD, fontSize(oldFont.getSize())));
         jLabel.setForeground(Color.GRAY.darker());
 //        jLabel.setFont(new Font(Font.MONOSPACED,Font.BOLD,12));
         return jLabel;
     }
 
-    public JComponent createIconButton(String icon, String tooltip, ButtonAction action) {
-        if (true) {
-            return createIconButton0(icon, tooltip, action, true);
+    public JLabel createLabel() {
+        JLabel jLabel = new JLabel();
+        Font oldFont = jLabel.getFont();
+        jLabel.setFont(oldFont.deriveFont(Font.BOLD, fontSize(oldFont.getSize())));
+        jLabel.setForeground(Color.GRAY.darker());
+//        jLabel.setFont(new Font(Font.MONOSPACED,Font.BOLD,12));
+        return jLabel;
+    }
+
+
+    public int iconSize() {
+        boolean compact = frameInfo.isCompact();
+        int size = compact ? 16 : 32;
+        return iconSize(size);
+    }
+
+    public int iconSize(int size) {
+        int zoom = frameInfo.getZoom();
+        if (zoom > 100) {
+            zoom = 100;
+        }
+        if (zoom < -32) {
+            zoom = -32;
+        }
+        if (zoom > 0) {
+            size += zoom * 2;
         } else {
-            return createIconButton(icon, tooltip, action, true);
+            size += zoom;
+        }
+        if (size < 1) {
+            size = 1;
+        }
+        return size;
+    }
+
+    public ImageIcon createIcon(String icon) {
+        boolean compact = frameInfo.isCompact();
+        int size = compact ? 16 : 32;
+        int zoom = frameInfo.getZoom();
+        if (zoom > 100) {
+            zoom = 100;
+        }
+        if (zoom < -32) {
+            zoom = -32;
+        }
+        if (zoom > 0) {
+            size += zoom * 2;
+        } else {
+            size += zoom;
+        }
+        if (size < 1) {
+            size = 1;
+        }
+        return SwingUtils2.loadIcon(icon + ".png", size);
+    }
+
+    public void prepareComponent(JComponent component) {
+        prepareComponent(component, null);
+    }
+
+
+    public void prepareComponent(JComponent component, RefreshContext.Refresher r) {
+        Object a = component.getClientProperty("SwingToolkit.refresh");
+        RefreshContext rr;
+        if (a instanceof RefreshContext) {
+            rr = (RefreshContext) a;
+        } else {
+            rr = new RefreshContext();
+            component.putClientProperty("SwingToolkit.refresh", rr);
+        }
+        rr.item = component;
+        rr.initialFont = component.getFont();
+        if (r == null) {
+            r = new DefaultJComponentRefresher();
+        }
+        rr.refresher = r;
+        rr.oldInfo = frameInfo;
+    }
+
+    public void refreshComponent(JComponent component) {
+        Object u = component.getClientProperty("SwingToolkit.refresh");
+        if (u instanceof RefreshContext) {
+            RefreshContext uu = (RefreshContext) u;
+            uu.newInfo = frameInfo;
+            uu.onRefresh();
+            uu.oldInfo = frameInfo;
         }
     }
 
-    public ImageIcon createIcon(String icon, boolean compact) {
-        return SwingUtils2.loadIcon(icon + ".png", compact ? 16 : 32);
-    }
-
-    public JComponent createIconButton(String icon, String tooltip, ButtonAction action, boolean compact) {
+    public JComponent createIconButton(String icon, String tooltip, ButtonAction action) {
         if (true) {
-            return createIconButton0(icon, tooltip, action, true);
+            return createIconButton0(icon, tooltip, action);
         } else {
-            compact = true;
-            ImageIcon imageIcon = SwingUtils2.loadIcon(icon + ".png", compact ? 16 : 32);
+            ImageIcon imageIcon = SwingUtils2.loadIcon(icon + ".png", iconSize());
             JButton button = new JButton(imageIcon);
-            int m = compact ? 1 : 4;
+            int m = frameInfo.isCompact() ? 1 : 4;
             button.setMargin(new Insets(1, m, 1, m));
             button.setToolTipText(msg(tooltip).getText());
             button.addActionListener((ActionEvent t) -> action.action());
@@ -492,4 +603,11 @@ public class SwingToolkit {
         showError(msg("Toolkit.OpenFolder.Error.Invalid"));
     }
 
+    private class DefaultJComponentRefresher implements RefreshContext.Refresher {
+        @Override
+        public void onRefresh(RefreshContext context) {
+            JComponent c = (JComponent) context.item;
+            c.setFont(context.initialFont.deriveFont(fontSize(context.initialFont.getSize())));
+        }
+    }
 }

@@ -16,11 +16,7 @@ import javax.swing.event.ChangeEvent;
 import net.thevpc.netbeans.launcher.model.NetbeansInstallation;
 import net.thevpc.netbeans.launcher.model.NetbeansInstallationStore;
 import net.thevpc.netbeans.launcher.model.NetbeansLocation;
-import net.thevpc.netbeans.launcher.ui.AppPane;
-import net.thevpc.netbeans.launcher.ui.AppPanePos;
-import net.thevpc.netbeans.launcher.ui.AppPaneType;
-import net.thevpc.netbeans.launcher.ui.MainWindowSwing;
-import net.thevpc.netbeans.launcher.ui.utils.CatalogComponent;
+import net.thevpc.netbeans.launcher.ui.*;
 import net.thevpc.netbeans.launcher.ui.utils.JdkJlistToStringer;
 import net.thevpc.netbeans.launcher.util.*;
 import net.thevpc.nuts.NPlatformLocation;
@@ -62,7 +58,7 @@ public class SettingsPane extends AppPane {
     }
 
     @Override
-    public JComponent createMain(boolean compact) {
+    public JComponent createMain(FrameInfo compact) {
         return getComps2().main;
     }
 
@@ -124,7 +120,7 @@ public class SettingsPane extends AppPane {
     }
 
     @Override
-    public JComponent[] createButtons(boolean compact) {
+    public JComponent[] createButtons(FrameInfo compact) {
         return getComps2().buttons;
     }
 
@@ -298,12 +294,12 @@ public class SettingsPane extends AppPane {
         Comp2 c = new Comp2();
         c.nbListView = createRemoteNbList();
         c.jdkListView = createJdkList();
-        c.buttonAdd = toolkit.createIconButton("add", "App.Action.Add", () -> onAdd(), win.isCompact());
-        c.buttonRemove = toolkit.createIconButton("remove", "App.Action.Remove", () -> onRemove(), win.isCompact());
-        c.buttonSearchLocal = toolkit.createIconButton("search-local", "App.Action.SearchLocal", () -> onSearchLocal(), win.isCompact());
-        c.buttonSearchRemote = toolkit.createIconButton("search-remote", "App.Action.SearchRemote", () -> onSearchRemote(), win.isCompact());
-        c.buttonDownload = toolkit.createIconButton("download", "App.Action.Download", () -> c.nbListView.onDownload(), win.isCompact());
-        c.buttonClose = toolkit.createIconButton("close", "App.Action.Close", () -> win.setSelectedPane(AppPaneType.LIST_WS), win.isCompact());
+        c.buttonAdd = toolkit.createIconButton("add", "App.Action.Add", () -> onAdd());
+        c.buttonRemove = toolkit.createIconButton("remove", "App.Action.Remove", () -> onRemove());
+        c.buttonSearchLocal = toolkit.createIconButton("search-local", "App.Action.SearchLocal", () -> onSearchLocal());
+        c.buttonSearchRemote = toolkit.createIconButton("search-remote", "App.Action.SearchRemote", () -> onSearchRemote());
+        c.buttonDownload = toolkit.createIconButton("download", "App.Action.Download", () -> c.nbListView.onDownload());
+        c.buttonClose = toolkit.createIconButton("close", "App.Action.Close", () -> win.setSelectedPane(AppPaneType.LIST_WS));
         c.buttons = new JComponent[]{c.buttonAdd, c.buttonRemove, c.buttonDownload, c.buttonSearchLocal, c.buttonSearchRemote, c.buttonClose};
         c.tabbedPane = NbTheme.prepare(new JTabbedPane() {
             Font font = getFont();
@@ -345,13 +341,13 @@ public class SettingsPane extends AppPane {
     private int cached_k;
 
     @Override
-    public void onPreChangeCompatStatus(boolean compact) {
+    public void onPreChangeCompatStatus(FrameInfo compact) {
         cached_i = getComps2().jdkListView.getSelectedIndex();
         cached_k = getComps2().nbListView.getSelectedIndex();
     }
 
     @Override
-    public void onChangeCompatStatus(boolean compact) {
+    public void onChangeCompatStatus(FrameInfo compact) {
         super.onChangeCompatStatus(compact);
         getComps2().jdkListView.setSelectedIndex(cached_i);
         getComps2().nbListView.setSelectedIndex(cached_k);

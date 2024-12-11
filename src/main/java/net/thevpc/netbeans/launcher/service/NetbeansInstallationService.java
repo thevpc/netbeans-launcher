@@ -563,6 +563,21 @@ public class NetbeansInstallationService {
                 }
             }
         }
+        for (NPath p : NPath.of("htmlfs:https://downloads.apache.org/netbeans/netbeans/").stream()) {
+            if (p.isDirectory()) {
+                ///12.0/netbeans-12.0-bin.zip
+                String version = p.getName();
+                NPath b = NPath.of("https://downloads.apache.org/netbeans/netbeans/" + version + "/netbeans-" + version + "-bin.zip");
+                if (b.exists()) {
+                    all.add(new NetbeansBinaryLink()
+                            .setPackaging("zip")
+                            .setVersion(version)
+                            .setUrl(b.toString())
+                            .setReleaseDate(b.getLastModifiedInstant())
+                    );
+                }
+            }
+        }
 
         Set<String> locallyAvailable = Arrays.stream(findNetbeansInstallations(SortType.LATEST_FIRST)).map(NetbeansInstallation::getVersion).collect(Collectors.toSet());
         return all.stream().filter(x -> !locallyAvailable.contains(x.getVersion()))

@@ -5,17 +5,16 @@
  */
 package net.thevpc.netbeans.launcher.ui.panes;
 
-import net.thevpc.netbeans.launcher.ui.AppPane;
-import net.thevpc.netbeans.launcher.ui.AppPanePos;
-import net.thevpc.netbeans.launcher.ui.AppPaneType;
-import net.thevpc.netbeans.launcher.ui.MainWindowSwing;
+import net.thevpc.netbeans.launcher.ui.*;
 import net.thevpc.nuts.cmdline.NCmdLine;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 /**
@@ -38,15 +37,18 @@ public class JVMOptions extends AppPane {
         JComboBox text = new JComboBox();
     }
 
-    Comps1 compact;
-    Comps1 nonCompact;
+    protected Map<FrameInfo, Comps1> cachedComps1=new HashMap<>();
+
+    private Comps1 getComps1() {
+        return cachedComps1.computeIfAbsent(toolkit.getFrameInfo(),k->createComps1(k));
+    }
 
     public JVMOptions(MainWindowSwing win) {
         super(AppPaneType.JVM_OPTIONS,new AppPanePos(0,2), win);
         build();
     }
 
-    private Comps1 createComps1(boolean compact) {
+    private Comps1 createComps1(FrameInfo compact) {
         Comps1 c = new Comps1();
 
         c.text.setEditable(true);
@@ -62,12 +64,12 @@ public class JVMOptions extends AppPane {
         model.addColumn("");
         c.list.setModel(model);
 
-        c.buttonUp = toolkit.createIconButton("up", "App.Action.Up", () -> onUp(), compact);
-        c.buttonDown = toolkit.createIconButton("down", "App.Action.Down", () -> onDown(), compact);
-        c.buttonAdd = toolkit.createIconButton("add", "App.Action.Add", () -> onAdd(), compact);
-        c.buttonRemove = toolkit.createIconButton("remove", "App.Action.Remove", () -> onRemove(), compact);
-        c.buttonOk = toolkit.createIconButton("ok", "App.Action.Ok", () -> onOk(), compact);
-        c.buttonCancel = toolkit.createIconButton("close", "App.Action.Cancel", () -> onCancel(), compact);
+        c.buttonUp = toolkit.createIconButton("up", "App.Action.Up", () -> onUp());
+        c.buttonDown = toolkit.createIconButton("down", "App.Action.Down", () -> onDown());
+        c.buttonAdd = toolkit.createIconButton("add", "App.Action.Add", () -> onAdd());
+        c.buttonRemove = toolkit.createIconButton("remove", "App.Action.Remove", () -> onRemove());
+        c.buttonOk = toolkit.createIconButton("ok", "App.Action.Ok", () -> onOk());
+        c.buttonCancel = toolkit.createIconButton("close", "App.Action.Cancel", () -> onCancel());
         c.buttons = new JComponent[]{c.buttonAdd,c.buttonRemove,c.buttonUp,c.buttonDown,c.buttonOk,c.buttonCancel};
         JPanel p = new JPanel(new BorderLayout());
         p.add(c.text, BorderLayout.NORTH);
@@ -133,26 +135,13 @@ public class JVMOptions extends AppPane {
         supp.accept(false);
     }
 
-    private Comps1 getComps1() {
-        if (win.isCompact()) {
-            if (compact == null) {
-                compact = createComps1(true);
-            }
-            return compact;
-        }
-        if (nonCompact == null) {
-            nonCompact = createComps1(false);
-        }
-        return nonCompact;
-    }
-
     @Override
-    public JComponent[] createButtons(boolean compact) {
+    public JComponent[] createButtons(FrameInfo compact) {
         return getComps1().buttons;
     }
 
     @Override
-    public JComponent createMain(boolean compact) {
+    public JComponent createMain(FrameInfo compact) {
         return getComps1().main;
     }
 

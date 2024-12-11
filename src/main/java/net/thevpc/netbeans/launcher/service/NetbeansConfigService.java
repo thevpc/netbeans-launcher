@@ -54,6 +54,10 @@ public class NetbeansConfigService {
         return config.getSumoMode();
     }
 
+    public ObservableValue<Integer> getZoom() {
+        return config.getZoom();
+    }
+
     public ObservableNetbeansConfig config() {
         return config;
     }
@@ -122,7 +126,7 @@ public class NetbeansConfigService {
             ).filter(x -> x.getVersion().compareTo(NApp.of().getVersion().get()) < 0).collect(Collectors.toList());
             for (NId olderVersion : olderVersions) {
                 NPath validFile2
-                        = NLocations.of().getStoreLocation(olderVersion, NStoreType.CONF)
+                        = NWorkspace.of().getStoreLocation(olderVersion, NStoreType.CONF)
                                 .resolve("config.json");
                 if (validFile2.isRegularFile()) {
                     try {
@@ -193,6 +197,13 @@ public class NetbeansConfigService {
     public boolean isSumoMode() {
         return config.getSumoMode().get();
     }
+
+    public boolean setZoom(int b) {
+        config.getZoom().set(b);
+        saveConfig();
+        return true;
+    }
+
 
     public void waitForConfigLoaded() {
         if (configLoaded) {

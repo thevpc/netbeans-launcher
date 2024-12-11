@@ -19,13 +19,14 @@ import java.awt.event.ActionListener;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
 
 import net.thevpc.netbeans.launcher.model.NbOptions;
+import net.thevpc.netbeans.launcher.util.RefreshContext;
 import net.thevpc.nuts.NApp;
-import net.thevpc.nuts.NSession;
 
 /**
  * @author thevpc
@@ -41,13 +42,16 @@ public class MainWindowSwing {
     private ConfirmPane confirmPane;
     private JVMOptions jvmOptions;
     protected JFrame frame;
-    private boolean compact = false;
     private AppPaneContainer appPaneContainer;
     private JComponent minimizeButton;
+    private JComponent noZoomButton;
+    private JComponent zoomInButton;
+    private JComponent zoomOutButton;
     private JComponent enlargeButton;
     private JComponent compactButton;
     private JComponent exitButton;
     private JPanel headerButtons;
+    private JLabel logo;
     private AppPane currentPane;
     private JComponent winHeader;
 
@@ -158,11 +162,14 @@ public class MainWindowSwing {
 
     public void start(JFrame primaryStage) { //int2troadmin
         toolkit = new SwingToolkit(primaryStage);
-        configService.conf().getSumoMode().addListener(t -> setCompact(!t.getNewValue()));
+        configService.conf().getSumoMode().addListener(t -> setFrameInfo(this.toolkit.getFrameInfo().setCompact(!t.getNewValue())));
         configService.conf().getInstallations().addListener(e -> updateList());
         configService.conf().getJdkLocations().addListener(e -> updateList());
         configService.conf().getWorkspaces().addListener(e -> updateList());
-        compact = !configService.conf().getSumoMode().get();
+        toolkit.setFrameInfo(new FrameInfo(
+                !configService.conf().getSumoMode().get(),
+                configService.conf().getZoom().get()
+        ));
         this.frame = primaryStage;
         primaryStage.setTitle("Netbeans Launcher " + NApp.of().getId().get().getVersion());
         primaryStage.setIconImage(new ImageIcon(MainWindowSwing.class.getResource("nb.png")).getImage());
@@ -192,7 +199,7 @@ public class MainWindowSwing {
             pane.onInit();
         }
         setSelectedPane(AppPaneType.LIST_WS);
-        onChangeCompatStatus(compact);
+        onChangeCompatStatus();
         frame.setUndecorated(true);
         primaryStage.setLocationRelativeTo(null);
         primaryStage.setVisible(true);
@@ -225,22 +232,39 @@ public class MainWindowSwing {
 //        header.addAll(new JLabel("Netbeans Launcher"));
         JLabel icon = new JLabel(SwingUtils2.loadIcon("nb.png", 32));
         winHeader.add(icon);
-        JLabel logo = new JLabel(SwingUtils2.loadIcon("logo.png", 63, 28));
+        logo = new JLabel(SwingUtils2.loadIcon("logo.png", 63, 28));
+        toolkit.prepareComponent(logo, new RefreshContext.Refresher() {
+            @Override
+            public void onRefresh(RefreshContext context) {
+                int is = toolkit.iconSize();
+                logo.setIcon(SwingUtils2.loadIcon("logo.png", 63+is-16, 28+is-16));
+            }
+        });
         winHeader.add(logo);
         headerButtons = new JPanel(new BorderLayout());
         headerButtons.setOpaque(false);
         winHeader.add(headerButtons);
         winHeader.addGlueH();
 
-        minimizeButton = getToolkit().createIconButton("minimize-window", "App.Action.MinimizeWindow", () -> frame.setState(Frame.ICONIFIED), compact);
+        zoomInButton = getToolkit().createIconButton("zoom-in", "App.Action.ZoomIn", () -> setFrameInfo(toolkit.getFrameInfo().zoomIn()));
+        winHeader.add(zoomInButton);
+
+        noZoomButton = getToolkit().createIconButton("zoom-out", "App.Action.NoZoom", () -> setFrameInfo(toolkit.getFrameInfo().zoomOut()));
+        winHeader.add(noZoomButton);
+
+        zoomOutButton = getToolkit().createIconButton("no-zoom", "App.Action.ZoomOut", () -> setFrameInfo(toolkit.getFrameInfo().zoomNone()));
+        winHeader.add(zoomOutButton);
+
+        minimizeButton = getToolkit().createIconButton("minimize-window", "App.Action.MinimizeWindow", () -> frame.setState(Frame.ICONIFIED));
         winHeader.add(minimizeButton);
-        enlargeButton = getToolkit().createIconButton("enlarge", "App.Action.NonCompactMode", () -> setCompact(false), compact);
+
+        enlargeButton = getToolkit().createIconButton("enlarge", "App.Action.NonCompactMode", () -> setFrameInfo(toolkit.getFrameInfo().setCompact(false)));
         winHeader.add(enlargeButton);
-        compactButton = getToolkit().createIconButton("compress", "App.Action.CompactMode", () -> setCompact(true), compact);
+        compactButton = getToolkit().createIconButton("compress", "App.Action.CompactMode", () -> setFrameInfo(toolkit.getFrameInfo().setCompact(true)));
         winHeader.add(compactButton);
-        exitButton = getToolkit().createIconButton("exit", "App.Action.Exit", () -> confirmAndExit(), compact);
+        exitButton = getToolkit().createIconButton("exit", "App.Action.Exit", () -> confirmAndExit());
         winHeader.add(exitButton);
-        setCompact(compact);
+        setFrameInfo(toolkit.getFrameInfo());
         JComponent c = winHeader.toComponent();
         NbUtils.installMoveWin(c, frame);
         return c;
@@ -300,6 +324,7 @@ public class MainWindowSwing {
             if (child.isVisible()) {
                 visible++;
             }
+            toolkit.refreshComponent(child);
         }
         winHeader.invalidate();
         winHeader.revalidate();
@@ -357,41 +382,58 @@ public class MainWindowSwing {
     }
 
     public boolean isCompact() {
-        return compact;
+        return toolkit.getFrameInfo().isCompact();
     }
 
-    public void setCompact(boolean compact) {
-        if (this.compact != compact) {
-            onPreChangeCompatStatus(compact);
-            this.compact = compact;
-            onChangeCompatStatus(compact);
-            configService.conf().setSumoMode(!compact);
+    public void setFrameInfo(FrameInfo frameInfo) {
+        if (!Objects.equals(toolkit.getFrameInfo(), frameInfo)) {
+            toolkit.setFrameInfo(frameInfo);
+            toolkit.refreshComponent(zoomInButton);
+            toolkit.refreshComponent(zoomOutButton);
+            toolkit.refreshComponent(noZoomButton);
+            toolkit.refreshComponent(enlargeButton);
+            toolkit.refreshComponent(compactButton);
+            toolkit.refreshComponent(exitButton);
+            toolkit.refreshComponent(minimizeButton);
+            toolkit.refreshComponent(logo);
+            onPreChangeCompatStatus();
+            onChangeCompatStatus();
+            updateGlobalHeader();
+            configService.conf().setSumoMode(!frameInfo.isCompact());
             frame.invalidate();
             frame.revalidate();
             frame.repaint();
         }
-        enlargeButton.setVisible(compact);
-        compactButton.setVisible(!compact);
+        enlargeButton.setVisible(frameInfo.isCompact());
+        compactButton.setVisible(!frameInfo.isCompact());
         if (appPaneContainer != null) {
             ((SlideAppPaneContainer) appPaneContainer).setSlideTime(
                     //                    compact ? 50 : 20
-                    compact ? 500 : 200
+                    frameInfo.isCompact() ? 500 : 200
             );
         }
     }
 
-    public void onPreChangeCompatStatus(boolean compact) {
+
+    public void onPreChangeCompatStatus() {
         for (AppPane pane : getPanes()) {
-            pane.onPreChangeCompatStatus(compact);
+            pane.onPreChangeCompatStatus(toolkit.getFrameInfo());
         }
     }
 
-    public void onChangeCompatStatus(boolean compact) {
-        this.toolkit.setCompact(compact);
+    public void onChangeCompatStatus() {
         for (AppPane pane : getPanes()) {
-            pane.onChangeCompatStatus(compact);
+            pane.onChangeCompatStatus(toolkit.getFrameInfo());
         }
-        Dimension dimension = compact ? new Dimension(410, 300) : new Dimension(800, 600);
+        int extraX=toolkit.getFrameInfo().getZoom()*16;
+        int extraY=toolkit.getFrameInfo().getZoom()*16;
+        if(extraX<0){
+            extraX=0;
+        }
+        if(extraY<0){
+            extraY=0;
+        }
+        Dimension dimension = toolkit.getFrameInfo().isCompact() ? new Dimension(410+extraX, 300+extraY) : new Dimension(800+extraX, 600+extraY);
         frame.setPreferredSize(dimension);
         frame.setSize(dimension);
     }

@@ -8,6 +8,7 @@ import net.thevpc.netbeans.launcher.model.NetbeansLocation;
 import net.thevpc.netbeans.launcher.model.SortType;
 import net.thevpc.netbeans.launcher.ui.utils.CatalogComponent;
 import net.thevpc.netbeans.launcher.ui.utils.Equalizer;
+import net.thevpc.netbeans.launcher.ui.utils.SwingToolkit;
 import net.thevpc.netbeans.launcher.util.SwingWorker;
 import net.thevpc.netbeans.launcher.util.Workers;
 import net.thevpc.netbeans.launcher.ui.AppPaneType;
@@ -21,12 +22,14 @@ import java.util.TreeSet;
 public abstract class NetbeansInstallationListComponent {
 
     protected MainWindowSwing win;
+    protected SwingToolkit toolkit;
     protected CatalogComponent table;
     protected Runnable _onRequiredUpdateButtonStatuses;
     private static final Set<String> downloading = new HashSet<>();
 
     public NetbeansInstallationListComponent(MainWindowSwing win, Runnable _onRequiredUpdateButtonStatuses) {
         this.win = win;
+        this.toolkit = win.getToolkit();
         this._onRequiredUpdateButtonStatuses = _onRequiredUpdateButtonStatuses;
         table = createCatalog();
         prepare();

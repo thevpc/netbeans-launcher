@@ -5,26 +5,19 @@
  */
 package net.thevpc.netbeans.launcher.ui.panes;
 
-import java.awt.Color;
-import java.awt.Component;
+import java.awt.*;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import net.thevpc.netbeans.launcher.model.NetbeansInstallation;
 
 import net.thevpc.netbeans.launcher.model.NetbeansLocation;
 import net.thevpc.netbeans.launcher.model.NetbeansWorkspace;
-import net.thevpc.netbeans.launcher.ui.AppPane;
-import net.thevpc.netbeans.launcher.ui.AppPanePos;
-import net.thevpc.netbeans.launcher.ui.AppPaneType;
-import net.thevpc.netbeans.launcher.ui.MainWindowSwing;
+import net.thevpc.netbeans.launcher.ui.*;
 import net.thevpc.netbeans.launcher.util.LocalDateTimePeriod;
 import net.thevpc.netbeans.launcher.util.NbTheme;
 import net.thevpc.netbeans.launcher.util.NbUtils;
@@ -86,26 +79,25 @@ public class NetbeansWorkspaceListPane extends AppPane {
         JComponent buttonAdd;
         JComponent[] buttons;
         JComponent main;
-        boolean compact;
+        FrameInfo compact;
     }
 
-    Comps1 compact;
-    Comps1 nonCompact;
+    protected Map<FrameInfo, Comps1> cachedComps1=new HashMap<>();
 
     public NetbeansWorkspaceListPane(MainWindowSwing win) {
         super(AppPaneType.LIST_WS, new AppPanePos(0, 0), win);
         build();
     }
 
-    private Comps1 createComps1(boolean compact) {
+    private Comps1 createComps1(FrameInfo compact) {
         Comps1 c = new Comps1();
         c.compact = compact;
-        c.buttonAdd = toolkit.createIconButton("add", "App.Action.Add", () -> win.onAddWorkspace(null), compact);
-        c.buttonRemove = toolkit.createIconButton("remove", "App.Action.Remove", () -> onRemoveWorkspace(), compact);
-        c.buttonCopy = toolkit.createIconButton("copy", "App.Action.Copy", () -> onCopyWorkspace(), compact);
-        c.buttonEdit = toolkit.createIconButton("edit", "App.Action.Edit", () -> win.onEditWorkspace(getSelectedWorkspace()), compact);
-        c.buttonStart = toolkit.createIconButton("start", "App.Action.Start", () -> win.startWorkspace(getSelectedWorkspace()), compact);
-        c.buttonSearchLocal = toolkit.createIconButton("settings", "App.Action.Settings", () -> win.setSelectedPane(AppPaneType.SETTINGS), compact);
+        c.buttonAdd = toolkit.createIconButton("add", "App.Action.Add", () -> win.onAddWorkspace(null));
+        c.buttonRemove = toolkit.createIconButton("remove", "App.Action.Remove", () -> onRemoveWorkspace());
+        c.buttonCopy = toolkit.createIconButton("copy", "App.Action.Copy", () -> onCopyWorkspace());
+        c.buttonEdit = toolkit.createIconButton("edit", "App.Action.Edit", () -> win.onEditWorkspace(getSelectedWorkspace()));
+        c.buttonStart = toolkit.createIconButton("start", "App.Action.Start", () -> win.startWorkspace(getSelectedWorkspace()));
+        c.buttonSearchLocal = toolkit.createIconButton("settings", "App.Action.Settings", () -> win.setSelectedPane(AppPaneType.SETTINGS));
         c.buttons = new JComponent[]{c.buttonStart, c.buttonAdd, c.buttonRemove, c.buttonEdit, c.buttonCopy, c.buttonSearchLocal};
 
         c.workspacesListView = new TableComponent();
@@ -115,7 +107,9 @@ public class NetbeansWorkspaceListPane extends AppPane {
         }
         c.workspacesListView.addEnterSelection((e) -> win.startWorkspace(getSelectedWorkspace()));
         if (c.workspacesListView instanceof ListComponent) {
-            ((ListComponent) c.workspacesListView).getList().setCellRenderer(new DefaultListCellRenderer() {
+            JList li = ((ListComponent) c.workspacesListView).getList();
+            Font initialFont = li.getFont();
+            li.setCellRenderer(new DefaultListCellRenderer() {
                 @Override
                 public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                     NetbeansWorkspace ws = (value instanceof NetbeansWorkspace) ? (NetbeansWorkspace) value : null;
@@ -133,15 +127,16 @@ public class NetbeansWorkspaceListPane extends AppPane {
 //                    } else {
 //                        setBackground(MainWindowSwingHelper.color("ffdb9d"));
 //                    }
-                        setIcon(SwingUtils2.loadIcon("anb.png", win.isCompact() ? 16 : 32));
+                        setIcon(SwingUtils2.loadIcon("anb.png", toolkit.iconSize()));
                     } else {
                         if (!isSelected) {
                             setBackground(index % 2 == 0 ? Color.WHITE : SwingUtils2.color("f9f9f9"));
                         } else {
                             setBackground(SwingUtils2.color("0096c9"));
                         }
-                        setIcon(SwingUtils2.loadIcon("anbg.png", win.isCompact() ? 16 : 32));
+                        setIcon(SwingUtils2.loadIcon("anbg.png", toolkit.iconSize()));
                     }
+                    setFont(toolkit.deriveFont(initialFont));
                     return this;
                 }
             });
@@ -168,6 +163,7 @@ public class NetbeansWorkspaceListPane extends AppPane {
                 }
 
             }.setColumnSizes(new float[]{5, 2, 1}));
+            Font initialFont = a.getTable().getFont();
             a.getTable().getColumnModel().getColumn(0).setCellRenderer(new DefaultTableCellRenderer() {
                 @Override
                 public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -179,18 +175,35 @@ public class NetbeansWorkspaceListPane extends AppPane {
 //                        } else {
 //                            setBackground(SwingUtils2.color("0096c9"));
 //                        }
-                        setIcon(SwingUtils2.loadIcon("anb.png", win.isCompact() ? 24 : 48));
+                        setIcon(SwingUtils2.loadIcon("anb.png", toolkit.iconSize()));
                     } else {
 //                        if (!isSelected) {
 //                            setBackground(index % 2 == 0 ? Color.WHITE : SwingUtils2.color("f9f9f9"));
 //                        } else {
 //                            setBackground(SwingUtils2.color("0096c9"));
 //                        }
-                        setIcon(SwingUtils2.loadIcon("anbg.png", win.isCompact() ? 24 : 48));
+                        setIcon(SwingUtils2.loadIcon("anbg.png", toolkit.iconSize()));
                     }
+                    setFont(toolkit.deriveFont(initialFont));
                     return this;
                 }
 
+            });
+            a.getTable().getColumnModel().getColumn(1).setCellRenderer(new DefaultTableCellRenderer() {
+                @Override
+                public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                    super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                    setFont(toolkit.deriveFont(initialFont));
+                    return this;
+                }
+            });
+            a.getTable().getColumnModel().getColumn(2).setCellRenderer(new DefaultTableCellRenderer() {
+                @Override
+                public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                    super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                    setFont(toolkit.deriveFont(initialFont));
+                    return this;
+                }
             });
         }
 
@@ -209,16 +222,7 @@ public class NetbeansWorkspaceListPane extends AppPane {
     }
 
     private Comps1 getComps1() {
-        if (win.isCompact()) {
-            if (compact == null) {
-                compact = createComps1(true);
-            }
-            return compact;
-        }
-        if (nonCompact == null) {
-            nonCompact = createComps1(false);
-        }
-        return nonCompact;
+        return cachedComps1.computeIfAbsent(toolkit.getFrameInfo(),k->createComps1(k));
     }
 
     public void setSelectedWorkspace(NetbeansWorkspace w) {
@@ -377,12 +381,12 @@ public class NetbeansWorkspaceListPane extends AppPane {
     }
 
     @Override
-    public JComponent[] createButtons(boolean compact) {
+    public JComponent[] createButtons(FrameInfo compact) {
         return getComps1().buttons;
     }
 
     @Override
-    public JComponent createMain(boolean compact) {
+    public JComponent createMain(FrameInfo compact) {
         return getComps1().main;
     }
 
@@ -414,13 +418,13 @@ public class NetbeansWorkspaceListPane extends AppPane {
     private int cached_i;
 
     @Override
-    public void onPreChangeCompatStatus(boolean compact) {
+    public void onPreChangeCompatStatus(FrameInfo compact) {
         super.onPreChangeCompatStatus(compact);
         cached_i = getComps1().workspacesListView.getSelectedIndex();
     }
 
     @Override
-    public void onChangeCompatStatus(boolean compact) {
+    public void onChangeCompatStatus(FrameInfo compact) {
         super.onChangeCompatStatus(compact);
         getComps1().workspacesListView.setSelectedIndex(cached_i);
     }

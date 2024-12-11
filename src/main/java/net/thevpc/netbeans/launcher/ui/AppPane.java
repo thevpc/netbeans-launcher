@@ -11,6 +11,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URI;
 import java.text.DecimalFormat;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
@@ -39,8 +41,7 @@ public abstract class AppPane extends JPanel {
         protected JProgressBar jpb;
     }
 
-    protected Comps compactComp;
-    protected Comps nonCompactComp;
+    protected Map<FrameInfo,Comps> cachedComs=new HashMap<>();
     protected MainWindowSwing win;
     protected SwingToolkit toolkit;
     protected NetbeansLauncherModule configService;
@@ -85,18 +86,7 @@ public abstract class AppPane extends JPanel {
     }
 
     public void build() {
-        Comps c = null;
-        if (win.isCompact()) {
-            if (compactComp == null) {
-                compactComp = build0(true);
-            }
-            c = compactComp;
-        } else {
-            if (nonCompactComp == null) {
-                nonCompactComp = build0(false);
-            }
-            c = nonCompactComp;
-        }
+        Comps c = currentComps();
         this.removeAll();
         if(c.headerComponent!=null) {
             this.add(c.headerComponent, BorderLayout.NORTH);
@@ -108,14 +98,15 @@ public abstract class AppPane extends JPanel {
         this.revalidate();
     }
 
-    public BoxH getHeader() {
-        if (win.isCompact()) {
-            return compactComp.header;
-        }
-        return nonCompactComp.header;
+    private Comps currentComps() {
+        return cachedComs.computeIfAbsent(toolkit.getFrameInfo(), k -> build0(k));
     }
 
-    private Comps build0(boolean compact) {
+    public BoxH getHeader() {
+        return currentComps().header;
+    }
+
+    private Comps build0(FrameInfo compact) {
         Comps c = new Comps();
         int vgap = 1;//compact ? 1 : 10;
         int hgap = 1;//compact ? 1 : 5;
@@ -141,7 +132,7 @@ public abstract class AppPane extends JPanel {
         c.footer.addExpandH(c.jpb);
 //        c.footer.addGlueH();
         c.footer.setBackground(SwingUtils2.componentGradientPaint("d6d9df","dfe2e8", Direction.BOTTOM));
-        JLabel link = new JLabel();
+        JLabel link = toolkit.createLabel();
         link.setText("v" + NApp.of().getVersion().get());
         link.setForeground(SwingUtils2.color("0095c9"));
         link.addMouseListener(new MouseAdapter() {
@@ -174,12 +165,7 @@ public abstract class AppPane extends JPanel {
     }
 
     private void updateProgressbar() {
-        if (compactComp != null && compactComp.jpb != null) {
-            updateProgressbar(compactComp.jpb);
-        }
-        if (nonCompactComp != null && nonCompactComp.jpb != null) {
-            updateProgressbar(nonCompactComp.jpb);
-        }
+        updateProgressbar(currentComps().jpb);
     }
 
     private static class LongOperationTracker{
@@ -235,9 +221,9 @@ public abstract class AppPane extends JPanel {
                 LongOperation o = tracker.next(operations);
                 jpb.setValue((int) percents);
                 if(o.getName()==null) {
-                    jpb.setString(operations.length + " task(s) : "+df.format(o.getPercent()));
+                    jpb.setString(operations.length + " task(s) : "+df.format(percents));
                 }else{
-                    jpb.setString(operations.length + " task(s) : "+df.format(o.getPercent()) + "% " + o.getName());
+                    jpb.setString(operations.length + " task(s) : "+df.format(percents) + "% " + o.getName());
                 }
             }
 
@@ -263,16 +249,16 @@ public abstract class AppPane extends JPanel {
 
     }
 
-    public void onPreChangeCompatStatus(boolean compact) {
+    public void onPreChangeCompatStatus(FrameInfo compact) {
 
     }
 
-    public void onChangeCompatStatus(boolean compact) {
+    public void onChangeCompatStatus(FrameInfo compact) {
         build();
         onRefreshHeader();
     }
 
-    public abstract JComponent[] createButtons(boolean compact);
+    public abstract JComponent[] createButtons(FrameInfo compact);
 
-    public abstract JComponent createMain(boolean compact);
+    public abstract JComponent createMain(FrameInfo compact);
 }

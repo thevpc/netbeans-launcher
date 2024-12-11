@@ -45,10 +45,10 @@ public class JVMOptionsPanel1 extends JPanel {
         defaultComboBoxModel.addElement("-J-Xms1g");
         defaultComboBoxModel.addElement("-J-Xmx4g");
         text.setSelectedItem("");
-        add = toolkit.createIconButton("add", "App.Action.Add", () -> onAdd(), true);
-        remove = toolkit.createIconButton("remove", "App.Action.Remove", () -> onRemove(), true);
-        up = toolkit.createIconButton("up", "App.Action.Up", () -> onUp(), true);
-        down = toolkit.createIconButton("down", "App.Action.Down", () -> onDown(), true);
+        add = toolkit.createIconButton("add", "App.Action.Add", () -> onAdd());
+        remove = toolkit.createIconButton("remove", "App.Action.Remove", () -> onRemove());
+        up = toolkit.createIconButton("up", "App.Action.Up", () -> onUp());
+        down = toolkit.createIconButton("down", "App.Action.Down", () -> onDown());
         DefaultTableModel model = new DefaultTableModel();
         model.addColumn("");
         list.setModel(model);

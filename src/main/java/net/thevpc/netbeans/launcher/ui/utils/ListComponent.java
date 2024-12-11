@@ -5,8 +5,7 @@
  */
 package net.thevpc.netbeans.launcher.ui.utils;
 
-import java.awt.Color;
-import java.awt.Component;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -35,10 +34,11 @@ public class ListComponent implements CatalogComponent {
     private JList list;
     private JlistToStringer stringer;
 
-    public ListComponent() {
+    public ListComponent(SwingToolkit toolkit) {
         list = new JList(new DefaultListModel());
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         list.setBorder(new EmptyBorder(2, 2, 2, 2));
+        Font initialFont = list.getFont();
         list.setCellRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
@@ -48,6 +48,7 @@ public class ListComponent implements CatalogComponent {
                 } else {
                     setBackground(SwingUtils2.color("0096c9"));
                 }
+                setFont(toolkit.deriveFont(initialFont));
                 return this;
             }
         });

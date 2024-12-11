@@ -71,7 +71,7 @@ public class NbListComponentAsList extends NetbeansInstallationListComponent {
 
     @Override
     protected CatalogComponent createCatalog() {
-        return new ListComponent().setStringer(nbLinkStringer);
+        return new ListComponent(toolkit).setStringer(nbLinkStringer);
     }
 
 }

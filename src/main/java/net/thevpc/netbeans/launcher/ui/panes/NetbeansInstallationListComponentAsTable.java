@@ -103,35 +103,46 @@ public class NetbeansInstallationListComponentAsTable extends NetbeansInstallati
                 return nbLinkStringer.toString(m, value);
             }
         }.setColumnSizes(new float[]{1.5f, 1f, 0.75f}));
+        Font initialFont = tab.getTable().getFont();
         tab.getTable().getColumnModel().getColumn(1).setCellRenderer(new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-                JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 String s = String.valueOf(value);
                 if ("Not Installed".equals(s)) {
-                    label.setToolTipText("Double click to install");
+                    setToolTipText("Double click to install");
                 } else {
-                    label.setToolTipText(null);
+                    setToolTipText(null);
                 }
-                return label;
+                setFont(toolkit.deriveFont(initialFont));
+                return this;
             }
         });
         tab.getTable().getColumnModel().getColumn(0).setCellRenderer(new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-                JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 Object oo = null;
                 try {
                     oo = NetbeansInstallationListComponentAsTable.this.table.getValues().get(row);
-                }catch (Exception e){
+                } catch (Exception e) {
                     //
                 }
-                if(oo instanceof NetbeansBinaryLink) {
-                    setIcon(win.getToolkit().createIcon("download", win.isCompact()));
-                }else{
-                    setIcon(win.getToolkit().createIcon("anb", win.isCompact()));
+                if (oo instanceof NetbeansBinaryLink) {
+                    setIcon(win.getToolkit().createIcon("download"));
+                } else {
+                    setIcon(win.getToolkit().createIcon("anb"));
                 }
-                return label;
+                setFont(toolkit.deriveFont(initialFont));
+                return this;
+            }
+        });
+        tab.getTable().getColumnModel().getColumn(2).setCellRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                setFont(toolkit.deriveFont(initialFont));
+                return this;
             }
         });
         return tab;

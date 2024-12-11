@@ -25,6 +25,7 @@ public class NetbeansConfig implements Serializable {
     @SuppressWarnings("FieldMayBeFinal")
     private List<NPlatformLocation> jdkLocations = new ArrayList<>();
     private boolean sumoMode = false;
+    private int zoom = 0;
 
     public List<NetbeansInstallation> getInstallations() {
         return installations;
@@ -58,4 +59,11 @@ public class NetbeansConfig implements Serializable {
         this.sumoMode = sumoMode;
     }
 
+    public int getZoom() {
+        return zoom;
+    }
+
+    public void setZoom(int zoom) {
+        this.zoom = zoom;
+    }
 }

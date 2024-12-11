@@ -9,6 +9,7 @@ public class ObservableNetbeansConfig {
     private final ObservableList<NetbeansWorkspace> workspaces = new ObservableList<>();
     private final ObservableList<NPlatformLocation> jdkLocations = new ObservableList<>();
     private final ObservableValue<Boolean> sumoMode = new ObservableValue<>(false);
+    private final ObservableValue<Integer> zoom = new ObservableValue<>(0);
 
     public void setNetbeansConfig(NetbeansConfig c){
         if(c==null){
@@ -16,11 +17,13 @@ public class ObservableNetbeansConfig {
             workspaces.clear();
             jdkLocations.clear();
             sumoMode.set(false);
+            zoom.set(0);
         }else {
             installations.setAll(c.getInstallations());
             workspaces.setAll(c.getWorkspaces());
             jdkLocations.setAll(c.getJdkLocations());
             sumoMode.set(c.isSumoMode());
+            zoom.set(c.getZoom());
         }
     }
 
@@ -30,6 +33,7 @@ public class ObservableNetbeansConfig {
         c.getWorkspaces().addAll(workspaces.list());
         c.getJdkLocations().addAll(jdkLocations.list());
         c.setSumoMode(sumoMode.get());
+        c.setZoom(zoom.get());
         return c;
     }
 
@@ -47,5 +51,9 @@ public class ObservableNetbeansConfig {
 
     public ObservableValue<Boolean> getSumoMode() {
         return sumoMode;
+    }
+
+    public ObservableValue<Integer> getZoom() {
+        return zoom;
     }
 }
