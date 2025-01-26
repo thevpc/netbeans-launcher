@@ -15,6 +15,7 @@ import net.thevpc.nuts.io.NPrintStream;
 
 import javax.swing.*;
 
+import net.thevpc.nuts.lib.nswing.NSwingUtils;
 import net.thevpc.nuts.util.NSupportMode;
 
 /**
@@ -46,10 +47,9 @@ public class NbMain implements NApplication {
 
     @Override
     public void run() {
-        NWorkspace workspace = NWorkspace.of();
-        SwingUtilities.invokeLater(workspace::setSharedInstance);
-        NPrintStream out = NSession.of().out();
-        NPrintStream err = NSession.of().err();
+        NSession session = NSession.of();
+        NPrintStream out = session.out();
+        NPrintStream err = session.err();
         if (!NbUtils.isPlatformSupported()) {
             err.println("platform not supported");
             if (System.console() == null) {
@@ -60,7 +60,7 @@ public class NbMain implements NApplication {
         NbOptions options = new NbOptions();
         NCmdLine cmdLine = NApp.of().getCmdLine();
         while (cmdLine.hasNext()) {
-            if (NSession.of().configureFirst(cmdLine)) {
+            if (session.configureFirst(cmdLine)) {
                 //do nothing
             } else if (cmdLine.next("--swing") != null) {
                 options.plaf = "nimbus";
@@ -97,6 +97,7 @@ public class NbMain implements NApplication {
         } else if (options.cli && !options.swing_arg) {
             MainWindowCLI.launch(options);
         } else if (options.swing_arg) {
+            NSwingUtils.setSharedWorkspaceInstance();
             MainWindowSwing.launch(options, true);
         } else {
             //will default to swing!!
