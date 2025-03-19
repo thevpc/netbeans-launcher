@@ -31,7 +31,7 @@ import static net.thevpc.netbeans.launcher.util.NbStringUtils.match;
 
 import net.thevpc.netbeans.launcher.util.NbUtils;
 import net.thevpc.nuts.*;
-import net.thevpc.nuts.concurrent.NLocks;
+import net.thevpc.nuts.concurrent.NLock;
 import net.thevpc.nuts.elem.NElements;
 import net.thevpc.nuts.io.NCp;
 import net.thevpc.nuts.io.NPath;
@@ -106,7 +106,7 @@ public class NetbeansInstallationService {
                 .setProgressMonitor(new OpNInputStreamProgressMonitor(module.rt().addOperation("Downloading " + i)))
                 .run();
         //}
-        NLocks.of().setSource(zipTo).run(() -> {
+        NLock.of(zipTo).runWith(() -> {
             if (folderTo.resolve("bin").resolve("netbeans").exists()) {
                 //already unzipped!!
             } else {

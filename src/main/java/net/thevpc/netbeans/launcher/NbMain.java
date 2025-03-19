@@ -27,7 +27,7 @@ public class NbMain implements NApplication {
 
     public static void main(String[] args) {
         // just create an instance and call runAndExit in the main method
-        new NbMain().runAndExit(args);
+        new NbMain().main(NMainArgs.ofHandled(args));
     }
 
     @Override
