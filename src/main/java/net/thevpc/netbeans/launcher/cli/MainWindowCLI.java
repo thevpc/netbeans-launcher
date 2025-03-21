@@ -22,7 +22,7 @@ public class MainWindowCLI {
     }
 
     private void run() {
-        NSession.of().out().println("CLI mode is not yet supported. Ignoring command");
+        NOut.println("CLI mode is not yet supported. Ignoring command");
     }
 
     public MainWindowCLI(NbOptions options) {
