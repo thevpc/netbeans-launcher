@@ -7,6 +7,7 @@ package net.thevpc.netbeans.launcher.cli;
 
 import net.thevpc.netbeans.launcher.service.NetbeansLauncherModule;
 import net.thevpc.netbeans.launcher.model.NbOptions;
+import net.thevpc.nuts.NOut;
 import net.thevpc.nuts.NSession;
 
 /**
