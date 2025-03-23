@@ -15,7 +15,7 @@ import net.thevpc.nuts.io.NPrintStream;
 
 import javax.swing.*;
 
-import net.thevpc.nuts.lib.nswing.NSwingUtils;
+import net.thevpc.nuts.nswing.NSwingUtils;
 import net.thevpc.nuts.util.NSupportMode;
 
 /**
