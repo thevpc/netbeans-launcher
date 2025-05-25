@@ -399,7 +399,7 @@ public class NbUtils {
     private static NbProcess[] _last_getRunning = null;
 
     public static NbProcess[] getRunning() {
-        NbProcess[] aa = NPs.of().type("java").getResultList()
+        NbProcess[] aa = NPs.of().setPlatformFamily(NPlatformFamily.JAVA).getResultList()
                 .stream().filter((p) -> p.getName().equals("org.netbeans.Main"))
                 .map(x -> new NbProcess(x)).toArray(NbProcess[]::new);
         Arrays.sort(aa);
