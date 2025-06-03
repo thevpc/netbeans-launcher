@@ -19,6 +19,7 @@ import net.thevpc.netbeans.launcher.util.ObservableList;
 import net.thevpc.netbeans.launcher.util.ObservableValue;
 import net.thevpc.nuts.*;
 import net.thevpc.nuts.concurrent.NScheduler;
+import net.thevpc.nuts.elem.NElementParser;
 import net.thevpc.nuts.elem.NElements;
 import net.thevpc.nuts.io.NPath;
 
@@ -88,7 +89,7 @@ public class NetbeansConfigService {
         boolean foundCurrVersionFile = false;
         if (validFile.isRegularFile()) {
             try {
-                config = (NetbeansConfig) NElements.of().json().parse(validFile, NetbeansConfig.class);
+                config = (NetbeansConfig) NElementParser.ofJson().parse(validFile, NetbeansConfig.class);
                 foundCurrVersionFile = config != null;
             } catch (Exception e) {
                 System.err.println("Unable to load config from " + validFile.toString());
@@ -130,7 +131,7 @@ public class NetbeansConfigService {
                                 .resolve("config.json");
                 if (validFile2.isRegularFile()) {
                     try {
-                        config = (NetbeansConfig) NElements.of().json().parse(validFile2, NetbeansConfig.class);
+                        config = (NetbeansConfig) NElementParser.ofJson().parse(validFile2, NetbeansConfig.class);
                     } catch (Exception e) {
                         System.err.println("Unable to load config from " + validFile2.toString());
                         break;
