@@ -20,6 +20,7 @@ import net.thevpc.netbeans.launcher.util.ObservableValue;
 import net.thevpc.nuts.*;
 import net.thevpc.nuts.concurrent.NScheduler;
 import net.thevpc.nuts.elem.NElementParser;
+import net.thevpc.nuts.elem.NElementWriter;
 import net.thevpc.nuts.elem.NElements;
 import net.thevpc.nuts.io.NPath;
 
@@ -77,9 +78,8 @@ public class NetbeansConfigService {
 
     public synchronized void saveConfig() {
         NetbeansConfig c = config.getNetbeansConfig();
-        NElements.of().json()
-                .setValue(c).setNtf(false)
-                .print(NApp.of().getConfFolder().resolve("config.json"));
+        NElementWriter.ofJson()
+                .write(c,NApp.of().getConfFolder().resolve("config.json"));
     }
 
     public <T> void loadFile(ConfigListener onFinish) {

@@ -6,6 +6,8 @@
 package net.thevpc.netbeans.launcher.compat;
 
 import net.thevpc.netbeans.launcher.model.NetbeansConfig;
+import net.thevpc.nuts.elem.NElementParser;
+import net.thevpc.nuts.elem.NElementWriter;
 import net.thevpc.nuts.elem.NElements;
 
 import java.io.StringReader;
@@ -16,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
  * @author thevpc
  */
 public class NetbeansConfigLoader11 {
@@ -42,12 +43,10 @@ public class NetbeansConfigLoader11 {
     }
 
     public static NetbeansConfig load(Path file) {
-        NElements json = NElements.of().json();
-        Map o = json.parse(file, Map.class);
+        Map o = NElementParser.ofJson().parse(file, Map.class);
         visit(o);
-        StringWriter sw = new StringWriter();
-        json.setNtf(false).setValue(o).print(sw);
-        NetbeansConfig c = json.parse(new StringReader(sw.toString()), NetbeansConfig.class);
+        ;
+        NetbeansConfig c = NElementParser.ofJson().parse(new StringReader(NElementWriter.ofJson().toString(o)), NetbeansConfig.class);
         return c;
     }
 }
