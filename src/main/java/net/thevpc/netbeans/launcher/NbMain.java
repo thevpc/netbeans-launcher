@@ -21,7 +21,7 @@ import net.thevpc.nuts.util.NSupportMode;
 /**
  * @author thevpc
  */
-@NApp.Info
+@NApp.Definition
 public class NbMain  {
 
     String PREFERRED_ALIAS = "nbl";
