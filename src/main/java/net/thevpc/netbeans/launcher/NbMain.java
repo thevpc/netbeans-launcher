@@ -46,7 +46,7 @@ public class NbMain  {
         NWorkspace.of().removeCommandIfExists(PREFERRED_ALIAS);
     }
 
-    @NApp.Main
+    @NApp.Runner
     public void run() {
         NSession session = NSession.of();
         NPrintStream out = session.out();
