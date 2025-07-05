@@ -21,7 +21,7 @@ import net.thevpc.nuts.util.NSupportMode;
 /**
  * @author thevpc
  */
-@NApp.Definition
+@NAppDefinition
 public class NbMain  {
 
     String PREFERRED_ALIAS = "nbl";
@@ -31,22 +31,22 @@ public class NbMain  {
         NApp.builder(args).run();
     }
 
-    @NApp.Installer
+    @NAppInstaller
     public void onInstallApplication() {
         addDesktopIntegration();
     }
 
-    @NApp.Updater
+    @NAppUpdater
     public void onUpdateApplication() {
         onInstallApplication();
     }
 
-    @NApp.Uninstaller
+    @NAppUninstaller
     public void onUninstallApplication() {
         NWorkspace.of().removeCommandIfExists(PREFERRED_ALIAS);
     }
 
-    @NApp.Runner
+    @NAppRunner
     public void run() {
         NSession session = NSession.of();
         NPrintStream out = session.out();
