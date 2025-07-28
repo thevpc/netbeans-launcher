@@ -237,7 +237,6 @@ public class SwingToolkit {
     }
 
     private void showError(String title, String message, Exception ex) {
-        System.out.println("AAA 0002");
         if (NbUtils.isEmpty(title)) {
             title = msg("Toolkit.ShowError.Title").getText();
         }

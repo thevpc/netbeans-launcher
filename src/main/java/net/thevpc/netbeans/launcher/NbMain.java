@@ -48,6 +48,7 @@ public class NbMain  {
 
     @NAppRunner
     public void run() {
+        NSwingUtils.setSharedWorkspaceInstance();
         NSession session = NSession.of();
         NPrintStream out = session.out();
         NPrintStream err = session.err();
