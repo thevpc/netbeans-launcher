@@ -125,9 +125,9 @@ public class NetbeansConfigService {
             ).addId(NApp.of().getId().get().builder().setVersion("").build()).getResultIds().stream().sorted(
                     (a, b) -> b.getVersion().compareTo(a.getVersion())
             ).filter(x -> x.getVersion().compareTo(NApp.of().getVersion().get()) < 0).collect(Collectors.toList());
-            for (NId olderVersion : olderVersions) {
+            for (NId olderVersionId : olderVersions) {
                 NPath validFile2
-                        = NWorkspace.of().getStoreLocation(olderVersion, NStoreType.CONF)
+                        = NPath.ofIdStore(olderVersionId, NStoreType.CONF)
                                 .resolve("config.json");
                 if (validFile2.isRegularFile()) {
                     try {
