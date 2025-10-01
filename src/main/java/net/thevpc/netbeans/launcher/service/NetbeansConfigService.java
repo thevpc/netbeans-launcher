@@ -18,10 +18,9 @@ import net.thevpc.netbeans.launcher.model.ObservableNetbeansConfig;
 import net.thevpc.netbeans.launcher.util.ObservableList;
 import net.thevpc.netbeans.launcher.util.ObservableValue;
 import net.thevpc.nuts.*;
-import net.thevpc.nuts.concurrent.NScheduler;
+import net.thevpc.nuts.concurrent.NConcurrent;
 import net.thevpc.nuts.elem.NElementParser;
 import net.thevpc.nuts.elem.NElementWriter;
-import net.thevpc.nuts.elem.NElements;
 import net.thevpc.nuts.io.NPath;
 
 /**
@@ -181,7 +180,7 @@ public class NetbeansConfigService {
     }
 
     public void loadAsync(ConfigListener onFinish) {
-        NScheduler.of()
+        NConcurrent.of()
                 .executorService().submit(() -> this.load(onFinish));
     }
 
