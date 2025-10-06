@@ -25,7 +25,7 @@ import net.thevpc.netbeans.launcher.service.NetbeansWorkspaceService;
 import net.thevpc.netbeans.launcher.ui.*;
 import net.thevpc.netbeans.launcher.ui.utils.*;
 import net.thevpc.netbeans.launcher.util.NbUtils;
-import net.thevpc.nuts.NPlatformLocation;
+import net.thevpc.nuts.platform.NPlatformLocation;
 import net.thevpc.nuts.util.NStringUtils;
 
 /**
