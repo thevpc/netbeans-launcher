@@ -23,8 +23,11 @@ import javax.swing.JFrame;
 import net.thevpc.netbeans.launcher.model.NbOsConfig;
 import net.thevpc.netbeans.launcher.model.NetbeansWorkspace;
 import net.thevpc.netbeans.launcher.ui.utils.CachedValue;
-import net.thevpc.nuts.*;
+import net.thevpc.nuts.command.NExecCmd;
+import net.thevpc.nuts.command.NExecutionType;
+import net.thevpc.nuts.core.NWorkspace;
 import net.thevpc.nuts.io.NPs;
+import net.thevpc.nuts.platform.NPlatformFamily;
 import net.thevpc.nuts.util.NStringUtils;
 
 /**
