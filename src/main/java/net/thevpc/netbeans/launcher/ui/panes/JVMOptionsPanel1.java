@@ -13,7 +13,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
 import net.thevpc.netbeans.launcher.ui.utils.SwingToolkit;
-import net.thevpc.nuts.NSession;
+import net.thevpc.nuts.core.NSession;
 import net.thevpc.nuts.cmdline.NCmdLine;
 
 /**
