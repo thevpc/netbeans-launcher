@@ -17,11 +17,16 @@ import net.thevpc.netbeans.launcher.model.NetbeansWorkspace;
 import net.thevpc.netbeans.launcher.model.ObservableNetbeansConfig;
 import net.thevpc.netbeans.launcher.util.ObservableList;
 import net.thevpc.netbeans.launcher.util.ObservableValue;
-import net.thevpc.nuts.*;
+import net.thevpc.nuts.app.NApp;
+import net.thevpc.nuts.artifact.NDefinitionFilters;
+import net.thevpc.nuts.artifact.NId;
+import net.thevpc.nuts.command.NSearchCmd;
 import net.thevpc.nuts.concurrent.NConcurrent;
 import net.thevpc.nuts.elem.NElementParser;
 import net.thevpc.nuts.elem.NElementWriter;
 import net.thevpc.nuts.io.NPath;
+import net.thevpc.nuts.platform.NPlatformLocation;
+import net.thevpc.nuts.platform.NStoreType;
 
 /**
  *
@@ -78,7 +83,7 @@ public class NetbeansConfigService {
     public synchronized void saveConfig() {
         NetbeansConfig c = config.getNetbeansConfig();
         NElementWriter.ofJson()
-                .write(c,NApp.of().getConfFolder().resolve("config.json"));
+                .write(c, NApp.of().getConfFolder().resolve("config.json"));
     }
 
     public <T> void loadFile(ConfigListener onFinish) {
