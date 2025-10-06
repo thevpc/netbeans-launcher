@@ -26,7 +26,7 @@ import javax.swing.*;
 
 import net.thevpc.netbeans.launcher.model.NbOptions;
 import net.thevpc.netbeans.launcher.util.RefreshContext;
-import net.thevpc.nuts.NApp;
+import net.thevpc.nuts.app.NApp;
 
 /**
  * @author thevpc
