@@ -11,9 +11,9 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import net.thevpc.netbeans.launcher.util.NbUtils;
-import net.thevpc.nuts.NPlatformFamily;
-import net.thevpc.nuts.NPlatformLocation;
-import net.thevpc.nuts.NWorkspace;
+import net.thevpc.nuts.platform.NPlatformFamily;
+import net.thevpc.nuts.platform.NPlatformLocation;
+import net.thevpc.nuts.core.NWorkspace;
 import net.thevpc.nuts.io.NPath;
 import net.thevpc.nuts.util.NBlankable;
 
