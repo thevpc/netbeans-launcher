@@ -14,7 +14,7 @@ import net.thevpc.netbeans.launcher.ui.utils.ObjectTableModel;
 import net.thevpc.netbeans.launcher.ui.utils.TableComponent;
 import net.thevpc.netbeans.launcher.util.ObservableList;
 import net.thevpc.netbeans.launcher.util.ObservableListEvent;
-import net.thevpc.nuts.NPlatformLocation;
+import net.thevpc.nuts.platform.NPlatformLocation;
 
 /**
  *
