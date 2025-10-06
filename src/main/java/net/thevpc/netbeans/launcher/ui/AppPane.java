@@ -25,7 +25,7 @@ import net.thevpc.netbeans.launcher.ui.utils.Direction;
 import net.thevpc.netbeans.launcher.ui.utils.SwingToolkit;
 import net.thevpc.netbeans.launcher.ui.utils.SwingUtils2;
 import net.thevpc.netbeans.launcher.util.NbUtils;
-import net.thevpc.nuts.NApp;
+import net.thevpc.nuts.app.NApp;
 
 /**
  * @author thevpc
