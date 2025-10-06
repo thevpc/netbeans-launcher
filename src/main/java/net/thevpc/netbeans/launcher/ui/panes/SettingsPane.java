@@ -19,7 +19,7 @@ import net.thevpc.netbeans.launcher.model.NetbeansLocation;
 import net.thevpc.netbeans.launcher.ui.*;
 import net.thevpc.netbeans.launcher.ui.utils.JdkJlistToStringer;
 import net.thevpc.netbeans.launcher.util.*;
-import net.thevpc.nuts.NPlatformLocation;
+import net.thevpc.nuts.platform.NPlatformLocation;
 
 /**
  * @author thevpc
