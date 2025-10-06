@@ -2,7 +2,7 @@ package net.thevpc.netbeans.launcher.model;
 
 import net.thevpc.netbeans.launcher.util.ObservableList;
 import net.thevpc.netbeans.launcher.util.ObservableValue;
-import net.thevpc.nuts.NPlatformLocation;
+import net.thevpc.nuts.platform.NPlatformLocation;
 
 public class ObservableNetbeansConfig {
     private final ObservableList<NetbeansInstallation> installations = new ObservableList<>();
