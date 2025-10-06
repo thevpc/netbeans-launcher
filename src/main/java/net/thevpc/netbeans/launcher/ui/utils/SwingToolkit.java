@@ -27,7 +27,7 @@ import javax.swing.*;
 import net.thevpc.netbeans.launcher.ui.FrameInfo;
 import net.thevpc.netbeans.launcher.util.NbUtils;
 import net.thevpc.netbeans.launcher.util.RefreshContext;
-import net.thevpc.nuts.NExecutionException;
+import net.thevpc.nuts.command.NExecutionException;
 import net.thevpc.nuts.util.NStringUtils;
 
 /**
