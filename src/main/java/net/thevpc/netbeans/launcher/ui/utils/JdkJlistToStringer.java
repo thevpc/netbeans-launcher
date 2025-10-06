@@ -1,7 +1,7 @@
 package net.thevpc.netbeans.launcher.ui.utils;
 
 import net.thevpc.netbeans.launcher.util.JlistToStringer;
-import net.thevpc.nuts.NPlatformLocation;
+import net.thevpc.nuts.platform.NPlatformLocation;
 
 public class JdkJlistToStringer extends JlistToStringer {
     public JdkJlistToStringer() {
