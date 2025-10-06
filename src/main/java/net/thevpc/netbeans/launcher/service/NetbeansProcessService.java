@@ -10,8 +10,8 @@ import java.util.List;
 
 import net.thevpc.netbeans.launcher.model.NetbeansWorkspace;
 import net.thevpc.netbeans.launcher.util.NbUtils;
-import net.thevpc.nuts.NExecCmd;
-import net.thevpc.nuts.NExecutionType;
+import net.thevpc.nuts.command.NExecCmd;
+import net.thevpc.nuts.command.NExecutionType;
 import net.thevpc.nuts.io.NPath;
 import net.thevpc.nuts.util.NBlankable;
 
