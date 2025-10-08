@@ -41,7 +41,7 @@ import net.thevpc.nuts.io.NPathOption;
 import net.thevpc.nuts.io.NUncompress;
 import net.thevpc.nuts.platform.NStoreType;
 import net.thevpc.nuts.util.NIllegalArgumentException;
-import net.thevpc.nuts.util.NMsg;
+import net.thevpc.nuts.text.NMsg;
 
 /**
  * @author vpc
