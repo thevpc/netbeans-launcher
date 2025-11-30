@@ -562,7 +562,7 @@ public class NetbeansInstallationService {
                             .setPackaging("zip")
                             .setVersion(version)
                             .setUrl(b.toString())
-                            .setReleaseDate(b.lastModifiedInstant())
+                            .setReleaseDate(b.getLastModifiedInstant())
                     );
                 }
             }
@@ -577,7 +577,7 @@ public class NetbeansInstallationService {
                             .setPackaging("zip")
                             .setVersion(version)
                             .setUrl(b.toString())
-                            .setReleaseDate(b.lastModifiedInstant())
+                            .setReleaseDate(b.getLastModifiedInstant())
                     );
                 }
             }
