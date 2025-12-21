@@ -23,11 +23,11 @@ import javax.swing.JFrame;
 import net.thevpc.netbeans.launcher.model.NbOsConfig;
 import net.thevpc.netbeans.launcher.model.NetbeansWorkspace;
 import net.thevpc.netbeans.launcher.ui.utils.CachedValue;
-import net.thevpc.nuts.command.NExecCmd;
+import net.thevpc.nuts.command.NExec;
 import net.thevpc.nuts.command.NExecutionType;
-import net.thevpc.nuts.core.NWorkspace;
 import net.thevpc.nuts.io.NPs;
-import net.thevpc.nuts.platform.NPlatformFamily;
+import net.thevpc.nuts.platform.NEnv;
+import net.thevpc.nuts.platform.NExecutionEngineFamily;
 import net.thevpc.nuts.util.NStringUtils;
 
 /**
@@ -134,7 +134,7 @@ public class NbUtils {
     }
 
     public static String response(String[] cmd) {
-        NExecCmd e = NExecCmd.of().setExecutionType(NExecutionType.SYSTEM)
+        NExec e = NExec.of().setExecutionType(NExecutionType.SYSTEM)
                 .addCommand(cmd)
                 .setFailFast(true)
                 .setSleepMillis(500);
@@ -184,7 +184,7 @@ public class NbUtils {
     }
 
     public static final NbOsConfig getNbOsConfig() {
-        switch (NWorkspace.of().getOsFamily()) {
+        switch (NEnv.of().getOsFamily()) {
             case UNIX:
             case LINUX:
                 return NbUtils.LINUX_CONFIG;
@@ -402,7 +402,7 @@ public class NbUtils {
     private static NbProcess[] _last_getRunning = null;
 
     public static NbProcess[] getRunning() {
-        NbProcess[] aa = NPs.of().setPlatformFamily(NPlatformFamily.JAVA).getResultList()
+        NbProcess[] aa = NPs.of().setPlatformFamily(NExecutionEngineFamily.JAVA).getResultList()
                 .stream().filter((p) -> p.getName().equals("org.netbeans.Main"))
                 .map(x -> new NbProcess(x)).toArray(NbProcess[]::new);
         Arrays.sort(aa);
