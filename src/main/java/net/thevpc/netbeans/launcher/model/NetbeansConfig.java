@@ -5,7 +5,7 @@
  */
 package net.thevpc.netbeans.launcher.model;
 
-import net.thevpc.nuts.platform.NPlatformLocation;
+import net.thevpc.nuts.platform.NExecutionEngineLocation;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -23,7 +23,7 @@ public class NetbeansConfig implements Serializable {
     @SuppressWarnings("FieldMayBeFinal")
     private List<NetbeansWorkspace> workspaces = new ArrayList<>();
     @SuppressWarnings("FieldMayBeFinal")
-    private List<NPlatformLocation> jdkLocations = new ArrayList<>();
+    private List<NExecutionEngineLocation> jdkLocations = new ArrayList<>();
     private boolean sumoMode = false;
     private int zoom = 0;
 
@@ -35,7 +35,7 @@ public class NetbeansConfig implements Serializable {
         return workspaces;
     }
 
-    public List<NPlatformLocation> getJdkLocations() {
+    public List<NExecutionEngineLocation> getJdkLocations() {
         return jdkLocations;
     }
 
@@ -47,7 +47,7 @@ public class NetbeansConfig implements Serializable {
         this.workspaces = workspaces;
     }
 
-    public void setJdkLocations(List<NPlatformLocation> jdkLocations) {
+    public void setJdkLocations(List<NExecutionEngineLocation> jdkLocations) {
         this.jdkLocations = jdkLocations;
     }
 
