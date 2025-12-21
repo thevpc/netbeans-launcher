@@ -2,12 +2,12 @@ package net.thevpc.netbeans.launcher.model;
 
 import net.thevpc.netbeans.launcher.util.ObservableList;
 import net.thevpc.netbeans.launcher.util.ObservableValue;
-import net.thevpc.nuts.platform.NPlatformLocation;
+import net.thevpc.nuts.platform.NExecutionEngineLocation;
 
 public class ObservableNetbeansConfig {
     private final ObservableList<NetbeansInstallation> installations = new ObservableList<>();
     private final ObservableList<NetbeansWorkspace> workspaces = new ObservableList<>();
-    private final ObservableList<NPlatformLocation> jdkLocations = new ObservableList<>();
+    private final ObservableList<NExecutionEngineLocation> jdkLocations = new ObservableList<>();
     private final ObservableValue<Boolean> sumoMode = new ObservableValue<>(false);
     private final ObservableValue<Integer> zoom = new ObservableValue<>(0);
 
@@ -45,7 +45,7 @@ public class ObservableNetbeansConfig {
         return workspaces;
     }
 
-    public ObservableList<NPlatformLocation> getJdkLocations() {
+    public ObservableList<NExecutionEngineLocation> getJdkLocations() {
         return jdkLocations;
     }
 
