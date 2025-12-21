@@ -14,7 +14,7 @@ import net.thevpc.netbeans.launcher.ui.utils.ObjectTableModel;
 import net.thevpc.netbeans.launcher.ui.utils.TableComponent;
 import net.thevpc.netbeans.launcher.util.ObservableList;
 import net.thevpc.netbeans.launcher.util.ObservableListEvent;
-import net.thevpc.nuts.platform.NPlatformLocation;
+import net.thevpc.nuts.platform.NExecutionEngineLocation;
 
 /**
  *
@@ -33,12 +33,12 @@ public class JdkListComponent extends TableComponent {
             ((ListComponent) this).setStringer(jdkStringer);
         } else */
         if (this instanceof TableComponent) {
-            setColumns(new ObjectTableModel.NamedColumns<NPlatformLocation>(
+            setColumns(new ObjectTableModel.NamedColumns<NExecutionEngineLocation>(
                     win.isCompact() ? new String[]{"Name"}
                     : new String[]{"Name", "Type", "Version", "Location"}
             ) {
                 @Override
-                public Object getValueAt(int row, String column, NPlatformLocation t) {
+                public Object getValueAt(int row, String column, NExecutionEngineLocation t) {
                     switch (column) {
                         case "Name":
                             return t == null ? "<null>" : t.getName();
@@ -92,19 +92,19 @@ public class JdkListComponent extends TableComponent {
         });
 
         win.getConfigService().conf()
-                .getJdkLocations().addListener(new ObservableList.ObservableListListener<NPlatformLocation>() {
+                .getJdkLocations().addListener(new ObservableList.ObservableListListener<NExecutionEngineLocation>() {
                     @Override
-                    public void onAdd(ObservableListEvent<NPlatformLocation> event) {
+                    public void onAdd(ObservableListEvent<NExecutionEngineLocation> event) {
                         updateJdkList();
                     }
 
                     @Override
-                    public void onRemove(ObservableListEvent<NPlatformLocation> event) {
+                    public void onRemove(ObservableListEvent<NExecutionEngineLocation> event) {
                         updateJdkList();
                     }
 
                     @Override
-                    public void onUpdate(ObservableListEvent<NPlatformLocation> event) {
+                    public void onUpdate(ObservableListEvent<NExecutionEngineLocation> event) {
                         updateJdkList();
                     }
                 });
@@ -129,7 +129,7 @@ public class JdkListComponent extends TableComponent {
     }
 
     public void updateJdkList() {
-        parent.getNbToolkit().updateTable(this, win.getConfigService().jdk().findAllJdks(), (a, b) -> a != null && b != null && ((NPlatformLocation) a).getName().equals(((NPlatformLocation) b).getName()), null, null);
+        parent.getNbToolkit().updateTable(this, win.getConfigService().jdk().findAllJdks(), (a, b) -> a != null && b != null && ((NExecutionEngineLocation) a).getName().equals(((NExecutionEngineLocation) b).getName()), null, null);
     }
 
 }
