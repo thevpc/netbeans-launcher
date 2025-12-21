@@ -20,12 +20,12 @@ import net.thevpc.netbeans.launcher.util.ObservableValue;
 import net.thevpc.nuts.app.NApp;
 import net.thevpc.nuts.artifact.NDefinitionFilters;
 import net.thevpc.nuts.artifact.NId;
-import net.thevpc.nuts.command.NSearchCmd;
+import net.thevpc.nuts.command.NSearch;
 import net.thevpc.nuts.concurrent.NConcurrent;
 import net.thevpc.nuts.elem.NElementParser;
 import net.thevpc.nuts.elem.NElementWriter;
 import net.thevpc.nuts.io.NPath;
-import net.thevpc.nuts.platform.NPlatformLocation;
+import net.thevpc.nuts.platform.NExecutionEngineLocation;
 import net.thevpc.nuts.platform.NStoreType;
 
 /**
@@ -52,7 +52,7 @@ public class NetbeansConfigService {
         return config.getWorkspaces();
     }
 
-    public ObservableList<NPlatformLocation> getJdkLocations() {
+    public ObservableList<NExecutionEngineLocation> getJdkLocations() {
         return config.getJdkLocations();
     }
 
@@ -124,7 +124,7 @@ public class NetbeansConfigService {
             loaded = true;
         }
         if (!foundCurrVersionFile) {
-            List<NId> olderVersions = NSearchCmd.of().setDefinitionFilter(
+            List<NId> olderVersions = NSearch.of().setDefinitionFilter(
                     NDefinitionFilters.of().byInstalled(true)
             ).addId(NApp.of().getId().get().builder().setVersion("").build()).getResultIds().stream().sorted(
                     (a, b) -> b.getVersion().compareTo(a.getVersion())
