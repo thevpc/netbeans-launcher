@@ -11,9 +11,9 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import net.thevpc.netbeans.launcher.util.NbUtils;
-import net.thevpc.nuts.platform.NPlatformFamily;
-import net.thevpc.nuts.platform.NPlatformLocation;
-import net.thevpc.nuts.core.NWorkspace;
+import net.thevpc.nuts.platform.NExecutionEngineFamily;
+import net.thevpc.nuts.platform.NExecutionEngines;
+import net.thevpc.nuts.platform.NExecutionEngineLocation;
 import net.thevpc.nuts.io.NPath;
 import net.thevpc.nuts.util.NBlankable;
 
@@ -41,22 +41,22 @@ public class JdkService {
         return NPath.of(path);
     }
 
-    public NPlatformLocation detectJdk(String path) {
+    public NExecutionEngineLocation detectJdk(String path) {
         return detectJdk(toPath(path));
     }
 
-    public NPlatformLocation detectJdk(NPath path) {
-        return NWorkspace.of().resolvePlatform(NPlatformFamily.JAVA, path, null)
-                .filter(x -> "jdk".equalsIgnoreCase(x.getPackaging()))
+    public NExecutionEngineLocation detectJdk(NPath path) {
+        return NExecutionEngines.of().resolveExecutionEngine(NExecutionEngineFamily.JAVA, path, null)
+                .filter(x -> NExecutionEngineLocation.JAVA_PRODUCT_JDK.equalsIgnoreCase(x.getProduct()))
                 .orNull();
     }
 
-    public List<NPlatformLocation> configureJdks(NPath[] baseFolders, boolean autoAdd) {
-        ArrayList<NPlatformLocation> all = new ArrayList<>();
+    public List<NExecutionEngineLocation> configureJdks(NPath[] baseFolders, boolean autoAdd) {
+        ArrayList<NExecutionEngineLocation> all = new ArrayList<>();
         for (NPath baseFolder : baseFolders) {
             if (baseFolder.isDirectory()) {
                 for (NPath file : baseFolder.list().stream().filter(x -> x.isDirectory()).collect(Collectors.toList())) {
-                    NPlatformLocation o = findJdk(file);
+                    NExecutionEngineLocation o = findJdk(file);
                     if (o == null) {
                         o = detectJdk(file);
                         if (o != null) {
@@ -72,21 +72,21 @@ public class JdkService {
         return all;
     }
 
-    public NPlatformLocation findJdk(NPath path) {
+    public NExecutionEngineLocation findJdk(NPath path) {
         if (path == null) {
             return null;
         }
-        for (NPlatformLocation loc : module.conf().getJdkLocations()) {
+        for (NExecutionEngineLocation loc : module.conf().getJdkLocations()) {
             if (NbUtils.equalsStr(path.toString(), toPath(loc.getPath()).toString())) {
                 return loc;
             }
         }
-        for (NPlatformLocation loc : module.conf().getJdkLocations()) {
+        for (NExecutionEngineLocation loc : module.conf().getJdkLocations()) {
             if (NbUtils.equalsStr(path.toString(), toPath(loc.getName()).toString())) {
                 return loc;
             }
         }
-        for (NPlatformLocation loc : module.conf().getJdkLocations()) {
+        for (NExecutionEngineLocation loc : module.conf().getJdkLocations()) {
             if (NbUtils.equalsStr(path.toString(), toPath(loc.getVersion()).toString())) {
                 return loc;
             }
@@ -94,11 +94,11 @@ public class JdkService {
         return null;
     }
 
-    public NPlatformLocation findOrAddJdk(String path) {
+    public NExecutionEngineLocation findOrAddJdk(String path) {
         if (path == null) {
             return null;
         }
-        NPlatformLocation o = findJdk(toPath(path));
+        NExecutionEngineLocation o = findJdk(toPath(path));
         if (o == null) {
             o = detectJdk(toPath(path));
             if (o != null) {
@@ -108,8 +108,8 @@ public class JdkService {
         return o;
     }
 
-    public boolean addJdk(NPlatformLocation netbeansInstallation) {
-        for (NPlatformLocation installation : module.conf().getJdkLocations()) {
+    public boolean addJdk(NExecutionEngineLocation netbeansInstallation) {
+        for (NExecutionEngineLocation installation : module.conf().getJdkLocations()) {
             if (NbUtils.equalsStr(netbeansInstallation.getPath(), installation.getPath())) {
                 return false;
             }
@@ -119,8 +119,8 @@ public class JdkService {
         return true;
     }
 
-    public NPlatformLocation[] findAllJdks() {
-        List<NPlatformLocation> list = module.conf().getJdkLocations().list();
+    public NExecutionEngineLocation[] findAllJdks() {
+        List<NExecutionEngineLocation> list = module.conf().getJdkLocations().list();
         list.sort((a, b) -> {
             int i = NbUtils.compareVersions(a.getVersion(), b.getVersion());
             if (i != 0) {
@@ -128,15 +128,15 @@ public class JdkService {
             }
             return a.getName().compareTo(b.getName());
         });
-        return list.toArray(new NPlatformLocation[0]);
+        return list.toArray(new NExecutionEngineLocation[0]);
     }
 
     public void addDefaultJdks() {
-        List<NPlatformLocation> all =
+        List<NExecutionEngineLocation> all =
                 configureJdks(
                         Arrays.stream(NbUtils.getNbOsConfig().getJdkFolders()).map(x -> toPath(x)).toArray(NPath[]::new)
                         , false);
-        Map<String, List<NPlatformLocation>> mapped = all.stream().collect(
+        Map<String, List<NExecutionEngineLocation>> mapped = all.stream().collect(
                 Collectors.groupingBy(x -> {
                     File file = new File(x.getPath());
                     try {
@@ -146,8 +146,8 @@ public class JdkService {
                     }
                 })
         );
-        for (Map.Entry<String, List<NPlatformLocation>> e : mapped.entrySet()) {
-            List<NPlatformLocation> li = e.getValue();
+        for (Map.Entry<String, List<NExecutionEngineLocation>> e : mapped.entrySet()) {
+            List<NExecutionEngineLocation> li = e.getValue();
             if (li.size() > 1) {
                 //remove if have link pointed to it!
                 li.removeIf(x -> x.getPath().equals(e.getKey()));
@@ -169,11 +169,11 @@ public class JdkService {
                 removeOtherIfFound(li, n -> n.equals("default"));
             }
         }
-        List<NPlatformLocation> res = new ArrayList<>();
-        for (Map.Entry<String, List<NPlatformLocation>> e : mapped.entrySet()) {
+        List<NExecutionEngineLocation> res = new ArrayList<>();
+        for (Map.Entry<String, List<NExecutionEngineLocation>> e : mapped.entrySet()) {
             res.addAll(e.getValue());
         }
-        for (NPlatformLocation r : res) {
+        for (NExecutionEngineLocation r : res) {
             addJdk(r);
         }
     }
@@ -182,14 +182,14 @@ public class JdkService {
         boolean accept(String toRemoveName, String baseName);
     }
 
-    private void removeOthersIfFound(List<NPlatformLocation> li, Predicate<String> name, ToRemove toRemove) {
-        NPlatformLocation javaOpenJdk = li.stream().filter(x -> name.test(new File(x.getPath()).getName())).findFirst().orElse(null);
+    private void removeOthersIfFound(List<NExecutionEngineLocation> li, Predicate<String> name, ToRemove toRemove) {
+        NExecutionEngineLocation javaOpenJdk = li.stream().filter(x -> name.test(new File(x.getPath()).getName())).findFirst().orElse(null);
         if (javaOpenJdk != null) {
             li.removeIf(x -> toRemove.accept(new File(x.getPath()).getName(), new File(javaOpenJdk.getPath()).getName()));
         }
     }
 
-    private void removeOtherIfFound(List<NPlatformLocation> li, Predicate<String> name) {
+    private void removeOtherIfFound(List<NExecutionEngineLocation> li, Predicate<String> name) {
         if (
                 li.stream().anyMatch(x -> name.test(new File(x.getPath()).getName()))
                         && li.stream().anyMatch(x -> !name.test(new File(x.getPath()).getName()))
@@ -198,7 +198,7 @@ public class JdkService {
         }
     }
 
-    private void removeThisIfFound(List<NPlatformLocation> li, Predicate<String> name) {
+    private void removeThisIfFound(List<NExecutionEngineLocation> li, Predicate<String> name) {
         if (
                 li.stream().anyMatch(x -> name.test(new File(x.getPath()).getName()))
                         && li.stream().anyMatch(x -> !name.test(new File(x.getPath()).getName()))
@@ -208,7 +208,7 @@ public class JdkService {
     }
 
     public void removeJdk(String path) {
-        NPlatformLocation o = findJdk(toPath(path));
+        NExecutionEngineLocation o = findJdk(toPath(path));
         if (o != null) {
             module.ws().removeNetbeansWorkspacesByJdkPath(o.getPath());
             module.conf().getJdkLocations().remove(o);
