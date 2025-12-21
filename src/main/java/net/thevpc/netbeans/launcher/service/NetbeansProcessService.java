@@ -10,7 +10,7 @@ import java.util.List;
 
 import net.thevpc.netbeans.launcher.model.NetbeansWorkspace;
 import net.thevpc.netbeans.launcher.util.NbUtils;
-import net.thevpc.nuts.command.NExecCmd;
+import net.thevpc.nuts.command.NExec;
 import net.thevpc.nuts.command.NExecutionType;
 import net.thevpc.nuts.io.NPath;
 import net.thevpc.nuts.util.NBlankable;
@@ -91,9 +91,9 @@ public class NetbeansProcessService {
         return cmd.toArray(new String[0]);
     }
 
-    public NExecCmd launchNetbeans(NetbeansWorkspace w) throws IOException {
+    public NExec launchNetbeans(NetbeansWorkspace w) throws IOException {
         String[] cmd = createNetbeansRunCommand(w);
-        return NExecCmd.of()
+        return NExec.of()
                 .setExecutionType(NExecutionType.SYSTEM)
                 .setDirectory(
                         NBlankable.isBlank(w.getPath()) ? null
