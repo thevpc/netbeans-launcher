@@ -33,12 +33,12 @@ import net.thevpc.netbeans.launcher.util.NbUtils;
 import net.thevpc.nuts.app.NApp;
 import net.thevpc.nuts.artifact.NVersion;
 import net.thevpc.nuts.concurrent.NLock;
-import net.thevpc.nuts.core.NWorkspace;
 import net.thevpc.nuts.elem.NElementParser;
 import net.thevpc.nuts.io.NCp;
 import net.thevpc.nuts.io.NPath;
 import net.thevpc.nuts.io.NPathOption;
 import net.thevpc.nuts.io.NUncompress;
+import net.thevpc.nuts.platform.NEnv;
 import net.thevpc.nuts.platform.NStoreType;
 import net.thevpc.nuts.util.NIllegalArgumentException;
 import net.thevpc.nuts.text.NMsg;
@@ -121,7 +121,7 @@ public class NetbeansInstallationService {
         });
         NetbeansInstallation o = detectNetbeansInstallations(folderTo.toString(), NetbeansInstallationStore.DEFAULT);
         if (o != null) {
-            switch (NWorkspace.of().getOsFamily()) {
+            switch (NEnv.of().getOsFamily()) {
                 case LINUX:
                 case UNIX:
                 case MACOS: {
