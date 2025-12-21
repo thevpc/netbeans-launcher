@@ -19,7 +19,7 @@ import net.thevpc.netbeans.launcher.model.NetbeansLocation;
 import net.thevpc.netbeans.launcher.ui.*;
 import net.thevpc.netbeans.launcher.ui.utils.JdkJlistToStringer;
 import net.thevpc.netbeans.launcher.util.*;
-import net.thevpc.nuts.platform.NPlatformLocation;
+import net.thevpc.nuts.platform.NExecutionEngineLocation;
 
 /**
  * @author thevpc
@@ -136,7 +136,7 @@ public class SettingsPane extends AppPane {
                         final File f = c.getSelectedFile();
                         if (f != null) {
                             configService.rt().setCurrentDirectory(f);
-                            NPlatformLocation loc = configService.jdk().detectJdk(f.getPath());
+                            NExecutionEngineLocation loc = configService.jdk().detectJdk(f.getPath());
                             if (loc != null) {
                                 configService.jdk().addJdk(loc);
                                 getComps2().jdkListView.updateJdkList();
@@ -186,7 +186,7 @@ public class SettingsPane extends AppPane {
         try {
             switch (getSettingType()) {
                 case JDK_INSTALLATION: {
-                    NPlatformLocation loc = getSelectedJdkLocation();
+                    NExecutionEngineLocation loc = getSelectedJdkLocation();
                     if (loc != null) {
                         configService.jdk().removeJdk(loc.getPath());
                         getComps2().jdkListView.updateJdkList();
@@ -269,8 +269,8 @@ public class SettingsPane extends AppPane {
 //        }
 //        return null;
 //    }
-    public NPlatformLocation getSelectedJdkLocation() {
-        NPlatformLocation w = (NPlatformLocation) getComps2().jdkListView.getSelectedValue();
+    public NExecutionEngineLocation getSelectedJdkLocation() {
+        NExecutionEngineLocation w = (NExecutionEngineLocation) getComps2().jdkListView.getSelectedValue();
         if (w != null) {
             return w;
         }
