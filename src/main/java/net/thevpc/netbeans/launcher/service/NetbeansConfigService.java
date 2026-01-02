@@ -22,7 +22,7 @@ import net.thevpc.nuts.artifact.NDefinitionFilters;
 import net.thevpc.nuts.artifact.NId;
 import net.thevpc.nuts.command.NSearch;
 import net.thevpc.nuts.concurrent.NConcurrent;
-import net.thevpc.nuts.elem.NElementParser;
+import net.thevpc.nuts.elem.NElementReader;
 import net.thevpc.nuts.elem.NElementWriter;
 import net.thevpc.nuts.io.NPath;
 import net.thevpc.nuts.platform.NExecutionEngineLocation;
@@ -93,7 +93,7 @@ public class NetbeansConfigService {
         boolean foundCurrVersionFile = false;
         if (validFile.isRegularFile()) {
             try {
-                config = (NetbeansConfig) NElementParser.ofJson().parse(validFile, NetbeansConfig.class);
+                config = (NetbeansConfig) NElementReader.ofJson().read(validFile, NetbeansConfig.class);
                 foundCurrVersionFile = config != null;
             } catch (Exception e) {
                 System.err.println("Unable to load config from " + validFile.toString());
@@ -135,7 +135,7 @@ public class NetbeansConfigService {
                                 .resolve("config.json");
                 if (validFile2.isRegularFile()) {
                     try {
-                        config = (NetbeansConfig) NElementParser.ofJson().parse(validFile2, NetbeansConfig.class);
+                        config = (NetbeansConfig) NElementReader.ofJson().read(validFile2, NetbeansConfig.class);
                     } catch (Exception e) {
                         System.err.println("Unable to load config from " + validFile2.toString());
                         break;
