@@ -15,7 +15,6 @@ import java.util.logging.Logger;
 import net.thevpc.netbeans.launcher.model.*;
 import net.thevpc.netbeans.launcher.util.NbStringUtils;
 import net.thevpc.netbeans.launcher.util.NbUtils;
-import net.thevpc.nuts.util.NAssert;
 import net.thevpc.nuts.util.NBlankable;
 import net.thevpc.nuts.util.NOptional;
 import net.thevpc.nuts.util.NStringUtils;
@@ -101,7 +100,7 @@ public class NetbeansWorkspaceService {
     }
 
     public NOptional<NetbeansInstallation> findBestNetbeansInstallationOrLatest(String version) {
-        return findBestNetbeansInstallationOr(version).orElseUse(() -> {
+        return findBestNetbeansInstallationOr(version).orElseGetOptionalFrom(() -> {
             NetbeansInstallation[] all = module.ins().findNetbeansInstallations(SortType.LATEST_FIRST);
             if (all.length > 0) {
                 return NOptional.of(all[0]);
@@ -259,7 +258,7 @@ public class NetbeansWorkspaceService {
             NetbeansWorkspace w = new NetbeansWorkspace();
             w.copyFrom(o);
             w.setPath(i.getPath());
-            w.setName(NStringUtils.firstNonBlank(o.getName(), i.getName(), "Netbeans").trim());
+            w.setName(NStringUtils.firstNonBlankTrimmed(o.getName(), i.getName(), "Netbeans").trim());
             w.setCreationDate(Instant.now());
             module.conf().getWorkspaces().add(w);
             module.conf().saveConfig();
