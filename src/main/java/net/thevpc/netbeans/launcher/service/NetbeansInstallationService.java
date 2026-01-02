@@ -33,7 +33,7 @@ import net.thevpc.netbeans.launcher.util.NbUtils;
 import net.thevpc.nuts.app.NApp;
 import net.thevpc.nuts.artifact.NVersion;
 import net.thevpc.nuts.concurrent.NLock;
-import net.thevpc.nuts.elem.NElementParser;
+import net.thevpc.nuts.elem.NElementReader;
 import net.thevpc.nuts.io.NCp;
 import net.thevpc.nuts.io.NPath;
 import net.thevpc.nuts.io.NPathOption;
@@ -548,7 +548,7 @@ public class NetbeansInstallationService {
 
     public NetbeansBinaryLink[] searchRemoteInstallableNbBinaries() {
         List<NetbeansBinaryLink> all = new ArrayList<>(
-                Arrays.asList(NElementParser.ofJson().parse(getClass().getResource("/net/thevpc/netbeans/launcher/binaries.json"), NetbeansBinaryLink[].class))
+                Arrays.asList(NElementReader.ofJson().read(getClass().getResource("/net/thevpc/netbeans/launcher/binaries.json"), NetbeansBinaryLink[].class))
         );
 
         //nuts supports out of the box navigating apache website using htmlfs
