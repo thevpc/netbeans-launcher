@@ -21,11 +21,6 @@ import java.util.Map;
  */
 public class ConvertFlatLafFile {
 
-//    public static void main(String[] args) {
-//        File file = new File("/home/vpc/.netbeans/Netbeans IDE 21 Scholar/config/LookAndFeel/FlatLaf.properties");
-//        convertPropertiesFile(file);
-//    }
-
     private static void convertPropertiesFile(File file) {
 
         List<String> lines = new ArrayList<>();
