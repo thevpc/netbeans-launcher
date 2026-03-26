@@ -22,6 +22,7 @@ import net.thevpc.nuts.artifact.NDefinitionFilters;
 import net.thevpc.nuts.artifact.NId;
 import net.thevpc.nuts.command.NSearch;
 import net.thevpc.nuts.concurrent.NConcurrent;
+import net.thevpc.nuts.core.NStoreKey;
 import net.thevpc.nuts.elem.NElementReader;
 import net.thevpc.nuts.elem.NElementWriter;
 import net.thevpc.nuts.io.NPath;
@@ -131,7 +132,7 @@ public class NetbeansConfigService {
             ).filter(x -> x.getVersion().compareTo(NApp.of().getVersion().get()) < 0).collect(Collectors.toList());
             for (NId olderVersionId : olderVersions) {
                 NPath validFile2
-                        = NPath.ofIdStore(olderVersionId, NStoreType.CONF)
+                        = NPath.of(NStoreKey.ofConf(olderVersionId))
                                 .resolve("config.json");
                 if (validFile2.isRegularFile()) {
                     try {
