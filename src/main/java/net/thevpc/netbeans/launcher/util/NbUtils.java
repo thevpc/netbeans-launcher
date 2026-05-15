@@ -134,10 +134,10 @@ public class NbUtils {
     }
 
     public static String response(String[] cmd) {
-        NExec e = NExec.of().setExecutionType(NExecutionType.SYSTEM)
+        NExec e = NExec.of().executionType(NExecutionType.SYSTEM)
                 .addCommand(cmd)
-                .setFailFast(true)
-                .setSleepMillis(500);
+                .failFast(true)
+                .sleepMillis(500);
         return e.getGrabbedAllString();
     }
 

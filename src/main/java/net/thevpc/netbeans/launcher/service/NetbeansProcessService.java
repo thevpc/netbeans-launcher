@@ -94,14 +94,14 @@ public class NetbeansProcessService {
     public NExec launchNetbeans(NetbeansWorkspace w) throws IOException {
         String[] cmd = createNetbeansRunCommand(w);
         return NExec.of()
-                .setExecutionType(NExecutionType.SYSTEM)
-                .setDirectory(
+                .executionType(NExecutionType.SYSTEM)
+                .directory(
                         NBlankable.isBlank(w.getPath()) ? null
                         : NPath.of(w.getPath())
                 )
                 .addCommand(cmd)
                 .redirectErr()
-                .setFailFast(true)
+                .failFast(true)
                 .run();
     }
 
