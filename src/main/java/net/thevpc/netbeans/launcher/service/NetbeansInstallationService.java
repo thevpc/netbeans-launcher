@@ -107,14 +107,14 @@ public class NetbeansInstallationService {
                 .resolve("netbeans-" + i.getVersion());
         //if (!Files.exists(zipTo)) {
         NCp.of().from(NPath.of(i.getUrl())).to(zipTo).addOptions(NPathOption.LOG, NPathOption.TRACE)
-                .setProgressMonitor(new OpNInputStreamProgressMonitor(module.rt().addOperation("Downloading " + i)))
+                .progressMonitor(new OpNInputStreamProgressMonitor(module.rt().addOperation("Downloading " + i)))
                 .run();
         //}
         NLock.of(zipTo).runWith(() -> {
             if (folderTo.resolve("bin").resolve("netbeans").exists()) {
                 //already unzipped!!
             } else {
-                NUncompress.of().from(zipTo).to(folderTo).setSkipRoot(true)
+                NUncompress.of().from(zipTo).to(folderTo).skipRoot(true)
                         .progressMonitor(new OpNInputStreamProgressMonitor(module.rt().addOperation("Unzipping " + i)))
                         .run();
             }

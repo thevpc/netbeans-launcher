@@ -171,7 +171,7 @@ public class MainWindowSwing {
                 configService.conf().getZoom().get()
         ));
         this.frame = primaryStage;
-        primaryStage.setTitle("Netbeans Launcher " + NApp.of().getId().get().getVersion());
+        primaryStage.setTitle("Netbeans Launcher " + NApp.of().id().get().version());
         primaryStage.setIconImage(new ImageIcon(MainWindowSwing.class.getResource("nb.png")).getImage());
         primaryStage.setResizable(false);
         JPanel basePanel = new JPanel(new BorderLayout());

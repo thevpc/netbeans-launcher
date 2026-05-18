@@ -63,7 +63,7 @@ public class NbMain  {
             return;
         }
         NbOptions options = new NbOptions();
-        NCmdLine cmdLine = NApp.of().getCmdLine();
+        NCmdLine cmdLine = NApp.of().cmdLine();
         while (cmdLine.hasNext()) {
             if (session.configureFirst(cmdLine)) {
                 //do nothing
@@ -98,7 +98,7 @@ public class NbMain  {
         }
 
         if (options.version) {
-            out.println(NApp.of().getId().get().getVersion());
+            out.println(NApp.of().id().get().version());
         } else if (options.cli && !options.swing_arg) {
             MainWindowCLI.launch(options);
         } else if (options.swing_arg) {
@@ -112,7 +112,7 @@ public class NbMain  {
 
     protected void addDesktopIntegration() {
         NWorkspace.of().addLauncher(new NLauncherOptions()
-                .setId(NApp.of().getId().get())
+                .setId(NApp.of().id().get())
                 .setAlias(PREFERRED_ALIAS)
                 .setCreateAlias(true)
                 .setCreateMenuLauncher(NSupportMode.PREFERRED)

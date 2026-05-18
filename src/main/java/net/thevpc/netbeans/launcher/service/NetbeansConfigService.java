@@ -83,13 +83,13 @@ public class NetbeansConfigService {
     public synchronized void saveConfig() {
         NetbeansConfig c = config.getNetbeansConfig();
         NElementWriter.ofJson()
-                .write(c, NApp.of().getConfFolder().resolve("config.json"));
+                .write(c, NApp.of().confFolder().resolve("config.json"));
     }
 
     public <T> void loadFile(ConfigListener onFinish) {
         NetbeansConfig config = null;
         boolean loaded = false;
-        NPath validFile = NApp.of().getConfFolder().resolve("config.json");
+        NPath validFile = NApp.of().confFolder().resolve("config.json");
         boolean foundCurrVersionFile = false;
         if (validFile.isRegularFile()) {
             try {
@@ -126,9 +126,9 @@ public class NetbeansConfigService {
         if (!foundCurrVersionFile) {
             List<NId> olderVersions = NSearch.of().setDefinitionFilter(
                     NDefinitionFilters.of().byInstalled(true)
-            ).addId(NApp.of().getId().get().builder().setVersion("").build()).getResultIds().stream().sorted(
-                    (a, b) -> b.getVersion().compareTo(a.getVersion())
-            ).filter(x -> x.getVersion().compareTo(NApp.of().getVersion().get()) < 0).collect(Collectors.toList());
+            ).addId(NApp.of().id().get().builder().setVersion("").build()).getResultIds().stream().sorted(
+                    (a, b) -> b.version().compareTo(a.version())
+            ).filter(x -> x.version().compareTo(NApp.of().version().get()) < 0).collect(Collectors.toList());
             for (NId olderVersionId : olderVersions) {
                 NPath validFile2
                         = NPath.of(NStoreKey.ofConf(olderVersionId))

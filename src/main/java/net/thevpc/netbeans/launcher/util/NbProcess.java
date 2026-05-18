@@ -14,10 +14,10 @@ public class NbProcess implements Comparable<NbProcess> {
     private final String cachedir;
 
     public NbProcess(NPsInfo jpsResult) {
-        NCmdLine cmd = NCmdLine.of(jpsResult.getCmdLineArgs());
+        NCmdLine cmd = NCmdLine.of(jpsResult.cmdLineArgs());
         NArg a;
-        pid = jpsResult.getPid();
-        className = jpsResult.getName();
+        pid = jpsResult.pid();
+        className = jpsResult.name();
         String _userdir = null;
         String _cachedir = null;
         while (cmd.hasNext()) {
