@@ -27,7 +27,6 @@ import net.thevpc.nuts.elem.NElementReader;
 import net.thevpc.nuts.elem.NElementWriter;
 import net.thevpc.nuts.io.NPath;
 import net.thevpc.nuts.platform.NExecutionEngineLocation;
-import net.thevpc.nuts.platform.NStoreType;
 
 /**
  *
@@ -100,7 +99,7 @@ public class NetbeansConfigService {
                 System.err.println("Unable to load config from " + validFile.toString());
                 int i = 2;
                 while (true) {
-                    NPath f2 = validFile.resolveSibling(validFile.getName() + "." + i + ".save");
+                    NPath f2 = validFile.resolveSibling(validFile.name() + "." + i + ".save");
                     if (!f2.exists()) {
                         validFile.moveTo(f2);
                         break;

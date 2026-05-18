@@ -555,14 +555,14 @@ public class NetbeansInstallationService {
         for (NPath p : NPath.of("htmlfs:https://archive.apache.org/dist/netbeans/netbeans/").stream()) {
             if (p.isDirectory()) {
                 ///12.0/netbeans-12.0-bin.zip
-                String version = p.getName();
+                String version = p.name();
                 NPath b = NPath.of("https://archive.apache.org/dist/netbeans/netbeans/" + version + "/netbeans-" + version + "-bin.zip");
                 if (b.exists()) {
                     all.add(new NetbeansBinaryLink()
                             .setPackaging("zip")
                             .setVersion(version)
                             .setUrl(b.toString())
-                            .setReleaseDate(b.getLastModifiedInstant())
+                            .setReleaseDate(b.lastModifiedInstant())
                     );
                 }
             }
@@ -570,14 +570,14 @@ public class NetbeansInstallationService {
         for (NPath p : NPath.of("htmlfs:https://downloads.apache.org/netbeans/netbeans/").stream()) {
             if (p.isDirectory()) {
                 ///12.0/netbeans-12.0-bin.zip
-                String version = p.getName();
+                String version = p.name();
                 NPath b = NPath.of("https://downloads.apache.org/netbeans/netbeans/" + version + "/netbeans-" + version + "-bin.zip");
                 if (b.exists()) {
                     all.add(new NetbeansBinaryLink()
                             .setPackaging("zip")
                             .setVersion(version)
                             .setUrl(b.toString())
-                            .setReleaseDate(b.getLastModifiedInstant())
+                            .setReleaseDate(b.lastModifiedInstant())
                     );
                 }
             }
