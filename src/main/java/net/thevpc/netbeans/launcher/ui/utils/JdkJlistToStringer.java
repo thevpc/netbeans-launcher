@@ -14,10 +14,10 @@ public class JdkJlistToStringer extends JlistToStringer {
             NExecutionEngineLocation i = (NExecutionEngineLocation) value;
             switch (level) {
                 case 0: {
-                    return i.getName();
+                    return i.name();
                 }
                 case 1: {
-                    return i.getName() + " (" + i.getPath() + ")";
+                    return i.name() + " (" + i.path() + ")";
                 }
             }
         }

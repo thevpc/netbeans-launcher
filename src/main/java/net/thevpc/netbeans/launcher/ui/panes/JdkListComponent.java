@@ -41,13 +41,13 @@ public class JdkListComponent extends TableComponent {
                 public Object getValueAt(int row, String column, NExecutionEngineLocation t) {
                     switch (column) {
                         case "Name":
-                            return t == null ? "<null>" : t.getName();
+                            return t == null ? "<null>" : t.name();
                         case "Type":
-                            return t == null ? "<null>" : t.getPackaging();
+                            return t == null ? "<null>" : t.packaging();
                         case "Version":
-                            return t == null ? "<null>" : t.getVersion();
+                            return t == null ? "<null>" : t.version();
                         case "Location":
-                            return t == null ? "<null>" : t.getPath();
+                            return t == null ? "<null>" : t.path();
                     }
                     return "";
                 }
@@ -129,7 +129,7 @@ public class JdkListComponent extends TableComponent {
     }
 
     public void updateJdkList() {
-        parent.getNbToolkit().updateTable(this, win.getConfigService().jdk().findAllJdks(), (a, b) -> a != null && b != null && ((NExecutionEngineLocation) a).getName().equals(((NExecutionEngineLocation) b).getName()), null, null);
+        parent.getNbToolkit().updateTable(this, win.getConfigService().jdk().findAllJdks(), (a, b) -> a != null && b != null && ((NExecutionEngineLocation) a).name().equals(((NExecutionEngineLocation) b).name()), null, null);
     }
 
 }

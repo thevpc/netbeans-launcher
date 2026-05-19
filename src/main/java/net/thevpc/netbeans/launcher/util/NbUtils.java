@@ -185,7 +185,7 @@ public class NbUtils {
     }
 
     public static final NbOsConfig getNbOsConfig() {
-        switch (NEnv.of().getOsFamily()) {
+        switch (NEnv.of().osFamily()) {
             case UNIX:
             case LINUX:
                 return NbUtils.LINUX_CONFIG;
@@ -403,7 +403,7 @@ public class NbUtils {
     private static NbProcess[] _last_getRunning = null;
 
     public static NbProcess[] getRunning() {
-        NbProcess[] aa = NPs.of().setPlatformFamily(NExecutionEngineFamily.JAVA).getResultList()
+        NbProcess[] aa = NPs.of().platformFamily(NExecutionEngineFamily.JAVA).getResultList()
                 .stream().filter((p) -> p.name().equals("org.netbeans.Main"))
                 .map(x -> new NbProcess(x)).toArray(NbProcess[]::new);
         Arrays.sort(aa);

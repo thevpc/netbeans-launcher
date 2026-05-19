@@ -121,7 +121,7 @@ public class NetbeansInstallationService {
         });
         NetbeansInstallation o = detectNetbeansInstallations(folderTo.toString(), NetbeansInstallationStore.DEFAULT);
         if (o != null) {
-            switch (NEnv.of().getOsFamily()) {
+            switch (NEnv.of().osFamily()) {
                 case LINUX:
                 case UNIX:
                 case MACOS: {

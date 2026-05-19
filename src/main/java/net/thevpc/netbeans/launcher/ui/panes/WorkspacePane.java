@@ -722,7 +722,7 @@ public class WorkspacePane extends AppPane {
     public String getEditJdkHome() {
         Object i = toolkit.getComboSelectedObject(getComps3().jdkhome);
         if (i instanceof NExecutionEngineLocation) {
-            return ((NExecutionEngineLocation) i).getPath();
+            return ((NExecutionEngineLocation) i).path();
         } else {
             return i == null ? null : String.valueOf(i);
         }

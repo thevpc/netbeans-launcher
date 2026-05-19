@@ -188,7 +188,7 @@ public class SettingsPane extends AppPane {
                 case JDK_INSTALLATION: {
                     NExecutionEngineLocation loc = getSelectedJdkLocation();
                     if (loc != null) {
-                        configService.jdk().removeJdk(loc.getPath());
+                        configService.jdk().removeJdk(loc.path());
                         getComps2().jdkListView.updateJdkList();
                     }
                     break;

@@ -47,7 +47,7 @@ public class JdkService {
 
     public NExecutionEngineLocation detectJdk(NPath path) {
         return NExecutionEngines.of().resolveExecutionEngine(NExecutionEngineFamily.JAVA, path, null)
-                .filter(x -> NExecutionEngineLocation.JAVA_PRODUCT_JDK.equalsIgnoreCase(x.getProduct()))
+                .filter(x -> NExecutionEngineLocation.JAVA_PRODUCT_JDK.equalsIgnoreCase(x.product()))
                 .orNull();
     }
 
@@ -77,17 +77,17 @@ public class JdkService {
             return null;
         }
         for (NExecutionEngineLocation loc : module.conf().getJdkLocations()) {
-            if (NbUtils.equalsStr(path.toString(), toPath(loc.getPath()).toString())) {
+            if (NbUtils.equalsStr(path.toString(), toPath(loc.path()).toString())) {
                 return loc;
             }
         }
         for (NExecutionEngineLocation loc : module.conf().getJdkLocations()) {
-            if (NbUtils.equalsStr(path.toString(), toPath(loc.getName()).toString())) {
+            if (NbUtils.equalsStr(path.toString(), toPath(loc.name()).toString())) {
                 return loc;
             }
         }
         for (NExecutionEngineLocation loc : module.conf().getJdkLocations()) {
-            if (NbUtils.equalsStr(path.toString(), toPath(loc.getVersion()).toString())) {
+            if (NbUtils.equalsStr(path.toString(), toPath(loc.version()).toString())) {
                 return loc;
             }
         }
@@ -110,7 +110,7 @@ public class JdkService {
 
     public boolean addJdk(NExecutionEngineLocation netbeansInstallation) {
         for (NExecutionEngineLocation installation : module.conf().getJdkLocations()) {
-            if (NbUtils.equalsStr(netbeansInstallation.getPath(), installation.getPath())) {
+            if (NbUtils.equalsStr(netbeansInstallation.path(), installation.path())) {
                 return false;
             }
         }
@@ -122,11 +122,11 @@ public class JdkService {
     public NExecutionEngineLocation[] findAllJdks() {
         List<NExecutionEngineLocation> list = module.conf().getJdkLocations().list();
         list.sort((a, b) -> {
-            int i = NbUtils.compareVersions(a.getVersion(), b.getVersion());
+            int i = NbUtils.compareVersions(a.version(), b.version());
             if (i != 0) {
                 return i;
             }
-            return a.getName().compareTo(b.getName());
+            return a.name().compareTo(b.name());
         });
         return list.toArray(new NExecutionEngineLocation[0]);
     }
@@ -138,7 +138,7 @@ public class JdkService {
                         , false);
         Map<String, List<NExecutionEngineLocation>> mapped = all.stream().collect(
                 Collectors.groupingBy(x -> {
-                    File file = new File(x.getPath());
+                    File file = new File(x.path());
                     try {
                         return file.getCanonicalPath();
                     } catch (IOException e) {
@@ -150,7 +150,7 @@ public class JdkService {
             List<NExecutionEngineLocation> li = e.getValue();
             if (li.size() > 1) {
                 //remove if have link pointed to it!
-                li.removeIf(x -> x.getPath().equals(e.getKey()));
+                li.removeIf(x -> x.path().equals(e.getKey()));
                 removeThisIfFound(li, n -> n.startsWith("jre-"));
                 for (String provider : new String[]{"openjdk", "openj9"}) {
                     removeOthersIfFound(li, n -> n.matches("^java-[0-9]+([.][0-9]+)*-" + provider + "$"),
@@ -183,34 +183,34 @@ public class JdkService {
     }
 
     private void removeOthersIfFound(List<NExecutionEngineLocation> li, Predicate<String> name, ToRemove toRemove) {
-        NExecutionEngineLocation javaOpenJdk = li.stream().filter(x -> name.test(new File(x.getPath()).getName())).findFirst().orElse(null);
+        NExecutionEngineLocation javaOpenJdk = li.stream().filter(x -> name.test(new File(x.path()).getName())).findFirst().orElse(null);
         if (javaOpenJdk != null) {
-            li.removeIf(x -> toRemove.accept(new File(x.getPath()).getName(), new File(javaOpenJdk.getPath()).getName()));
+            li.removeIf(x -> toRemove.accept(new File(x.path()).getName(), new File(javaOpenJdk.path()).getName()));
         }
     }
 
     private void removeOtherIfFound(List<NExecutionEngineLocation> li, Predicate<String> name) {
         if (
-                li.stream().anyMatch(x -> name.test(new File(x.getPath()).getName()))
-                        && li.stream().anyMatch(x -> !name.test(new File(x.getPath()).getName()))
+                li.stream().anyMatch(x -> name.test(new File(x.path()).getName()))
+                        && li.stream().anyMatch(x -> !name.test(new File(x.path()).getName()))
         ) {
-            li.removeIf(x -> !name.test(new File(x.getPath()).getName()));
+            li.removeIf(x -> !name.test(new File(x.path()).getName()));
         }
     }
 
     private void removeThisIfFound(List<NExecutionEngineLocation> li, Predicate<String> name) {
         if (
-                li.stream().anyMatch(x -> name.test(new File(x.getPath()).getName()))
-                        && li.stream().anyMatch(x -> !name.test(new File(x.getPath()).getName()))
+                li.stream().anyMatch(x -> name.test(new File(x.path()).getName()))
+                        && li.stream().anyMatch(x -> !name.test(new File(x.path()).getName()))
         ) {
-            li.removeIf(x -> name.test(new File(x.getPath()).getName()));
+            li.removeIf(x -> name.test(new File(x.path()).getName()));
         }
     }
 
     public void removeJdk(String path) {
         NExecutionEngineLocation o = findJdk(toPath(path));
         if (o != null) {
-            module.ws().removeNetbeansWorkspacesByJdkPath(o.getPath());
+            module.ws().removeNetbeansWorkspacesByJdkPath(o.path());
             module.conf().getJdkLocations().remove(o);
             module.conf().saveConfig();
         }
