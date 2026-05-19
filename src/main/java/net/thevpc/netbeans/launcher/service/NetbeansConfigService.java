@@ -124,9 +124,9 @@ public class NetbeansConfigService {
             loaded = true;
         }
         if (!foundCurrVersionFile) {
-            List<NId> olderVersions = NSearch.of().setDefinitionFilter(
+            List<NId> olderVersions = NSearch.of().definitionFilter(
                     NDefinitionFilters.of().byInstalled(true)
-            ).addId(NApp.of().id().get().builder().setVersion("").build()).getResultIds().stream().sorted(
+            ).addId(NApp.of().id().get().builder().version("").build()).getResultIds().stream().sorted(
                     (a, b) -> b.version().compareTo(a.version())
             ).filter(x -> x.version().compareTo(NApp.of().version().get()) < 0).collect(Collectors.toList());
             for (NId olderVersionId : olderVersions) {

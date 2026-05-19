@@ -28,6 +28,7 @@ import net.thevpc.nuts.command.NExecutionType;
 import net.thevpc.nuts.io.NPs;
 import net.thevpc.nuts.platform.NEnv;
 import net.thevpc.nuts.platform.NExecutionEngineFamily;
+import net.thevpc.nuts.time.NDuration;
 import net.thevpc.nuts.util.NStringUtils;
 
 /**
@@ -137,7 +138,7 @@ public class NbUtils {
         NExec e = NExec.of().executionType(NExecutionType.SYSTEM)
                 .addCommand(cmd)
                 .failFast(true)
-                .sleepMillis(500);
+                .sleepDuration(NDuration.ofMillis(500));
         return e.getGrabbedAllString();
     }
 
