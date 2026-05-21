@@ -139,7 +139,7 @@ public class NbUtils {
                 .addCommand(cmd)
                 .failFast(true)
                 .sleepDuration(NDuration.ofMillis(500));
-        return e.getGrabbedAllString();
+        return e.grabbedAll();
     }
 
     public static boolean equalsStr(String s1, String s2) {

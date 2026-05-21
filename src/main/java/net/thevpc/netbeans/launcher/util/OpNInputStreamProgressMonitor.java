@@ -22,7 +22,7 @@ public class OpNInputStreamProgressMonitor implements NProgressListener {
 
     @Override
     public boolean onProgress(NProgressEvent event) {
-        switch (event.getState()) {
+        switch (event.state()) {
             case START:
                 {
                     op.start(event.isIndeterminate());
@@ -35,7 +35,7 @@ public class OpNInputStreamProgressMonitor implements NProgressListener {
                 }
             case PROGRESS:
                 {
-                    op.setPercent((float) (event.getProgress() * 100));
+                    op.setPercent((float) (event.progress() * 100));
                     break;
                 }
         }
