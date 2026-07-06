@@ -373,16 +373,16 @@ public class WorkspacePane extends AppPane {
     private void onSaveWorkspacePane() {
         try {
             NetbeansWorkspace w = getWorkspace();
-            if (NStringUtils.trim(w.getName()).isEmpty()) {
+            if (NStringUtils.strip(w.getName()).isEmpty()) {
                 throw new IllegalArgumentException("missing name");
             }
-            if (NStringUtils.trim(w.getCachedir()).isEmpty()) {
+            if (NStringUtils.strip(w.getCachedir()).isEmpty()) {
                 throw new IllegalArgumentException("missing cache dir");
             }
-            if (NStringUtils.trim(w.getPath()).isEmpty()) {
+            if (NStringUtils.strip(w.getPath()).isEmpty()) {
                 throw new IllegalArgumentException("missing path");
             }
-            if (NStringUtils.trim(w.getUserdir()).isEmpty()) {
+            if (NStringUtils.strip(w.getUserdir()).isEmpty()) {
                 throw new IllegalArgumentException("missing user dir");
             }
             configService.ws().saveNetbeansWorkspace(w);

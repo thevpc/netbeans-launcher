@@ -258,7 +258,7 @@ public class NetbeansWorkspaceService {
             NetbeansWorkspace w = new NetbeansWorkspace();
             w.copyFrom(o);
             w.setPath(i.getPath());
-            w.setName(NStringUtils.firstNonBlankTrimmed(o.getName(), i.getName(), "Netbeans").trim());
+            w.setName(NStringUtils.firstNonBlankStripped(o.getName(), i.getName(), "Netbeans").trim());
             w.setCreationDate(Instant.now());
             module.conf().getWorkspaces().add(w);
             module.conf().saveConfig();
@@ -330,7 +330,7 @@ public class NetbeansWorkspaceService {
     }
 
     public String getUserdirProposal(NetbeansWorkspace w) {
-        String n = NStringUtils.trim(w.getName());
+        String n = NStringUtils.strip(w.getName());
         if (NbUtils.isEmpty(n)) {
             n = "noname";
         }
@@ -339,7 +339,7 @@ public class NetbeansWorkspaceService {
     }
 
     public String[] getUserdirProposals(NetbeansWorkspace w) {
-        String n = NStringUtils.trim(w.getName());
+        String n = NStringUtils.strip(w.getName());
         if (NbUtils.isEmpty(n)) {
             n = "noname";
         }
@@ -352,7 +352,7 @@ public class NetbeansWorkspaceService {
     }
 
     public String[] getCachedirProposals(NetbeansWorkspace w) {
-        String n = NStringUtils.trim(w.getName());
+        String n = NStringUtils.strip(w.getName());
         if (NbUtils.isEmpty(n)) {
             n = "noname";
         }
@@ -365,7 +365,7 @@ public class NetbeansWorkspaceService {
     }
 
     public String getCachedirProposal(NetbeansWorkspace w) {
-        String n = NStringUtils.trim(w.getName());
+        String n = NStringUtils.strip(w.getName());
         if (NbUtils.isEmpty(n)) {
             n = "noname";
         }

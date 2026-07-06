@@ -236,8 +236,8 @@ public class NbUtils {
     }
 
     public static int compareVersions(String v1, String v2) {
-        v1 = NStringUtils.trim(v1);
-        v2 = NStringUtils.trim(v2);
+        v1 = NStringUtils.strip(v1);
+        v2 = NStringUtils.strip(v2);
         if (v1.equals(v2)) {
             return 0;
         }
@@ -277,7 +277,7 @@ public class NbUtils {
     }
 
     private static String[] splitVersionParts(String v1) {
-        v1 = NStringUtils.trim(v1);
+        v1 = NStringUtils.strip(v1);
         List<String> parts = new ArrayList<>();
         StringBuilder last = new StringBuilder();
         for (char c : v1.toCharArray()) {
@@ -444,16 +444,16 @@ public class NbUtils {
         return Arrays.stream(all)
                 .filter(
                         x -> {
-                            String ud = NStringUtils.trim(nb.getUserdir());
+                            String ud = NStringUtils.strip(nb.getUserdir());
                             if (ud.isEmpty()) {
                                 return false;
                             }
-                            String cd = NStringUtils.trim(nb.getCachedir());
+                            String cd = NStringUtils.strip(nb.getCachedir());
                             if (cd.isEmpty()) {
                                 return false;
                             }
-                            return NStringUtils.trim(x.getUserdir()).equals(resolveFile(ud).getPath())
-                                    && NStringUtils.trim(x.getCachedir()).equals(resolveFile(cd).getPath());
+                            return NStringUtils.strip(x.getUserdir()).equals(resolveFile(ud).getPath())
+                                    && NStringUtils.strip(x.getCachedir()).equals(resolveFile(cd).getPath());
                         }
                 ).count() > 0;
     }

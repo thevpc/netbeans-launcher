@@ -140,17 +140,17 @@ public class NetbeansWorkspace implements Cloneable, Serializable {
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 23 * hash + Objects.hashCode(NStringUtils.trim(this.path));
-        hash = 23 * hash + Objects.hashCode(NStringUtils.trim(this.userdir));
-        hash = 23 * hash + Objects.hashCode(NStringUtils.trim(this.cachedir));
-        hash = 23 * hash + Objects.hashCode(NStringUtils.trim(this.name));
-        hash = 23 * hash + Objects.hashCode(NStringUtils.trim(this.group));
-        hash = 23 * hash + Objects.hashCode(NStringUtils.trim(this.jdkhome));
-        hash = 23 * hash + Objects.hashCode(NStringUtils.trim(this.laf));
-        hash = 23 * hash + Objects.hashCode(NStringUtils.trim(this.options));
-        hash = 23 * hash + Objects.hashCode(NStringUtils.trim(this.cpAppend));
-        hash = 23 * hash + Objects.hashCode(NStringUtils.trim(this.cpPrepend));
-        hash = 23 * hash + Objects.hashCode(NStringUtils.trim(this.locale));
+        hash = 23 * hash + Objects.hashCode(NStringUtils.strip(this.path));
+        hash = 23 * hash + Objects.hashCode(NStringUtils.strip(this.userdir));
+        hash = 23 * hash + Objects.hashCode(NStringUtils.strip(this.cachedir));
+        hash = 23 * hash + Objects.hashCode(NStringUtils.strip(this.name));
+        hash = 23 * hash + Objects.hashCode(NStringUtils.strip(this.group));
+        hash = 23 * hash + Objects.hashCode(NStringUtils.strip(this.jdkhome));
+        hash = 23 * hash + Objects.hashCode(NStringUtils.strip(this.laf));
+        hash = 23 * hash + Objects.hashCode(NStringUtils.strip(this.options));
+        hash = 23 * hash + Objects.hashCode(NStringUtils.strip(this.cpAppend));
+        hash = 23 * hash + Objects.hashCode(NStringUtils.strip(this.cpPrepend));
+        hash = 23 * hash + Objects.hashCode(NStringUtils.strip(this.locale));
         hash = 23 * hash + this.fontSize;
         return hash;
     }
@@ -170,37 +170,37 @@ public class NetbeansWorkspace implements Cloneable, Serializable {
         if (this.fontSize != other.fontSize) {
             return false;
         }
-        if (!Objects.equals(NStringUtils.trim(this.path), NStringUtils.trim(other.path))) {
+        if (!Objects.equals(NStringUtils.strip(this.path), NStringUtils.strip(other.path))) {
             return false;
         }
-        if (!Objects.equals(NStringUtils.trim(this.userdir), NStringUtils.trim(other.userdir))) {
+        if (!Objects.equals(NStringUtils.strip(this.userdir), NStringUtils.strip(other.userdir))) {
             return false;
         }
-        if (!Objects.equals(NStringUtils.trim(this.cachedir), NStringUtils.trim(other.cachedir))) {
+        if (!Objects.equals(NStringUtils.strip(this.cachedir), NStringUtils.strip(other.cachedir))) {
             return false;
         }
-        if (!Objects.equals(NStringUtils.trim(this.name), NStringUtils.trim(other.name))) {
+        if (!Objects.equals(NStringUtils.strip(this.name), NStringUtils.strip(other.name))) {
             return false;
         }
-        if (!Objects.equals(NStringUtils.trim(this.group), NStringUtils.trim(other.group))) {
+        if (!Objects.equals(NStringUtils.strip(this.group), NStringUtils.strip(other.group))) {
             return false;
         }
-        if (!Objects.equals(NStringUtils.trim(this.jdkhome), NStringUtils.trim(other.jdkhome))) {
+        if (!Objects.equals(NStringUtils.strip(this.jdkhome), NStringUtils.strip(other.jdkhome))) {
             return false;
         }
-        if (!Objects.equals(NStringUtils.trim(this.laf), NStringUtils.trim(other.laf))) {
+        if (!Objects.equals(NStringUtils.strip(this.laf), NStringUtils.strip(other.laf))) {
             return false;
         }
-        if (!Objects.equals(NStringUtils.trim(this.options), NStringUtils.trim( other.options))) {
+        if (!Objects.equals(NStringUtils.strip(this.options), NStringUtils.strip( other.options))) {
             return false;
         }
-        if (!Objects.equals(NStringUtils.trim(this.cpAppend), NStringUtils.trim(other.cpAppend))) {
+        if (!Objects.equals(NStringUtils.strip(this.cpAppend), NStringUtils.strip(other.cpAppend))) {
             return false;
         }
-        if (!Objects.equals(NStringUtils.trim(this.cpPrepend), NStringUtils.trim(other.cpPrepend))) {
+        if (!Objects.equals(NStringUtils.strip(this.cpPrepend), NStringUtils.strip(other.cpPrepend))) {
             return false;
         }
-        if (!Objects.equals(NStringUtils.trim(this.locale), NStringUtils.trim(other.locale))) {
+        if (!Objects.equals(NStringUtils.strip(this.locale), NStringUtils.strip(other.locale))) {
             return false;
         }
         return true;

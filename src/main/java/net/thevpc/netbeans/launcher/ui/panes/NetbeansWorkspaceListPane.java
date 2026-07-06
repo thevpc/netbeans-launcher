@@ -290,8 +290,8 @@ public class NetbeansWorkspaceListPane extends AppPane {
     }
 
     public void updateList(Runnable onFinish) {
-        Equalizer name = (a, b) -> a != null && b != null && NStringUtils.trim(((NetbeansWorkspace) a).getName())
-                .equals(NStringUtils.trim(((NetbeansWorkspace) b).getName()));
+        Equalizer name = (a, b) -> a != null && b != null && NStringUtils.strip(((NetbeansWorkspace) a).getName())
+                .equals(NStringUtils.strip(((NetbeansWorkspace) b).getName()));
         toolkit.updateTable(
                 getComps1().workspacesListView, configService.ws().findNetbeansWorkspaces(),
                 name,
