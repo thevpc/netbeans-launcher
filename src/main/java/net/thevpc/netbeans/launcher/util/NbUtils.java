@@ -136,7 +136,7 @@ public class NbUtils {
 
     public static String response(String[] cmd) {
         NExec e = NExec.of().executionType(NExecutionType.SYSTEM)
-                .addCommand(cmd)
+                .command(cmd)
                 .failFast(true)
                 .sleepDuration(NDuration.ofMillis(500));
         return e.grabbedAll();

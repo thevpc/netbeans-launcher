@@ -99,7 +99,7 @@ public class NetbeansProcessService {
                         NBlankable.isBlank(w.getPath()) ? null
                         : NPath.of(w.getPath())
                 )
-                .addCommand(cmd)
+                .command(cmd)
                 .redirectErr()
                 .failFast(true)
                 .run();
