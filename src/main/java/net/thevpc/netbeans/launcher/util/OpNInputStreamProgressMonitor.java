@@ -5,8 +5,8 @@
 package net.thevpc.netbeans.launcher.util;
 
 import net.thevpc.netbeans.launcher.model.WritableLongOperation;
-import net.thevpc.nuts.time.NProgressEvent;
-import net.thevpc.nuts.time.NProgressListener;
+import net.thevpc.nuts.mon.NProgressEvent;
+import net.thevpc.nuts.mon.NProgressListener;
 
 /**
  *
