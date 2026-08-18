@@ -18,7 +18,7 @@ import net.thevpc.netbeans.launcher.model.ObservableNetbeansConfig;
 import net.thevpc.netbeans.launcher.util.ObservableList;
 import net.thevpc.netbeans.launcher.util.ObservableValue;
 import net.thevpc.nuts.app.NApp;
-import net.thevpc.nuts.artifact.NDefinitionFilters;
+import net.thevpc.nuts.artifact.NDefinitionFilter;
 import net.thevpc.nuts.artifact.NId;
 import net.thevpc.nuts.command.NSearch;
 import net.thevpc.nuts.concurrent.NConcurrent;
@@ -125,7 +125,7 @@ public class NetbeansConfigService {
         }
         if (!foundCurrVersionFile) {
             List<NId> olderVersions = NSearch.of().definitionFilter(
-                    NDefinitionFilters.of().byInstalled(true)
+                    NDefinitionFilter.ofInstalled(true)
             ).addId(NApp.of().id().get().builder().version("").build()).getResultIds().stream().sorted(
                     (a, b) -> b.version().compareTo(a.version())
             ).filter(x -> x.version().compareTo(NApp.of().version().get()) < 0).collect(Collectors.toList());
