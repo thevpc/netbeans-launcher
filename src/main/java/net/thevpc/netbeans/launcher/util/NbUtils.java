@@ -404,7 +404,7 @@ public class NbUtils {
 
     public static NbProcess[] getRunning() {
         NbProcess[] aa = NPs.of().platformFamily(NExecutionEngineFamily.JAVA).getResultList()
-                .stream().filter((p) -> p.name().equals("org.netbeans.Main"))
+                .jstream().filter((p) -> p.name().equals("org.netbeans.Main"))
                 .map(x -> new NbProcess(x)).toArray(NbProcess[]::new);
         Arrays.sort(aa);
         if (_last_getRunning == null || !Arrays.equals(aa, _last_getRunning)) {
