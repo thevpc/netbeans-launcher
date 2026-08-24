@@ -25,7 +25,7 @@ import net.thevpc.netbeans.launcher.ui.utils.Direction;
 import net.thevpc.netbeans.launcher.ui.utils.SwingToolkit;
 import net.thevpc.netbeans.launcher.ui.utils.SwingUtils2;
 import net.thevpc.netbeans.launcher.util.NbUtils;
-import net.thevpc.nuts.app.NApp;
+import net.thevpc.nuts.app.NApplication;
 
 /**
  * @author thevpc
@@ -133,7 +133,7 @@ public abstract class AppPane extends JPanel {
 //        c.footer.addGlueH();
         c.footer.setBackground(SwingUtils2.componentGradientPaint("d6d9df","dfe2e8", Direction.BOTTOM));
         JLabel link = toolkit.createLabel();
-        link.setText("v" + NApp.of().version().get());
+        link.setText("v" + NApplication.of().version().get());
         link.setForeground(SwingUtils2.color("0095c9"));
         link.addMouseListener(new MouseAdapter() {
             @Override

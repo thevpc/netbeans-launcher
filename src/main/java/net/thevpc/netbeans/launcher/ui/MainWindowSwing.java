@@ -26,7 +26,7 @@ import javax.swing.*;
 
 import net.thevpc.netbeans.launcher.model.NbOptions;
 import net.thevpc.netbeans.launcher.util.RefreshContext;
-import net.thevpc.nuts.app.NApp;
+import net.thevpc.nuts.app.NApplication;
 
 /**
  * @author thevpc
@@ -171,7 +171,7 @@ public class MainWindowSwing {
                 configService.conf().getZoom().get()
         ));
         this.frame = primaryStage;
-        primaryStage.setTitle("Netbeans Launcher " + NApp.of().id().get().version());
+        primaryStage.setTitle("Netbeans Launcher " + NApplication.of().id().get().version());
         primaryStage.setIconImage(new ImageIcon(MainWindowSwing.class.getResource("nb.png")).getImage());
         primaryStage.setResizable(false);
         JPanel basePanel = new JPanel(new BorderLayout());

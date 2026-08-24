@@ -30,7 +30,7 @@ import net.thevpc.netbeans.launcher.util.NbStringUtils;
 import static net.thevpc.netbeans.launcher.util.NbStringUtils.match;
 
 import net.thevpc.netbeans.launcher.util.NbUtils;
-import net.thevpc.nuts.app.NApp;
+import net.thevpc.nuts.app.NApplication;
 import net.thevpc.nuts.artifact.NVersion;
 import net.thevpc.nuts.concurrent.NLock;
 import net.thevpc.nuts.elem.NElementReader;
@@ -97,11 +97,11 @@ public class NetbeansInstallationService {
     }
 
     public NetbeansInstallation addNetbeansInstallationByLink(NetbeansBinaryLink i) {
-        NPath zipTo = NApp.of().getSharedFolder(NStoreType.BIN)
+        NPath zipTo = NApplication.of().getSharedFolder(NStoreType.BIN)
                 .resolve("org")
                 .resolve("netbeans")
                 .resolve("netbeans-" + i.getVersion() + ".zip");
-        NPath folderTo = NApp.of().getSharedFolder(NStoreType.BIN)
+        NPath folderTo = NApplication.of().getSharedFolder(NStoreType.BIN)
                 .resolve("org")
                 .resolve("netbeans")
                 .resolve("netbeans-" + i.getVersion());

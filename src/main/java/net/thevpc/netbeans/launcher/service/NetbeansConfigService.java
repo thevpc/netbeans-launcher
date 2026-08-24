@@ -17,7 +17,7 @@ import net.thevpc.netbeans.launcher.model.NetbeansWorkspace;
 import net.thevpc.netbeans.launcher.model.ObservableNetbeansConfig;
 import net.thevpc.netbeans.launcher.util.ObservableList;
 import net.thevpc.netbeans.launcher.util.ObservableValue;
-import net.thevpc.nuts.app.NApp;
+import net.thevpc.nuts.app.NApplication;
 import net.thevpc.nuts.artifact.NDefinitionFilter;
 import net.thevpc.nuts.artifact.NId;
 import net.thevpc.nuts.command.NSearch;
@@ -83,13 +83,13 @@ public class NetbeansConfigService {
     public synchronized void saveConfig() {
         NetbeansConfig c = config.getNetbeansConfig();
         NElementWriter.ofJson()
-                .write(c, NApp.of().confFolder().resolve("config.json"));
+                .write(c, NApplication.of().confFolder().resolve("config.json"));
     }
 
     public <T> void loadFile(ConfigListener onFinish) {
         NetbeansConfig config = null;
         boolean loaded = false;
-        NPath validFile = NApp.of().confFolder().resolve("config.json");
+        NPath validFile = NApplication.of().confFolder().resolve("config.json");
         boolean foundCurrVersionFile = false;
         if (validFile.isRegularFile()) {
             try {
@@ -126,9 +126,9 @@ public class NetbeansConfigService {
         if (!foundCurrVersionFile) {
             List<NId> olderVersions = NSearch.of().definitionFilter(
                     NDefinitionFilter.ofInstalled(true)
-            ).addId(NApp.of().id().get().builder().version("").build()).getResultIds().jstream().sorted(
+            ).addId(NApplication.of().id().get().builder().version("").build()).getResultIds().jstream().sorted(
                     (a, b) -> b.version().compareTo(a.version())
-            ).filter(x -> x.version().compareTo(NApp.of().version().get()) < 0).collect(Collectors.toList());
+            ).filter(x -> x.version().compareTo(NApplication.of().version().get()) < 0).collect(Collectors.toList());
             for (NId olderVersionId : olderVersions) {
                 NPath validFile2
                         = NPath.of(NStoreKey.ofConf(olderVersionId))

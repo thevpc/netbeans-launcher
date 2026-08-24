@@ -24,32 +24,32 @@ import net.thevpc.nuts.util.NSupportMode;
 /**
  * @author thevpc
  */
-@NAppDefinition
+@NApp
 public class NbMain  {
 
     String PREFERRED_ALIAS = "nbl";
 
     public static void main(String[] args) {
         // just create an instance and call runAndExit in the main method
-        NApp.builder(args).run();
+        NApplication.builder(args).run();
     }
 
-    @NAppInstaller
+    @NAppInstall
     public void onInstallApplication() {
         addDesktopIntegration();
     }
 
-    @NAppUpdater
+    @NAppUpdate
     public void onUpdateApplication() {
         onInstallApplication();
     }
 
-    @NAppUninstaller
+    @NAppUninstall
     public void onUninstallApplication() {
         NWorkspace.of().removeCommandIfExists(PREFERRED_ALIAS);
     }
 
-    @NAppRunner
+    @NAppRun
     public void run() {
         NSwingUtils.setSharedWorkspaceInstance();
         NSession session = NSession.of();
@@ -63,7 +63,7 @@ public class NbMain  {
             return;
         }
         NbOptions options = new NbOptions();
-        NCmdLine cmdLine = NApp.of().cmdLine();
+        NCmdLine cmdLine = NApplication.of().cmdLine();
         while (cmdLine.hasNext()) {
             if (session.configureFirst(cmdLine)) {
                 //do nothing
@@ -98,7 +98,7 @@ public class NbMain  {
         }
 
         if (options.version) {
-            out.println(NApp.of().id().get().version());
+            out.println(NApplication.of().id().get().version());
         } else if (options.cli && !options.swing_arg) {
             MainWindowCLI.launch(options);
         } else if (options.swing_arg) {
@@ -112,7 +112,7 @@ public class NbMain  {
 
     protected void addDesktopIntegration() {
         NWorkspace.of().addLauncher(new NLauncherOptions()
-                .id(NApp.of().id().get())
+                .id(NApplication.of().id().get())
                 .alias(PREFERRED_ALIAS)
                 .createAlias(true)
                 .createMenuLauncher(NSupportMode.PREFERRED)
