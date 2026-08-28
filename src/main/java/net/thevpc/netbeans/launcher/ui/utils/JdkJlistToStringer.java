@@ -1,7 +1,7 @@
 package net.thevpc.netbeans.launcher.ui.utils;
 
 import net.thevpc.netbeans.launcher.util.JlistToStringer;
-import net.thevpc.nuts.platform.NExecutionEngineLocation;
+import net.thevpc.nuts.platform.NRuntimeDistribution;
 
 public class JdkJlistToStringer extends JlistToStringer {
     public JdkJlistToStringer() {
@@ -10,8 +10,8 @@ public class JdkJlistToStringer extends JlistToStringer {
 
     @Override
     public String toString(Object value, int level) {
-        if (value instanceof NExecutionEngineLocation) {
-            NExecutionEngineLocation i = (NExecutionEngineLocation) value;
+        if (value instanceof NRuntimeDistribution) {
+            NRuntimeDistribution i = (NRuntimeDistribution) value;
             switch (level) {
                 case 0: {
                     return i.name();

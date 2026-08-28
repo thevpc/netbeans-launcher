@@ -14,7 +14,7 @@ import net.thevpc.netbeans.launcher.ui.utils.ObjectTableModel;
 import net.thevpc.netbeans.launcher.ui.utils.TableComponent;
 import net.thevpc.netbeans.launcher.util.ObservableList;
 import net.thevpc.netbeans.launcher.util.ObservableListEvent;
-import net.thevpc.nuts.platform.NExecutionEngineLocation;
+import net.thevpc.nuts.platform.NRuntimeDistribution;
 
 /**
  *
@@ -33,12 +33,12 @@ public class JdkListComponent extends TableComponent {
             ((ListComponent) this).setStringer(jdkStringer);
         } else */
         if (this instanceof TableComponent) {
-            setColumns(new ObjectTableModel.NamedColumns<NExecutionEngineLocation>(
+            setColumns(new ObjectTableModel.NamedColumns<NRuntimeDistribution>(
                     win.isCompact() ? new String[]{"Name"}
                     : new String[]{"Name", "Type", "Version", "Location"}
             ) {
                 @Override
-                public Object getValueAt(int row, String column, NExecutionEngineLocation t) {
+                public Object getValueAt(int row, String column, NRuntimeDistribution t) {
                     switch (column) {
                         case "Name":
                             return t == null ? "<null>" : t.name();
@@ -92,19 +92,19 @@ public class JdkListComponent extends TableComponent {
         });
 
         win.getConfigService().conf()
-                .getJdkLocations().addListener(new ObservableList.ObservableListListener<NExecutionEngineLocation>() {
+                .getJdkLocations().addListener(new ObservableList.ObservableListListener<NRuntimeDistribution>() {
                     @Override
-                    public void onAdd(ObservableListEvent<NExecutionEngineLocation> event) {
+                    public void onAdd(ObservableListEvent<NRuntimeDistribution> event) {
                         updateJdkList();
                     }
 
                     @Override
-                    public void onRemove(ObservableListEvent<NExecutionEngineLocation> event) {
+                    public void onRemove(ObservableListEvent<NRuntimeDistribution> event) {
                         updateJdkList();
                     }
 
                     @Override
-                    public void onUpdate(ObservableListEvent<NExecutionEngineLocation> event) {
+                    public void onUpdate(ObservableListEvent<NRuntimeDistribution> event) {
                         updateJdkList();
                     }
                 });
@@ -129,7 +129,7 @@ public class JdkListComponent extends TableComponent {
     }
 
     public void updateJdkList() {
-        parent.getNbToolkit().updateTable(this, win.getConfigService().jdk().findAllJdks(), (a, b) -> a != null && b != null && ((NExecutionEngineLocation) a).name().equals(((NExecutionEngineLocation) b).name()), null, null);
+        parent.getNbToolkit().updateTable(this, win.getConfigService().jdk().findAllJdks(), (a, b) -> a != null && b != null && ((NRuntimeDistribution) a).name().equals(((NRuntimeDistribution) b).name()), null, null);
     }
 
 }

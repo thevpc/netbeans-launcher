@@ -26,7 +26,7 @@ import net.thevpc.nuts.core.NStoreKey;
 import net.thevpc.nuts.elem.NElementReader;
 import net.thevpc.nuts.elem.NElementWriter;
 import net.thevpc.nuts.io.NPath;
-import net.thevpc.nuts.platform.NExecutionEngineLocation;
+import net.thevpc.nuts.platform.NRuntimeDistribution;
 
 /**
  *
@@ -52,7 +52,7 @@ public class NetbeansConfigService {
         return config.getWorkspaces();
     }
 
-    public ObservableList<NExecutionEngineLocation> getJdkLocations() {
+    public ObservableList<NRuntimeDistribution> getJdkLocations() {
         return config.getJdkLocations();
     }
 

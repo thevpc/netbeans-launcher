@@ -27,7 +27,7 @@ import net.thevpc.nuts.command.NExec;
 import net.thevpc.nuts.command.NExecutionType;
 import net.thevpc.nuts.io.NPs;
 import net.thevpc.nuts.platform.NEnv;
-import net.thevpc.nuts.platform.NExecutionEngineFamily;
+import net.thevpc.nuts.platform.NRuntimeDistributionFamily;
 import net.thevpc.nuts.time.NDuration;
 import net.thevpc.nuts.util.NStringUtils;
 
@@ -403,7 +403,7 @@ public class NbUtils {
     private static NbProcess[] _last_getRunning = null;
 
     public static NbProcess[] getRunning() {
-        NbProcess[] aa = NPs.of().platformFamily(NExecutionEngineFamily.JAVA).getResultList()
+        NbProcess[] aa = NPs.of().platformFamily(NRuntimeDistributionFamily.JAVA).getResultList()
                 .jstream().filter((p) -> p.name().equals("org.netbeans.Main"))
                 .map(x -> new NbProcess(x)).toArray(NbProcess[]::new);
         Arrays.sort(aa);
