@@ -106,7 +106,7 @@ public class NetbeansInstallationService {
                 .resolve("netbeans")
                 .resolve("netbeans-" + i.getVersion());
         //if (!Files.exists(zipTo)) {
-        NCp.of().from(NPath.of(i.getUrl())).to(zipTo).addOptions(NPathOption.LOG, NPathOption.TRACE)
+        NCp.of().from(NPath.of(i.getUrl())).to(zipTo).options(NPathOption.LOG, NPathOption.TRACE)
                 .progressMonitor(new OpNInputStreamProgressMonitor(module.rt().addOperation("Downloading " + i)))
                 .run();
         //}
