@@ -185,8 +185,7 @@ public class NetbeansConfigService {
     }
 
     public void loadAsync(ConfigListener onFinish) {
-        NConcurrent.of()
-                .executorService().submit(() -> this.load(onFinish));
+        NConcurrent.executorService().submit(() -> this.load(onFinish));
     }
 
     public void load(ConfigListener onFinish) {
